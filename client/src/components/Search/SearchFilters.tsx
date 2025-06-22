@@ -3,8 +3,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search } from 'lucide-react';
+import { Search, Users } from 'lucide-react';
 import { getCities } from '@/data/staticFarms';
+import EnhancedDatePicker from '@/components/common/EnhancedDatePicker';
 
 interface SearchFiltersProps {
   onSearch?: (filters: SearchFilters) => void;
@@ -13,24 +14,22 @@ interface SearchFiltersProps {
 
 export interface SearchFilters {
   location: string;
-  checkIn: string;
-  checkOut: string;
-  guests: number;
+  checkIn?: Date;
+  checkOut?: Date;
+  guests?: number;
 }
 
 export default function SearchFilters({ onSearch, className = '' }: SearchFiltersProps) {
   const [filters, setFilters] = useState<SearchFilters>({
     location: '',
-    checkIn: '',
-    checkOut: '',
-    guests: 2,
+    checkIn: undefined,
+    checkOut: undefined,
+    guests: undefined,
   });
 
   const cities = getCities();
-  const today = new Date().toISOString().split('T')[0];
-  const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0];
 
-  const handleFilterChange = (key: keyof SearchFilters, value: string | number) => {
+  const handleFilterChange = (key: keyof SearchFilters, value: string | number | Date | undefined) => {
     setFilters(prev => ({ ...prev, [key]: value }));
   };
 
@@ -38,11 +37,9 @@ export default function SearchFilters({ onSearch, className = '' }: SearchFilter
     onSearch?.(filters);
   };
 
-  const guestOptions = Array.from({ length: 16 }, (_, i) => i + 1);
-
   return (
     <div className={`bg-white rounded-2xl shadow-lg p-6 ${className}`}>
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Location */}
         <div>
           <Label htmlFor="location" className="block text-sm font-medium text-neutral-700 mb-2">
@@ -63,65 +60,50 @@ export default function SearchFilters({ onSearch, className = '' }: SearchFilter
           </Select>
         </div>
 
-        {/* Check-in */}
-        <div>
-          <Label htmlFor="checkin" className="block text-sm font-medium text-neutral-700 mb-2">
-            Check-in
+        {/* Date Range */}
+        <div className="md:col-span-1">
+          <Label className="block text-sm font-medium text-neutral-700 mb-2">
+            Dates
           </Label>
-          <Input
-            id="checkin"
-            type="date"
-            min={today}
-            value={filters.checkIn}
-            onChange={(e) => handleFilterChange('checkIn', e.target.value)}
-            className="input-field"
-          />
-        </div>
-
-        {/* Check-out */}
-        <div>
-          <Label htmlFor="checkout" className="block text-sm font-medium text-neutral-700 mb-2">
-            Check-out
-          </Label>
-          <Input
-            id="checkout"
-            type="date"
-            min={filters.checkIn || tomorrow}
-            value={filters.checkOut}
-            onChange={(e) => handleFilterChange('checkOut', e.target.value)}
-            className="input-field"
+          <EnhancedDatePicker
+            checkIn={filters.checkIn}
+            checkOut={filters.checkOut}
+            onCheckInChange={(date) => handleFilterChange('checkIn', date)}
+            onCheckOutChange={(date) => handleFilterChange('checkOut', date)}
+            compact
           />
         </div>
 
         {/* Guests */}
         <div>
           <Label htmlFor="guests" className="block text-sm font-medium text-neutral-700 mb-2">
-            Guests
+            Guests (optional)
           </Label>
-          <Select value={filters.guests.toString()} onValueChange={(value) => handleFilterChange('guests', parseInt(value))}>
-            <SelectTrigger id="guests">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {guestOptions.map((num) => (
-                <SelectItem key={num} value={num.toString()}>
-                  {num} Guest{num !== 1 ? 's' : ''}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="relative">
+            <Input
+              id="guests"
+              type="number"
+              min="1"
+              max="20"
+              placeholder="Number of guests"
+              value={filters.guests || ''}
+              onChange={(e) => handleFilterChange('guests', e.target.value ? parseInt(e.target.value) : undefined)}
+              className="input-field pl-10"
+            />
+            <Users className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-neutral-400" />
+          </div>
         </div>
       </div>
 
       {/* Search Button */}
-      <div className="mt-6 md:mt-4">
+      <div className="mt-6">
         <Button
           onClick={handleSearch}
-          className="w-full md:w-auto bg-primary text-white hover:bg-primary/90 px-8"
+          className="w-full bg-primary text-white hover:bg-primary/90"
           size="lg"
         >
           <Search className="w-4 h-4 mr-2" />
-          Search Farms
+          Search Properties
         </Button>
       </div>
     </div>

@@ -36,7 +36,14 @@ export default function FarmList({
 
     // Filter by category
     if (selectedCategory && selectedCategory !== 'all') {
-      farms = farms.filter(farm => farm.category.toLowerCase() === selectedCategory.toLowerCase());
+      // For now, map categories to existing farm categories
+      const categoryMapping: Record<string, string> = {
+        'farms': 'rustic',
+        'villas': 'luxury', 
+        'resorts': 'modern'
+      };
+      const mappedCategory = categoryMapping[selectedCategory] || selectedCategory;
+      farms = farms.filter(farm => farm.category.toLowerCase() === mappedCategory.toLowerCase());
     }
 
     // Filter by search query

@@ -13,6 +13,13 @@ import MobileBottomNav from "@/components/Layout/MobileBottomNav";
 import Home from "@/pages/Home";
 import FarmDetail from "@/pages/FarmDetail";
 import OwnerDashboard from "@/pages/OwnerDashboard";
+import HappyCustomers from "@/pages/HappyCustomers";
+import Contact from "@/pages/Contact";
+import HowItWorks from "@/pages/HowItWorks";
+import PropertyRegistration from "@/pages/PropertyRegistration";
+import TermsOfService from "@/pages/TermsOfService";
+import PrivacyPolicy from "@/pages/PrivacyPolicy";
+import FAQ from "@/pages/FAQ";
 import NotFound from "@/pages/not-found";
 
 // Floating WhatsApp Button
@@ -47,14 +54,23 @@ function Router() {
           <Route path="/farm/:id" component={FarmDetail} />
           <Route path="/owner" component={OwnerDashboard} />
           <Route path="/owner/*" component={OwnerDashboard} />
+          <Route path="/owner/register" component={PropertyRegistration} />
           
-          {/* Additional routes that could be implemented */}
+          {/* New Pages */}
+          <Route path="/customers" component={HappyCustomers} />
+          <Route path="/contact" component={Contact} />
+          <Route path="/how-it-works" component={HowItWorks} />
+          
+          {/* Legal Pages */}
+          <Route path="/terms" component={TermsOfService} />
+          <Route path="/privacy" component={PrivacyPolicy} />
+          <Route path="/faq" component={FAQ} />
+          
+          {/* Additional routes */}
           <Route path="/farms" component={() => <Home />} />
           <Route path="/search" component={() => <Home />} />
           <Route path="/saved" component={() => <div className="container mx-auto py-16 text-center"><h1 className="text-2xl font-bold">Saved Farms</h1><p className="text-neutral-600 mt-2">Coming soon...</p></div>} />
           <Route path="/profile" component={() => <div className="container mx-auto py-16 text-center"><h1 className="text-2xl font-bold">User Profile</h1><p className="text-neutral-600 mt-2">Coming soon...</p></div>} />
-          <Route path="/reviews" component={() => <div className="container mx-auto py-16 text-center"><h1 className="text-2xl font-bold">Customer Reviews</h1><p className="text-neutral-600 mt-2">Coming soon...</p></div>} />
-          <Route path="/contact" component={() => <div className="container mx-auto py-16 text-center"><h1 className="text-2xl font-bold">Contact Us</h1><p className="text-neutral-600 mt-2">Coming soon...</p></div>} />
           
           {/* Fallback to 404 */}
           <Route component={NotFound} />

@@ -94,7 +94,16 @@ Currently using in-memory storage with plans for session-based authentication us
 
 ## Changelog
 
-- June 22, 2025. Initial setup
+- June 22, 2025: Initial setup and basic components
+- June 22, 2025: Implemented prioritized features:
+  - Live autocomplete search bar with farm navigation
+  - Enhanced date picker with calendar component
+  - Numeric guest input field
+  - Property category tabs (Farms, Villas, Resorts)
+  - New pages: Happy Customers, Contact, How It Works
+  - Complete property registration form with validation
+  - Legal pages: Terms, Privacy Policy, FAQ
+  - Updated routing and navigation structure
 
 ## User Preferences
 

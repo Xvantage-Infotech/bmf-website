@@ -6,19 +6,21 @@ import { getFeaturedFarms } from '@/data/staticFarms';
 import { formatPrice } from '@/lib/utils';
 import SearchFilters, { SearchFilters as SearchFiltersType } from '@/components/Search/SearchFilters';
 import CategoryTabs from '@/components/Search/CategoryTabs';
+import PropertyCategoryTabs from '@/components/common/PropertyCategoryTabs';
 import VideoGallery from '@/components/VideoGallery/VideoGallery';
 import FarmList from '@/components/FarmList/FarmList';
 import CustomerReviews from '@/components/Reviews/CustomerReviews';
+import { PropertyCategory } from '@/constants/categories';
 
 export default function Home() {
   const [selectedCity, setSelectedCity] = useState('all');
+  const [selectedCategory, setSelectedCategory] = useState<PropertyCategory | 'all'>('all');
   const [searchFilters, setSearchFilters] = useState<SearchFiltersType | null>(null);
   
   const featuredFarms = getFeaturedFarms();
 
   const handleSearch = (filters: SearchFiltersType) => {
     setSearchFilters(filters);
-    // TODO: Implement search functionality
     console.log('Search filters:', filters);
   };
 
@@ -67,7 +69,21 @@ export default function Home() {
       {/* Video Gallery */}
       <VideoGallery />
 
-      {/* Category Tabs */}
+      {/* Property Category Section */}
+      <section className="py-12 bg-neutral-50">
+        <div className="max-w-7xl mx-auto container-padding">
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-bold text-neutral-900 mb-4">Browse by Property Type</h2>
+            <p className="text-lg text-neutral-600">Find the perfect accommodation for your getaway</p>
+          </div>
+          <PropertyCategoryTabs 
+            selectedCategory={selectedCategory}
+            onCategoryChange={setSelectedCategory}
+          />
+        </div>
+      </section>
+
+      {/* Category Tabs by Location */}
       <CategoryTabs 
         selectedCity={selectedCity}
         onCityChange={setSelectedCity}
@@ -76,6 +92,7 @@ export default function Home() {
       {/* Farm List */}
       <FarmList 
         selectedCity={selectedCity !== 'all' ? selectedCity : undefined}
+        selectedCategory={selectedCategory !== 'all' ? selectedCategory : undefined}
         searchQuery={searchFilters?.location || ''}
       />
 

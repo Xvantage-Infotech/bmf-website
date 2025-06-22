@@ -1,0 +1,69 @@
+Please implement the following prioritized changes to the BookMyFarm web frontend. Treat existing components as building blocks—reuse the same calendar widget from the Farm Details page and the alias-based search API, etc.—and deliver production-ready React/TypeScript code with proper validation, clean architecture, and consistent styling.
+
+1. Homepage › Search Bar  
+   - Convert the static search bar into a live autocomplete that queries farm aliases only.  
+   - Keep the autocomplete dropdown within the header UI (no navigation to a separate page).  
+   - When the user clicks a farm in the dropdown, navigate to `/farm/:alias` (the Farm Details page).
+
+2. Homepage › Date Picker (Check-In / Check-Out)  
+   - Replace the current date selector with the same calendar component used on the Farm Details page (including hover states, multi-date selection, and visual feedback).  
+   - Wire it up so that selecting a start and end date updates the search parameters.
+
+3. Homepage › Guest Input  
+   - Change “Guests” from a dropdown into a simple numeric input field.  
+   - Make it optional and allow only positive integers.
+
+4. Homepage › Featured Farms & Categories  
+   - Retain the existing “Featured Farms (by browse location)” carousel.  
+   - Add three additional category buttons below: **Farms**, **Villas**, **Resorts**.  
+   - Hook each button to filter the same Featured Farms list by category.  
+   - Manage the category list in your codebase (e.g. an ENUM or constants file) and ensure it’s easy to extend.
+
+5. Header › Additional Pages  
+   - Add two new header links: **Happy Customers** (route: `/customers`) and **Contact** (route: `/contact`).  
+   - Create stub pages/components for both, with placeholder hero sections and page layouts.
+
+6. Footer › Additional Pages  
+   - Add two new footer links: **How It Works** (route: `/how-it-works`) and **List Your Property** (route: `/owner/register`).  
+   - Create a full “List Your Property” registration form at `/owner/register` with the fields and behaviors detailed below.  
+   - Also stub out a “How It Works” page with at least three step cards explaining user flow.
+
+7. Property Registration Form (`/owner/register`)  
+   - **Form structure & order** exactly as listed (with `*` required fields):  
+     1. Farm Owner Name *  
+     2. Farm Owner Mobile Number * (validate 10-digit)  
+     3. Farm Owner Email * (validate email)  
+     4. Farm Name *  
+     5. City * (text)  
+     6. Nearby Area * (text)  
+     7. Person Limit * (number; show note “extra charge applies”)  
+     8. Guest Stay Capacity (Day) * (number)  
+     9. Guest Stay Capacity (Night) * (number)  
+    10. Farm Size in Sq yd * (number)  
+    11. Extra Person Charge on Weekdays * (currency)  
+    12. Extra Person Charge on Weekends * (currency)  
+    13. 12-Hour Price Weekday * (currency)  
+    14. 24-Hour Price Weekday * (currency)  
+    15. 12-Hour Price Weekend * (currency)  
+    16. 24-Hour Price Weekend * (currency)  
+    17. Check-In Time * (dropdown of 12-hour clock, AM/PM)  
+    18. Check-Out Time * (same 12-hour dropdown)  
+    19. Caretaker Name *  
+    20. Caretaker Number * (validate phone)  
+    21. Farm Address * (multi-line)  
+    22. Farm Facilities * (multi-select checkboxes)  
+    23. Location Link * (validate URL)  
+    24. Property Rules * (multi-line)  
+    25. Swimming Pool Size (text)  
+    26. Kids Swimming Pool Available? (yes/no toggle)  
+    27. Referral Code (optional)  
+    28. Upload Property Photos * (up to 10 images/videos, max 10 MB each)
+
+   - **Calendar & Time inputs**: use the same React calendar component for date/time where applicable; ensure the 12-hour dropdown is consistent across all pages.  
+   - **Validation**: Show inline errors for required fields and format mismatches.  
+   - **File Upload**: allow multiple selection, preview thumbnails before upload, enforce count/file-size limits.
+
+8. Additional Footer Pages  
+   - Create and link any other footer pages you see in the design (e.g. Terms & Privacy, FAQ).
+
+Deliver each piece as a self-contained React component (with corresponding CSS/SCSS or Tailwind classes), update routing, and ensure the site builds and runs with zero ESLint or TypeScript errors. Use modular imports, keep components stateless where possible, and apply DRY principles for shared UI elements (autocomplete, calendar, dropdown, upload).  

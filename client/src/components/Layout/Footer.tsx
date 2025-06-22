@@ -5,8 +5,8 @@ export default function Footer() {
   const quickLinks = [
     { href: '/farms', label: 'Browse Farms' },
     { href: '/how-it-works', label: 'How it Works' },
-    { href: '/list-property', label: 'List Your Property' },
-    { href: '/reviews', label: 'Happy Customers' },
+    { href: '/owner/register', label: 'List Your Property' },
+    { href: '/customers', label: 'Happy Customers' },
     { href: '/about', label: 'About Us' },
   ];
 
@@ -29,6 +29,7 @@ export default function Footer() {
     { href: '/privacy', label: 'Privacy Policy' },
     { href: '/terms', label: 'Terms of Service' },
     { href: '/cookies', label: 'Cookie Policy' },
+    { href: '/faq', label: 'FAQ' },
   ];
 
   return (

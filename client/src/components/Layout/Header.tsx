@@ -1,20 +1,19 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Search, Menu, Home, Leaf } from 'lucide-react';
+import { Menu } from 'lucide-react';
 import { useResponsive } from '@/hooks/useResponsive';
+import LiveSearchBar from '@/components/common/LiveSearchBar';
 
 export default function Header() {
   const [location] = useLocation();
-  const [searchQuery, setSearchQuery] = useState('');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { isMobile } = useResponsive();
 
   const navigationItems = [
     { href: '/farms', label: 'Farms' },
-    { href: '/reviews', label: 'Happy Customers' },
+    { href: '/customers', label: 'Happy Customers' },
     { href: '/contact', label: 'Contact' },
   ];
 
@@ -30,16 +29,10 @@ export default function Header() {
   );
 
   const SearchBar = ({ className = '' }: { className?: string }) => (
-    <div className={`relative ${className}`}>
-      <Input
-        type="text"
-        placeholder="Search by farm name, location..."
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
-        className="w-full pl-4 pr-10 py-2 border-neutral-200 focus:ring-2 focus:ring-primary focus:border-transparent"
-      />
-      <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-neutral-400" />
-    </div>
+    <LiveSearchBar 
+      className={className}
+      placeholder="Search by farm name, location..."
+    />
   );
 
   const Navigation = ({ className = '', mobile = false }: { className?: string; mobile?: boolean }) => (

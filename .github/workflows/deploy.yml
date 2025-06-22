@@ -21,6 +21,7 @@ jobs:
           sshpass -p "${{ secrets.SSH_PASSWORD }}" ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
             cd /var/www
             if [ ! -d "BMFWebsite/.git" ]; then
+              mkdir BMFWebsite
               echo "🔧 Directory doesn't exist or not a Git repo. Cloning fresh..."
               git clone https://github.com/Xvantage-Infotech/bmf-website.git BMFWebsite
             else

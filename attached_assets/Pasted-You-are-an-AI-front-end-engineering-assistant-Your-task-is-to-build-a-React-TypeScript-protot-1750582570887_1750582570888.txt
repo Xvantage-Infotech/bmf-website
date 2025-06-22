@@ -1,0 +1,172 @@
+You are an AI front-end engineering assistant. Your task is to build a **React + TypeScript** prototype (to be migrated to Next.js later) for the BookMyFarm web application. Follow these guidelines exactly:
+
+1. **Tech Stack & Tooling**
+
+   * Initialize with Vite or Create React App using TypeScript.
+   * Configure ESLint + Prettier for code consistency.
+   * Use CSS Modules (with optional SASS/SCSS) or styled-components—apply [BEM naming](http://getbem.com/) if using CSS Modules.
+   * Organize code into an atomic/component-driven architecture:
+
+     ```
+     src/
+       components/
+         Button/
+         Card/
+         Layout/
+         VideoGallery/
+         FarmList/
+         FarmCard/
+         FarmDetail/
+         BookingForm/
+         Header/
+         Footer/
+         etc.
+       pages/
+         Home.tsx
+         FarmDetail.tsx
+         OwnerDashboard.tsx
+       styles/
+         variables.scss        // define $green: #17AE7D; $white: #fff; typography, spacing
+       data/
+         staticFarms.ts         // placeholder JSON arrays typed with interfaces
+       hooks/
+         useFetch.ts
+         useResponsive.ts
+       utils/
+         formatDate.ts
+         priceFormatter.ts
+       App.tsx
+       index.tsx
+     ```
+   * Stub all data calls to local `data/*.ts` files exporting TypeScript interfaces, so you can easily swap in real API calls later.
+
+2. **Design System & Theme**
+
+   * **Primary palette:**
+
+     * Green: `#17AE7D`
+     * White: `#FFFFFF`
+   * No generic AI-style gradients or dark modes by default—stick to a clean white background with green highlights for buttons, links, active states, hover states, icons, borders.
+   * Define typography scale (e.g. `headline-XL`, `headline-L`, `body`, `caption`) in your variables.
+   * Spacing: base unit `8px`, multiples for margins/paddings.
+
+3. **Responsive & Mobile-First**
+
+   * Build mobile-first: breakpoints at 640px (sm), 768px (md), 1024px (lg).
+   * Ensure touch targets ≥ 44×44px.
+   * Use CSS Grid or Flexbox for layout; components collapse nicely on small screens.
+
+4. **Routing & Pages**
+
+   * **Home (`/`)**
+
+     * Hero section: optional static banner (skip video per current scope).
+     * **VideoGallery** component: autoplay Instagram-style video grid (mute on load, loop on hover).
+     * **Search & Filters**: location autocomplete, date picker (stub), guest selector.
+     * **Category Tabs**: e.g. “All”, “Surat”, “Daman”, “Mumbai”, “Pune.”
+     * **FarmList**: grid of **FarmCard** components showing image, title, location badge, price per night, amenities icons.
+   * **Farm Detail (`/farm/:id`)**
+
+     * Hero carousel of images/videos.
+     * Title, location breadcrumb, price, rating.
+     * Tabbed sections: Description, Amenities (grid of icons + labels), Reviews (stub), BookingForm.
+     * **BookingForm**: date range picker, guest count, “Check Availability” button (stubbed).
+   * **Owner Dashboard (`/owner`)**
+
+     * Stubbed pages: listing table, “Add New Farm” button (opens modal), side navigation.
+     * Use placeholder components to represent future dynamic features.
+
+5. **UI Details (inspired by [https://farmhouserent.in/](https://farmhouserent.in/))**
+   • **Global Header**
+   – Logo (green-leaf icon + “FarmHouseRent” text) on the left
+   – Search input labeled “Search by farm name” with autocomplete suggestions
+   – Location filters: clickable tags (“By Location: Kamrej, Dumas, …, Vadodara”) with hover/focus highlights
+   – Main nav links (“Home, Farms, Happy Customer, Contact Us”)
+   – Sticky behavior on scroll; full-width on desktop; collapsible burger menu on mobile (≤768px)
+
+• **Home/Landing Page Sections**
+1\. **Hero / Recommended You**
+– Full-width carousel or slideshow of featured farms
+– Each card: background image, name, price, location, quick-view overlay on hover (lift + shadow), padding 40–60px, bold heading
+2\. **Nearby Listings**
+– Multiple subsections: “Nearby \[Village] : \[Area]” headings (medium-weight 20–24px, padded)
+– Horizontal grid of farm cards: image, price, name, location, #beds, #persons; 3–4 columns on desktop, 1–2 on tablet, swipeable on mobile
+3\. **Our Farm Videos**
+– HTML5 video or YouTube iframe, autoplay muted loop, minimal controls, lazy-load on scroll, full-width desktop, responsive resize mobile
+4\. **Client Reviews**
+– Carousel or fade/slide effect: 2–3 line quotes italicized, reviewer name bold, alternating backgrounds (light gray/white), padding 20px
+5\. **Footer**
+– 3–4 columns desktop, single column mobile: Useful Links, Social Icons (Instagram, Facebook, YouTube 24×24px line icons), Contact info, copyright
+– Hover states: link underline/color change; social icons use brand colors
+
+• **Listings Overview Page**
+– Page title “Our Farms” with background hero stripe
+– Sort control dropdown (“Latest, Price Low→High, High→Low, Name”) + Filter button (toggles sidebar/modal with filter fields: bedrooms, price-range, capacity)
+– Grid of property cards: image with dark gradient overlay, price top-left bold green, title/location white, bedrooms/persons bottom; hover zoom + lift; 4-col desktop, 2-col tablet, 1-col mobile
+– On mobile, sticky bottom bar for Sort+Filter
+
+• **Property Detail Page**
+1\. **Title & Summary**
+– Farm name large bold (28–32px), sublocation below (18px); summary badges: max persons and bedrooms with icons and colored background blocks; two-column desktop, stacked mobile
+2\. **Image Gallery**
+– Main carousel (swipe/arrow), lazy-load, 16:9 aspect, thumbnails/navigation
+3\. **Amenities**
+– Two sections (“Clubhouse (Paid) Amenities” and “Villa Amenities”): headings 20px bold, bullet lists with checkmark icons, padded list items
+4\. **About / Note**
+– Italicized footnote: “Note: We Provide 6 Pass Free For ClubHouse.”
+5\. **Pricing Table**
+– Three columns: Regular, Weekend, Couple; rows for 12h/24h rates; bold headers, cell padding 8px; responsive collapse to stacked blocks on mobile
+6\. **Booking Form**
+– Fields: Check-in date (10AM–8PM), Check-out date (9AM–6PM), No. of Adult, No. of Child; “Enquiry Now” button; side-by-side on desktop, full-width stacked on mobile; focus glow on inputs, hover shadow on button
+7\. **House Rules**
+– Numbered list, small indent, shaded background block, tight line-spacing
+8\. **Location Map**
+– Clickable link or iframe thumbnail “Click to get directions” opening Google Maps in new tab; full-width button on mobile
+9\. **Related Farms**
+– Horizontal scroll/grid of 4–5 cards: image, price, name; hover lift + shadow; 4-col desktop, swipeable mobile
+10\. **Footer** (same as global footer)
+
+• **Design System & Styles**
+– Color palette: white/light background, green (#2E7D32) accent, dark gray/blue text
+– Typography: sans-serif; body 16px, headings 20–32px bold; consistent line-heights
+– Spacing: 20–30px section padding; 16–24px card margins; 40px between major sections
+– Buttons: rounded corners 2xl, hover shadow, focus outline; primary in green, secondary in blue
+– Inputs: subtle border, focus glow; clear (×) icon in search input
+– Icons: minimal line icons, accent color; imported via React Icon library
+– Animations: CSS fade/slide on scroll, carousel transitions; header sticky; farm card hover lift
+
+• **Responsive & Accessibility**
+– Breakpoints: desktop (>1024px), tablet (≤768px), mobile (≤480px)
+– Collapse nav into burger menu with slide-in panel on mobile
+– Swipeable carousels for hero, nearby listings, testimonials, related farms
+– Keyboard-accessible nav and forms; focus states visible; aria-labels on interactive elements
+– Images: alt attributes; lazy-load with `loading="lazy"`
+– Contrast ratios meet WCAG AA
+
+• **Performance & SEO**
+– Next.js static generation + CDN for `/_next/static`
+– Code splitting per page; minimal JavaScript bundle for each route
+– Optimize and lazy-load images; preload critical fonts; defer non-critical scripts
+– Lazy-load videos and map iframe only when in viewport
+– Meta tags for SEO; Open Graph for social sharing
+
+6. **Accessibility & Semantics**
+
+   * Use `<button>`, `<nav>`, `<header>`, `<main>`, `<section>`, `<footer>`.
+   * Ensure alt text for images and aria labels for interactive elements.
+   * Color contrast meets WCAG AA (green on white is fine).
+
+7. **Static Data Management**
+
+   * Create `data/staticFarms.ts` exporting typed arrays of farm objects (id, name, location, price, images, amenities, category).
+   * All components consume props or hook into a simple `useFetch('farms')` that returns the static array.
+   * Document where to replace with real API calls (`// TODO: swap for real API`).
+
+8. **Deliverables on First Pass**
+
+   * A working `npm start` or `yarn dev` prototype with the Home and FarmDetail pages wired up using static data.
+   * A reusable component library (`components/`) and theme in `styles/variables.scss`.
+   * README.md with setup instructions, architecture overview, where to plug in real APIs.
+   * Basic unit tests for one core component (e.g. FarmCard) using Jest + React Testing Library.
+
+Follow these instructions exactly to deliver a clean, production-ready React + TypeScript front-end that matches the BookMyFarm branding and the look & feel of the reference site, with static data management and a clear path to swap in real APIs later.

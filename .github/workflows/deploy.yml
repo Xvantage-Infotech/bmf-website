@@ -24,7 +24,7 @@ jobs:
               mkdir BMFWebsite
               cd BMFWebsite
               echo "🔧 Directory doesn't exist or not a Git repo. Cloning fresh..."
-              git clone https://github.com/Xvantage-Infotech/bmf-website.git BMFWebsite
+              git clone git@github.com:Xvantage-Infotech/bmf-website.git BMFWebsite
             else
               echo "🔄 Directory exists. Pulling latest changes..."
               cd BMFWebsite

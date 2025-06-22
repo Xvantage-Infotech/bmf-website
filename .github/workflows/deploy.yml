@@ -19,6 +19,13 @@ jobs:
       - name: Deploy code to server
         run: |
           sshpass -p "${{ secrets.SSH_PASSWORD }}" ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
-            cd /root
-            mkdir vishal
+            cd /var/www
+            if [ ! -d "BMFWebsite/.git" ]; then
+              echo "🔧 Directory doesn't exist or not a Git repo. Cloning fresh..."
+              git clone https://github.com/Xvantage-Infotech/bmf-website.git BMFWebsite
+            else
+              echo "🔄 Directory exists. Pulling latest changes..."
+              cd BMFWebsite
+              git pull origin main
+            fi
           EOF

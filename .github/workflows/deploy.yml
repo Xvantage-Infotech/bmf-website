@@ -22,6 +22,7 @@ jobs:
             cd /var/www
             if [ ! -d "BMFWebsite/.git" ]; then
               mkdir BMFWebsite
+              cd BMFWebsite
               echo "🔧 Directory doesn't exist or not a Git repo. Cloning fresh..."
               git clone https://github.com/Xvantage-Infotech/bmf-website.git BMFWebsite
             else

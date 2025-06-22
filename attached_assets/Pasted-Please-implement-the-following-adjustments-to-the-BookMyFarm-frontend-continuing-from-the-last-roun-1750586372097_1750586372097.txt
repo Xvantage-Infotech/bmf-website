@@ -1,0 +1,59 @@
+Please implement the following adjustments to the BookMyFarm frontend (continuing from the last round). Reuse existing components and state logic, and deliver clean React/TypeScript code with zero ESLint/TS errors.
+
+---
+
+### 1. Search Availability UI  
+- **On “Search Availability” click**: hide the top video section and the “3 Farms Picked by Us” section; display only:
+  1. Your existing search form (alias autocomplete + dates + guests).  
+  2. The “List Properties” results panel on the right.  
+- **Otherwise** (no search): show in order:  
+  1. Featured video carousel  
+  2. “3 Farms Picked by Us”  
+  3. Happy customer reviews  
+
+### 2. “Add Your Farm” Section in Results Panel  
+- Above the results list, insert a call-to-action card: **“Can’t find your perfect farm? Add yours!”**  
+- Clicking it navigates to `/owner/register`.  
+ - **Form structure & order** exactly as listed (with `*` required fields):  
+     1. Farm Owner Name *  
+     2. Farm Owner Mobile Number * (validate 10-digit)  
+     3. Farm Owner Email * (validate email)  
+     4. Farm Name *  
+     5. City * (text)  
+     6. Nearby Area * (text)  
+     7. Person Limit * (number; show note “extra charge applies”)  
+     8. Guest Stay Capacity (Day) * (number)  
+     9. Guest Stay Capacity (Night) * (number)  
+    10. Farm Size in Sq yd * (number)  
+    11. Extra Person Charge on Weekdays * (currency)  
+    12. Extra Person Charge on Weekends * (currency)  
+    13. 12-Hour Price Weekday * (currency)  
+    14. 24-Hour Price Weekday * (currency)  
+    15. 12-Hour Price Weekend * (currency)  
+    16. 24-Hour Price Weekend * (currency)  
+    17. Check-In Time * (dropdown of 12-hour clock, AM/PM)  
+    18. Check-Out Time * (same 12-hour dropdown)  
+    19. Caretaker Name *  
+    20. Caretaker Number * (validate phone)  
+    21. Farm Address * (multi-line)  
+    22. Farm Facilities * (multi-select checkboxes)  
+    23. Location Link * (validate URL)  
+    24. Property Rules * (multi-line)  
+    25. Swimming Pool Size (text)  
+    26. Kids Swimming Pool Available? (yes/no toggle)  
+    27. Referral Code (optional)  
+    28. Upload Property Photos * (up to 10 images/videos, max 10 MB each)
+
+   - **Calendar & Time inputs**: use the same React calendar component for date/time where applicable; ensure the 12-hour dropdown is consistent across all pages.  
+   - **Validation**: Show inline errors for required fields and format mismatches.  
+   - **File Upload**: allow multiple selection, preview thumbnails before upload, enforce count/file-size limits.
+
+### 3. Booking Flow  
+- For each farm result, add a **“Book Now”** button.  
+- On click, open a dummy payment modal with three states: **Processing**, **Success**, and **Cancelled**.  
+  - No real Razorpay integration—just mock the flow and callbacks.  
+  - After **Success**, navigate to `/booking/confirmation`; on **Cancelled**, show an inline error banner.  
+
+---
+
+Deliver each change as modular React components, reuse calendar and autocomplete, manage UI state via existing hooks or context, and ensure styling consistency with Tailwind/CSS modules. Let me know if you spot any build errors or need further clarifications!  

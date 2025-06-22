@@ -5,6 +5,7 @@ import { ArrowRight } from 'lucide-react';
 import { getFeaturedFarms } from '@/data/staticFarms';
 import { formatPrice } from '@/lib/utils';
 import SearchFilters, { SearchFilters as SearchFiltersType } from '@/components/Search/SearchFilters';
+import SearchResultsPanel from '@/components/Search/SearchResultsPanel';
 import CategoryTabs from '@/components/Search/CategoryTabs';
 import PropertyCategoryTabs from '@/components/common/PropertyCategoryTabs';
 import VideoGallery from '@/components/VideoGallery/VideoGallery';
@@ -16,11 +17,13 @@ export default function Home() {
   const [selectedCity, setSelectedCity] = useState('all');
   const [selectedCategory, setSelectedCategory] = useState<PropertyCategory | 'all'>('all');
   const [searchFilters, setSearchFilters] = useState<SearchFiltersType | null>(null);
+  const [isSearchMode, setIsSearchMode] = useState(false);
   
   const featuredFarms = getFeaturedFarms();
 
   const handleSearch = (filters: SearchFiltersType) => {
     setSearchFilters(filters);
+    setIsSearchMode(true);
     console.log('Search filters:', filters);
   };
 

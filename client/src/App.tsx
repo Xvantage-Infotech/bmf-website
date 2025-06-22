@@ -17,6 +17,7 @@ import HappyCustomers from "@/pages/HappyCustomers";
 import Contact from "@/pages/Contact";
 import HowItWorks from "@/pages/HowItWorks";
 import PropertyRegistration from "@/pages/PropertyRegistration";
+import BookingConfirmation from "@/pages/BookingConfirmation";
 import TermsOfService from "@/pages/TermsOfService";
 import PrivacyPolicy from "@/pages/PrivacyPolicy";
 import FAQ from "@/pages/FAQ";
@@ -60,6 +61,7 @@ function Router() {
           <Route path="/customers" component={HappyCustomers} />
           <Route path="/contact" component={Contact} />
           <Route path="/how-it-works" component={HowItWorks} />
+          <Route path="/booking/confirmation" component={BookingConfirmation} />
           
           {/* Legal Pages */}
           <Route path="/terms" component={TermsOfService} />

@@ -1,0 +1,20 @@
+name: Deploy to DigitalOcean (Test Only)
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: ✅ Checkout code
+        uses: actions/checkout@v3
+
+      - name: 🧪 Simulate deployment
+        run: |
+          echo "🔧 Pretending to deploy to DigitalOcean..."
+          echo "📁 Code checked out, environment ready."
+          echo "🚫 No actual deployment performed in this test."

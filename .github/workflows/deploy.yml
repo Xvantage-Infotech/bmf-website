@@ -1,4 +1,4 @@
-name: Deploy to DigitalOcean (Test Only)
+name: Deploy via SSH (with Password)
 
 on:
   push:
@@ -10,11 +10,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: ✅ Checkout code
+      - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: 🧪 Simulate deployment
+      - name: Install sshpass
+        run: sudo apt-get update && sudo apt-get install -y sshpass
+
+      - name: Deploy code to server
         run: |
-          echo "🔧 Pretending to deploy to DigitalOcean..."
-          echo "📁 Code checked out, environment ready."
-          echo "🚫 No actual deployment performed in this test."
+          sshpass -p "${{ secrets.SSH_PASSWORD }}" ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+            cd /root
+            mkdir vishal
+          EOF

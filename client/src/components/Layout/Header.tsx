@@ -20,7 +20,7 @@ export default function Header() {
   const Logo = () => (
     <Link href="/" className="flex items-center space-x-3">
       <img 
-        src="/attached_assets/app_logo_1750582700060.png" 
+        src="/app_logo.png" 
         alt="BookMyFarm Logo" 
         className="w-12 h-12"
       />

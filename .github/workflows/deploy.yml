@@ -24,6 +24,7 @@ jobs:
               mkdir BMFWebsite
               cd BMFWebsite
               echo "🔧 Directory doesn't exist or not a Git repo. Cloning fresh..."
+              git init
               git remote add origin https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/Xvantage-Infotech/bmf-website.git 
               git fetch
               git checkout main

@@ -1,3 +1,21 @@
+name: Deploy via SSH (with Password)
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install sshpass
+        run: sudo apt-get update && sudo apt-get install -y sshpass
+
       - name: Deploy to server
         env:
           SSH_USER: ${{ secrets.SSH_USER }}
@@ -13,7 +31,6 @@
 
             if [ ! -d "BMFWebsite/.git" ]; then
               echo "🔧 Cloning project..."
-              rm -rf BMFWebsite
               git clone https://x-access-token:$GH_TOKEN@github.com/Xvantage-Infotech/bmf-website.git BMFWebsite
               cd BMFWebsite
             else

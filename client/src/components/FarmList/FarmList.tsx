@@ -113,14 +113,14 @@ export default function FarmList({
               </SelectContent>
             </Select>
             
-            <Button
+            {/* <Button
               variant="outline"
               onClick={() => setShowFilters(!showFilters)}
               className="flex items-center space-x-2"
             >
               <SlidersHorizontal className="w-4 h-4" />
               <span>Filters</span>
-            </Button>
+            </Button> */}
           </div>
         </div>
 

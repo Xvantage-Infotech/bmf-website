@@ -32,5 +32,7 @@ jobs:
               echo "🔄 Directory exists. Pulling latest changes..."
               cd BMFWebsite
               git pull origin main
+              npm run build
+              pm2 restart bmf
             fi
           EOF

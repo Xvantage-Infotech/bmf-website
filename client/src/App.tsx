@@ -27,6 +27,9 @@ import NotFound from "@/pages/not-found";
 import { MessageCircle } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { useResponsive } from "@/hooks/useResponsive";
+import Profile from "@/pages/profile";
+import SavedFarms from "@/pages/saved";
+
 
 function FloatingWhatsApp() {
   const { isMobile } = useResponsive();
@@ -71,8 +74,8 @@ function Router() {
           {/* Additional routes */}
           <Route path="/farms" component={() => <Home />} />
           <Route path="/search" component={() => <Home />} />
-          <Route path="/saved" component={() => <div className="container mx-auto py-16 text-center"><h1 className="text-2xl font-bold">Saved Farms</h1><p className="text-neutral-600 mt-2">Coming soon...</p></div>} />
-          <Route path="/profile" component={() => <div className="container mx-auto py-16 text-center"><h1 className="text-2xl font-bold">User Profile</h1><p className="text-neutral-600 mt-2">Coming soon...</p></div>} />
+          <Route path="/saved" component={SavedFarms} />
+          <Route path="/profile" component={Profile} />
           
           {/* Fallback to 404 */}
           <Route component={NotFound} />

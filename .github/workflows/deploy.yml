@@ -16,23 +16,27 @@ jobs:
       - name: Install sshpass
         run: sudo apt-get update && sudo apt-get install -y sshpass
 
-      - name: Deploy code to server
+      - name: Deploy to server
+        env:
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
-          sshpass -p "${{ secrets.SSH_PASSWORD }}" ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+          sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no "$SSH_USER@$SSH_HOST" << 'EOF'
             cd /var/www
+
             if [ ! -d "BMFWebsite/.git" ]; then
-              mkdir BMFWebsite
+              echo "🔧 Cloning project..."
+              git clone https://x-access-token:$GH_TOKEN@github.com/Xvantage-Infotech/bmf-website.git BMFWebsite
               cd BMFWebsite
-              echo "🔧 Directory doesn't exist or not a Git repo. Cloning fresh..."
-              git init
-              git remote add origin https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/Xvantage-Infotech/bmf-website.git 
-              git fetch
-              git checkout main
             else
-              echo "🔄 Directory exists. Pulling latest changes..."
+              echo "🔄 Pulling latest changes..."
               cd BMFWebsite
               git pull origin main
-              npm run build
-              pm2 restart bmf
             fi
+
+            npm install
+            npm run build
+            pm2 restart bmf || pm2 start npm --name bmf -- run start
           EOF

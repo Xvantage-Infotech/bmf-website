@@ -24,7 +24,6 @@ import FAQ from "@/pages/FAQ";
 import NotFound from "@/pages/not-found";
 
 // Floating WhatsApp Button
-import { MessageCircle } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { useResponsive } from "@/hooks/useResponsive";
 import Profile from "@/pages/profile";
@@ -42,7 +41,7 @@ function FloatingWhatsApp() {
       className="fixed bottom-20 right-6 w-14 h-14 bg-green-500 text-white rounded-full shadow-lg hover:bg-green-600 transition-all hover:scale-110 z-40"
       onClick={() => window.open('https://wa.me/919277778778', '_blank')}
     >
-      <MessageCircle className="w-6 h-6" />
+      <img src="/whatsapp.png" alt="WhatsApp" className="w-8 h-8" />
     </Button>
   );
 }

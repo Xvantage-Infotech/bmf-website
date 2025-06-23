@@ -69,8 +69,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Video Gallery */}
-      <VideoGallery />
+      
 
       {/* Property Category Section */}
       <section className="py-12 bg-neutral-50">
@@ -98,7 +97,8 @@ export default function Home() {
         selectedCategory={selectedCategory !== 'all' ? selectedCategory : undefined}
         searchQuery={searchFilters?.location || ''}
       />
-
+      {/* Video Gallery */}
+      <VideoGallery />
       {/* Customer Reviews */}
       <CustomerReviews />
 

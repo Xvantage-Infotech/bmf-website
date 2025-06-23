@@ -40,7 +40,7 @@ export default function Footer() {
           <div>
             <div className="flex items-center space-x-3 mb-4">
               <img 
-                src="/attached_assets/app_logo_1750582700060.png" 
+                src="/app_logo.png" 
                 alt="BookMyFarm Logo" 
                 className="w-10 h-10"
               />

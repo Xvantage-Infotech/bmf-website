@@ -52,12 +52,15 @@ export default function Header() {
         </Link>
       ))}
       {mobile && (
-        <Button 
-          className="w-full mt-4 bg-primary text-white hover:bg-primary/90"
-          onClick={() => setIsMenuOpen(false)}
-        >
-          List Your Farm
-        </Button>
+         <Link href="/owner/register">
+            <Button 
+              className="w-full mt-4 bg-primary text-white hover:bg-primary/90"
+              onClick={() => setIsMenuOpen(false)}
+              >
+              List Your Farm
+            </Button>
+         </Link>
+        
       )}
     </nav>
   );
@@ -78,9 +81,12 @@ export default function Header() {
           {!isMobile && (
             <div className="flex items-center space-x-6">
               <Navigation className="flex items-center space-x-6" />
-              <Button className="bg-primary text-white hover:bg-primary/90 transition-colors">
+               <Link href="/owner/register">
+               <Button className="bg-primary text-white hover:bg-primary/90 transition-colors">
                 List Your Farm
               </Button>
+              </Link>
+              
             </div>
           )}
 

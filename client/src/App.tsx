@@ -56,9 +56,9 @@ function Router() {
         <Switch>
           <Route path="/" component={Home} />
           <Route path="/farm/:id" component={FarmDetail} />
-          <Route path="/owner" component={OwnerDashboard} />
-          <Route path="/owner/*" component={OwnerDashboard} />
           <Route path="/owner/register" component={PropertyRegistration} />
+          <Route path="/owner" component={OwnerDashboard} />
+          <Route path="/owner/*" component={OwnerDashboard} />  
           
           {/* New Pages */}
           <Route path="/customers" component={HappyCustomers} />

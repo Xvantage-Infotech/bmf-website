@@ -37,7 +37,7 @@ function FloatingWhatsApp() {
     <Button
       size="icon"
       className="fixed bottom-20 right-6 w-14 h-14 bg-green-500 text-white rounded-full shadow-lg hover:bg-green-600 transition-all hover:scale-110 z-40"
-      onClick={() => window.open('https://wa.me/919876543210', '_blank')}
+      onClick={() => window.open('https://wa.me/919277778778', '_blank')}
     >
       <MessageCircle className="w-6 h-6" />
     </Button>

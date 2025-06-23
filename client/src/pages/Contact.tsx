@@ -187,7 +187,7 @@ export default function Contact() {
                   <Button
                     variant="outline"
                     className="flex-1 justify-start"
-                    onClick={() => window.open('tel:+919876543210', '_self')}
+                    onClick={() => window.open('tel:+919277778778', '_self')}
                   >
                     <Phone className="w-4 h-4 mr-2" />
                     Call Now
@@ -195,7 +195,7 @@ export default function Contact() {
                   <Button
                     variant="outline"
                     className="flex-1 justify-start"
-                    onClick={() => window.open('https://wa.me/919876543210', '_blank')}
+                    onClick={() => window.open('https://wa.me/919277778778', '_blank')}
                   >
                     <MessageCircle className="w-4 h-4 mr-2" />
                     WhatsApp

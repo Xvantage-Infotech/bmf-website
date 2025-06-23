@@ -157,7 +157,7 @@ export default function BookingForm({ farm, className = '' }: BookingFormProps) 
             <Button
               variant="outline"
               className="w-full justify-start"
-              onClick={() => window.open('tel:+919876543210', '_self')}
+              onClick={() => window.open('tel:+919277778778', '_self')}
             >
               <Phone className="w-4 h-4 mr-3" />
               Call us: +91 98765 43210
@@ -165,7 +165,7 @@ export default function BookingForm({ farm, className = '' }: BookingFormProps) 
             <Button
               variant="outline"
               className="w-full justify-start"
-              onClick={() => window.open('https://wa.me/919876543210', '_blank')}
+              onClick={() => window.open('https://wa.me/919277778778', '_blank')}
             >
               <MessageCircle className="w-4 h-4 mr-3" />
               WhatsApp Support

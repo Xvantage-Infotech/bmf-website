@@ -20,9 +20,9 @@ export default function Footer() {
 
   const socialLinks = [
     { icon: Facebook, href: 'https://facebook.com/bookmyfarm', label: 'Facebook' },
-    { icon: Instagram, href: 'https://instagram.com/bookmyfarm', label: 'Instagram' },
+    { icon: Instagram, href: 'https://instagram.com/book_my_farms', label: 'Instagram' },
     { icon: Youtube, href: 'https://youtube.com/bookmyfarm', label: 'YouTube' },
-    { icon: MessageCircle, href: 'https://wa.me/919876543210', label: 'WhatsApp' },
+    { icon: MessageCircle, href: 'https://wa.me/919277778778', label: 'WhatsApp' },
   ];
 
   const legalLinks = [

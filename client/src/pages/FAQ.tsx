@@ -165,7 +165,7 @@ export default function FAQ() {
               Contact Support
             </a>
             <a 
-              href="https://wa.me/919876543210" 
+              href="https://wa.me/919277778778" 
               target="_blank"
               rel="noopener noreferrer"
               className="border border-neutral-300 text-neutral-700 px-8 py-3 rounded-lg font-medium hover:bg-neutral-50 transition-colors"

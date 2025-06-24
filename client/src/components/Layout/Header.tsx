@@ -77,7 +77,10 @@ export default function Header() {
               <Button 
                 variant="outline" 
                 className="w-full justify-start" 
-                onClick={() => setIsMenuOpen(false)}
+                onClick={() => {
+                  setIsMenuOpen(false);
+                  window.location.href = '/profile';
+                }}
               >
                 <User className="mr-2 h-4 w-4" />
                 <span>Profile</span>
@@ -85,7 +88,10 @@ export default function Header() {
               <Button 
                 variant="outline" 
                 className="w-full justify-start" 
-                onClick={() => setIsMenuOpen(false)}
+                onClick={() => {
+                  setIsMenuOpen(false);
+                  window.location.href = '/profile';
+                }}
               >
                 <Settings className="mr-2 h-4 w-4" />
                 <span>Edit Profile</span>
@@ -151,14 +157,26 @@ export default function Header() {
                     </div>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem className="cursor-pointer">
+                    <DropdownMenuItem 
+                      className="cursor-pointer"
+                      onClick={() => {
+                        setIsMenuOpen(false);
+                        window.location.href = '/profile';
+                      }}
+                    >
                       <User className="mr-2 h-4 w-4" />
                       <span>Profile</span>
                     </DropdownMenuItem>
-                    <DropdownMenuItem className="cursor-pointer">
-                      <Settings className="mr-2 h-4 w-4" />
-                      <span>Edit Profile</span>
-                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                className="cursor-pointer" 
+                onClick={() => {
+                  setIsMenuOpen(false);
+                  window.location.href = '/profile';
+                }}
+              >
+                <Settings className="mr-2 h-4 w-4" />
+                <span>Edit Profile</span>
+              </DropdownMenuItem>
                     <DropdownMenuItem className="cursor-pointer" onClick={logout}>
                       <LogOut className="mr-2 h-4 w-4" />
                       <span>Logout</span>

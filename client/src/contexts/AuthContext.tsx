@@ -5,6 +5,10 @@ interface User {
   name: string;
   mobileNumber: string;
   profileImage?: string;
+  address?: string;
+  location?: string;
+  dob?: string;
+  isOwner?: boolean;
 }
 
 interface AuthContextType {

@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { useForm } from 'react-hook-form';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -15,6 +16,7 @@ interface AuthModalProps {
 export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
   const [activeTab, setActiveTab] = useState<'login' | 'signup'>('login');
   const [isOtpSent, setIsOtpSent] = useState(false);
+  const { login } = useAuth();
   
   const loginForm = useForm({
     defaultValues: {
@@ -40,12 +42,28 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
   const handleLogin = (values: any) => {
     // In a real app, this would verify OTP and log the user in
     console.log('Login with', values);
+    
+    // Mock login - in a real app, this would come from an API
+    login({
+      id: '1',
+      name: 'User', // In a real app, this would come from the backend
+      mobileNumber: values.mobileNumber
+    });
+    
     onClose();
   };
 
   const handleSignup = (values: any) => {
     // In a real app, this would verify OTP and create a new account
     console.log('Signup with', values);
+    
+    // Mock signup - in a real app, this would come from an API
+    login({
+      id: '1',
+      name: values.name,
+      mobileNumber: values.mobileNumber
+    });
+    
     onClose();
   };
 

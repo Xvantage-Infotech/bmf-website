@@ -2,16 +2,20 @@ import { useState } from 'react';
 import { Link, useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Menu } from 'lucide-react';
+import { Menu, User, LogOut, Settings } from 'lucide-react';
 import { useResponsive } from '@/hooks/useResponsive';
 import LiveSearchBar from '@/components/common/LiveSearchBar';
 import AuthModal from '@/components/auth/AuthModal';
+import { useAuth } from '@/contexts/AuthContext';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 export default function Header() {
   const [location] = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const { isMobile } = useResponsive();
+  const { user, isAuthenticated, logout } = useAuth();
 
   const navigationItems = [
     { href: '/farms', label: 'Farms' },
@@ -55,7 +59,52 @@ export default function Header() {
         </Link>
       ))}
       {mobile && (
-         <Button 
+        isAuthenticated ? (
+          <div className="mt-4 pt-4 border-t border-neutral-200">
+            <div className="flex items-center space-x-2 mb-3">
+              <Avatar className="h-8 w-8">
+                {user?.profileImage ? (
+                  <AvatarImage src={user.profileImage} alt={user.name} />
+                ) : (
+                  <AvatarFallback className="bg-primary text-white">
+                    {user?.name.charAt(0).toUpperCase()}
+                  </AvatarFallback>
+                )}
+              </Avatar>
+              <span className="text-sm font-medium">{user?.name}</span>
+            </div>
+            <div className="space-y-2">
+              <Button 
+                variant="outline" 
+                className="w-full justify-start" 
+                onClick={() => setIsMenuOpen(false)}
+              >
+                <User className="mr-2 h-4 w-4" />
+                <span>Profile</span>
+              </Button>
+              <Button 
+                variant="outline" 
+                className="w-full justify-start" 
+                onClick={() => setIsMenuOpen(false)}
+              >
+                <Settings className="mr-2 h-4 w-4" />
+                <span>Edit Profile</span>
+              </Button>
+              <Button 
+                variant="outline" 
+                className="w-full justify-start" 
+                onClick={() => {
+                  logout();
+                  setIsMenuOpen(false);
+                }}
+              >
+                <LogOut className="mr-2 h-4 w-4" />
+                <span>Logout</span>
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <Button 
             className="w-full mt-4 bg-primary text-white hover:bg-primary/90"
             onClick={() => {
               setIsMenuOpen(false);
@@ -64,6 +113,7 @@ export default function Header() {
           >
             Login/Sign Up
           </Button>
+        )
       )}
     </nav>
   );
@@ -84,12 +134,45 @@ export default function Header() {
           {!isMobile && (
             <div className="flex items-center space-x-6">
               <Navigation className="flex items-center space-x-6" />
-              <Button 
-                className="bg-primary text-white hover:bg-primary/90 transition-colors"
-                onClick={() => setIsAuthModalOpen(true)}
-              >
-                Login/Sign Up
-              </Button>
+              {isAuthenticated ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <div className="flex items-center space-x-2 cursor-pointer">
+                      <Avatar className="h-8 w-8">
+                        {user?.profileImage ? (
+                          <AvatarImage src={user.profileImage} alt={user.name} />
+                        ) : (
+                          <AvatarFallback className="bg-primary text-white">
+                            {user?.name.charAt(0).toUpperCase()}
+                          </AvatarFallback>
+                        )}
+                      </Avatar>
+                      <span className="text-sm font-medium">{user?.name}</span>
+                    </div>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem className="cursor-pointer">
+                      <User className="mr-2 h-4 w-4" />
+                      <span>Profile</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className="cursor-pointer">
+                      <Settings className="mr-2 h-4 w-4" />
+                      <span>Edit Profile</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className="cursor-pointer" onClick={logout}>
+                      <LogOut className="mr-2 h-4 w-4" />
+                      <span>Logout</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <Button 
+                  className="bg-primary text-white hover:bg-primary/90 transition-colors"
+                  onClick={() => setIsAuthModalOpen(true)}
+                >
+                  Login/Sign Up
+                </Button>
+              )}
               
             </div>
           )}

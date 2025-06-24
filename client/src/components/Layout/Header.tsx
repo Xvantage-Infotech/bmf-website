@@ -5,16 +5,19 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Menu } from 'lucide-react';
 import { useResponsive } from '@/hooks/useResponsive';
 import LiveSearchBar from '@/components/common/LiveSearchBar';
+import AuthModal from '@/components/auth/AuthModal';
 
 export default function Header() {
   const [location] = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const { isMobile } = useResponsive();
 
   const navigationItems = [
     { href: '/farms', label: 'Farms' },
     { href: '/customers', label: 'Happy Customers' },
     { href: '/contact', label: 'Contact' },
+    { href: '/owner/register', label: 'List Your Farm' },
   ];
 
   const Logo = () => (
@@ -52,15 +55,15 @@ export default function Header() {
         </Link>
       ))}
       {mobile && (
-         <Link href="/owner/register">
-            <Button 
-              className="w-full mt-4 bg-primary text-white hover:bg-primary/90"
-              onClick={() => setIsMenuOpen(false)}
-              >
-              List Your Farm
-            </Button>
-         </Link>
-        
+         <Button 
+            className="w-full mt-4 bg-primary text-white hover:bg-primary/90"
+            onClick={() => {
+              setIsMenuOpen(false);
+              setIsAuthModalOpen(true);
+            }}
+          >
+            Login/Sign Up
+          </Button>
       )}
     </nav>
   );
@@ -81,11 +84,12 @@ export default function Header() {
           {!isMobile && (
             <div className="flex items-center space-x-6">
               <Navigation className="flex items-center space-x-6" />
-               <Link href="/owner/register">
-               <Button className="bg-primary text-white hover:bg-primary/90 transition-colors">
-                List Your Farm
+              <Button 
+                className="bg-primary text-white hover:bg-primary/90 transition-colors"
+                onClick={() => setIsAuthModalOpen(true)}
+              >
+                Login/Sign Up
               </Button>
-              </Link>
               
             </div>
           )}
@@ -133,6 +137,12 @@ export default function Header() {
           </div>
         )}
       </div>
+
+      {/* Auth Modal */}
+      <AuthModal 
+        isOpen={isAuthModalOpen} 
+        onClose={() => setIsAuthModalOpen(false)} 
+      />
     </header>
   );
 }

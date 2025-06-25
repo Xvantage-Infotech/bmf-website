@@ -6,7 +6,9 @@ import { users, type User, type InsertUser } from "@shared/schema";
 export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
+  getUserByMobileNumber(mobileNumber: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  updateUser(user: User): Promise<User>;
 }
 
 export class MemStorage implements IStorage {
@@ -28,6 +30,12 @@ export class MemStorage implements IStorage {
     );
   }
 
+  async getUserByMobileNumber(mobileNumber: string): Promise<User | undefined> {
+    return Array.from(this.users.values()).find(
+      (user) => user.mobileNumber === mobileNumber,
+    );
+  }
+
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = this.currentId++;
     const user: User = { 
@@ -37,6 +45,14 @@ export class MemStorage implements IStorage {
       role: insertUser.role || "guest"
     };
     this.users.set(id, user);
+    return user;
+  }
+
+  async updateUser(user: User): Promise<User> {
+    if (!this.users.has(user.id)) {
+      throw new Error(`User with id ${user.id} not found`);
+    }
+    this.users.set(user.id, user);
     return user;
   }
 }

@@ -4,9 +4,16 @@ import { z } from "zod";
 
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
-  username: text("username").notNull().unique(),
-  email: text("email").notNull().unique(),
-  password: text("password").notNull(),
+  username: text("username").unique(),
+  email: text("email").unique(),
+  password: text("password"),
+  name: text("name"),
+  mobileNumber: text("mobile_number").unique(),
+  address: text("address"),
+  location: text("location"),
+  dateOfBirth: text("date_of_birth"),
+  profileImage: text("profile_image"),
+  firebaseUid: text("firebase_uid").unique(),
   role: text("role").notNull().default("guest"), // 'guest', 'owner', 'admin'
   createdAt: timestamp("created_at").defaultNow(),
 });
@@ -69,6 +76,17 @@ export const videos = pgTable("videos", {
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
   createdAt: true,
+}).extend({
+  username: z.string().optional(),
+  email: z.string().email().optional(),
+  password: z.string().optional(),
+  name: z.string().optional(),
+  mobileNumber: z.string().optional(),
+  address: z.string().optional(),
+  location: z.string().optional(),
+  dateOfBirth: z.string().optional(),
+  profileImage: z.string().optional(),
+  firebaseUid: z.string().optional(),
 });
 
 export const insertFarmSchema = createInsertSchema(farms).omit({

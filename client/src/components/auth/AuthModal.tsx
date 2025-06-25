@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { useForm } from 'react-hook-form';
 import { useAuth } from '@/contexts/AuthContext';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Loader2 } from 'lucide-react';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -16,7 +18,17 @@ interface AuthModalProps {
 export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
   const [activeTab, setActiveTab] = useState<'login' | 'signup'>('login');
   const [isOtpSent, setIsOtpSent] = useState(false);
-  const { login } = useAuth();
+  const [formattedPhone, setFormattedPhone] = useState('');
+  
+  const { 
+    sendOtpToPhone, 
+    verifyOtpAndLogin, 
+    signup, 
+    loading, 
+    error, 
+    clearError,
+    login 
+  } = useAuth();
   
   const loginForm = useForm({
     defaultValues: {
@@ -33,38 +45,96 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
     }
   });
 
-  const handleSendOtp = (mobileNumber: string) => {
-    // In a real app, this would call an API to send OTP
-    console.log('Sending OTP to', mobileNumber);
-    setIsOtpSent(true);
+  // Clear error when modal opens
+  useEffect(() => {
+    if (isOpen && !isOtpSent) {
+      // Clear any previous error
+      clearError();
+    }
+  }, [isOpen, isOtpSent, clearError]);
+
+  const formatPhoneNumber = (phone: string) => {
+    // Remove any non-digit characters
+    const digits = phone.replace(/\D/g, '');
+    
+    // Format as international number if it doesn't start with +
+    if (!phone.startsWith('+')) {
+      // Default to India (+91) if no country code
+      return `+91${digits}`;
+    }
+    
+    return phone;
   };
 
-  const handleLogin = (values: any) => {
-    // In a real app, this would verify OTP and log the user in
-    console.log('Login with', values);
+  const handleSendOtp = async (mobileNumber: string) => {
+    if (!mobileNumber || mobileNumber.length < 10) {
+      alert('Please enter a valid mobile number');
+      return;
+    }
     
-    // Mock login - in a real app, this would come from an API
-    login({
-      id: '1',
-      name: 'User', // In a real app, this would come from the backend
-      mobileNumber: values.mobileNumber
-    });
-    
-    onClose();
+    try {
+      // Format phone number for Firebase (needs to be in E.164 format)
+      const formattedNumber = formatPhoneNumber(mobileNumber);
+      setFormattedPhone(formattedNumber);
+      
+      // Send OTP using Firebase or API
+      await sendOtpToPhone(formattedNumber);
+      
+      // Move to OTP verification step
+      setIsOtpSent(true);
+    } catch (error) {
+      console.error('Error sending OTP:', error);
+      // Error is handled by AuthContext and displayed in the UI
+    }
   };
 
-  const handleSignup = (values: any) => {
-    // In a real app, this would verify OTP and create a new account
-    console.log('Signup with', values);
+  const handleLogin = async (values: any) => {
+    if (!values.otp || values.otp.length < 4) {
+      alert('Please enter a valid OTP');
+      return;
+    }
     
-    // Mock signup - in a real app, this would come from an API
-    login({
-      id: '1',
-      name: values.name,
-      mobileNumber: values.mobileNumber
-    });
+    try {
+      // Verify OTP and login
+      await verifyOtpAndLogin(values.otp);
+      
+      // Reset form and close modal on success
+      setIsOtpSent(false);
+      onClose();
+    } catch (error) {
+      console.error('Error verifying OTP:', error);
+      // Error is handled by AuthContext and displayed in the UI
+    }
+  };
+
+  const handleSignup = async (values: any) => {
+    if (!values.otp || values.otp.length < 4) {
+      alert('Please enter a valid OTP');
+      return;
+    }
     
-    onClose();
+    if (!values.name) {
+      alert('Please enter your name');
+      return;
+    }
+    
+    try {
+      // Verify OTP first
+      await verifyOtpAndLogin(values.otp);
+      
+      // Then update user profile with name
+      await signup({
+        name: values.name,
+        mobileNumber: formattedPhone,
+      });
+      
+      // Reset form and close modal on success
+      setIsOtpSent(false);
+      onClose();
+    } catch (error) {
+      console.error('Error verifying OTP:', error);
+      // Error is handled by AuthContext and displayed in the UI
+    }
   };
 
   return (
@@ -75,6 +145,15 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
             Log In or Sign Up
           </DialogTitle>
         </DialogHeader>
+        
+        {/* Error Alert */}
+        {error && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+        
+        {/* OTP will be sent via API */}
         
         <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'login' | 'signup')}>
           <TabsList className="grid w-full grid-cols-2">
@@ -112,17 +191,37 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                         {...loginForm.register('otp')}
                       />
                     </div>
-                    <Button type="submit" className="w-full bg-primary text-white hover:bg-primary/90">
-                      Login
+                    <Button 
+                      type="submit" 
+                      className="w-full bg-primary text-white hover:bg-primary/90"
+                      disabled={loading}
+                    >
+                      {loading ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Verifying...
+                        </>
+                      ) : (
+                        'Login'
+                      )}
                     </Button>
                   </>
                 ) : (
                   <Button 
+                    id="login-otp-button"
                     type="button" 
                     className="w-full bg-primary text-white hover:bg-primary/90"
                     onClick={() => handleSendOtp(loginForm.getValues('mobileNumber'))}
+                    disabled={loading}
                   >
-                    Get OTP
+                    {loading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Sending OTP...
+                      </>
+                    ) : (
+                      'Get OTP'
+                    )}
                   </Button>
                 )}
               </form>
@@ -169,17 +268,37 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                         {...signupForm.register('otp')}
                       />
                     </div>
-                    <Button type="submit" className="w-full bg-primary text-white hover:bg-primary/90">
-                      Create Account
+                    <Button 
+                      type="submit" 
+                      className="w-full bg-primary text-white hover:bg-primary/90"
+                      disabled={loading}
+                    >
+                      {loading ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Creating Account...
+                        </>
+                      ) : (
+                        'Create Account'
+                      )}
                     </Button>
                   </>
                 ) : (
                   <Button 
+                    id="signup-otp-button"
                     type="button" 
                     className="w-full bg-primary text-white hover:bg-primary/90"
                     onClick={() => handleSendOtp(signupForm.getValues('mobileNumber'))}
+                    disabled={loading}
                   >
-                    Get OTP
+                    {loading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Sending OTP...
+                      </>
+                    ) : (
+                      'Get OTP'
+                    )}
                   </Button>
                 )}
               </form>

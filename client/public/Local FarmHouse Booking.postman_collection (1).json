@@ -1,0 +1,1213 @@
+{
+	"info": {
+		"_postman_id": "10cd6f89-4e89-4738-befc-c41ecceaacbb",
+		"name": "Local FarmHouse Booking",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "6833658",
+		"_collection_link": "https://speeding-desert-7431.postman.co/workspace/Farm-House-Booking~f2fdb892-6e5b-46e2-80d1-2ed796f33476/collection/25300864-10cd6f89-4e89-4738-befc-c41ecceaacbb?action=share&source=collection_link&creator=6833658"
+	},
+	"item": [
+		{
+			"name": "Login",
+			"item": [
+				{
+					"name": "User Login",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"phone_number\": \"7046767790\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/login",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Verify Otp",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = JSON.parse(responseBody);\r",
+									"postman.setEnvironmentVariable(\"bearer\",\"Bearer \"+jsonData.data.token);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"phone_number\": \"7046767790\",\r\n    \"otp\": 517576\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/verify_otp",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"verify_otp"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{bearer}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/api/logout",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"logout"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete User",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{bearer}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/api/delete_user",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"delete_user"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "User",
+			"item": [
+				{
+					"name": "Update User",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{bearer}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "name",
+									"value": "mehul",
+									"type": "text"
+								},
+								{
+									"key": "email",
+									"value": "mehul.tupple@gmail.com",
+									"type": "text"
+								},
+								{
+									"key": "date_of_birth",
+									"value": "2000-01-19",
+									"type": "text"
+								},
+								{
+									"key": "phone_number",
+									"value": "7229006983",
+									"type": "text"
+								},
+								{
+									"key": "country",
+									"value": "india",
+									"type": "text"
+								},
+								{
+									"key": "state",
+									"value": "gujarat",
+									"type": "text"
+								},
+								{
+									"key": "street",
+									"value": "amroli",
+									"type": "text"
+								},
+								{
+									"key": "city",
+									"value": "surat",
+									"type": "text"
+								},
+								{
+									"key": "postal_code",
+									"value": "394107",
+									"type": "text"
+								},
+								{
+									"key": "profile_image",
+									"type": "file",
+									"src": []
+								}
+							]
+						},
+						"url": {
+							"raw": "{{url}}/api/update_user",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"update_user"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get User",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{bearer}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/api/get_user",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"get_user"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Category",
+			"item": [
+				{
+					"name": "Category",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "//http://127.0.0.1:8000/assets/images/category-icons/weekend_home.png",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/category",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"category"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Farms",
+			"item": [
+				{
+					"name": "Farms",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"city_id\": \"\",\r\n    \"no_of_guest\": \"\",\r\n    \"start_date\": \"\",\r\n    \"start_time\": \"\",\r\n    \"end_date\": \"\",\r\n    \"end_time\": \"\",\r\n    \"min_price\": \"\",\r\n    \"max_price\": \"\",\r\n    \"category_id\": \"\",\r\n    \"farm_id\": \"\",\r\n    \"sort_by\": \"\", // price_high_low | price_low_high | newest_first | guest_rating | popularity\r\n    \"page\": \"1\",\r\n    \"per_page\": \"10\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/farms",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"farms"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Farm Details",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"farm_id\": \"33\",\r\n    \"start_date\": \"2025-06-13\",\r\n    \"start_time\": \"\",\r\n    \"end_date\": \"2025-06-15\",\r\n    \"end_time\": \"\",\r\n    \"user_id\": \"\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/farm_details",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"farm_details"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Farm",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/api/create_farm",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"create_farm"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "City",
+			"item": [
+				{
+					"name": "City",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/api/city",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"city"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Wishlist",
+			"item": [
+				{
+					"name": "Wish List",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{bearer}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"page\": \"1\",\r\n    \"per_page\": \"10\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/wishlist",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"wishlist"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add Wishlist",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{bearer}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"farm_id\": \"1\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/add_wishlist",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"add_wishlist"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Booking",
+			"item": [
+				{
+					"name": "Booking List",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{bearer}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"status\": \"1\", // 0 - Complete | 1 - Upcoming | 2 - Cancelled\r\n    \"page\": \"1\",\r\n    \"per_page\": \"10\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/booking_list",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"booking_list"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Booking Details",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{bearer}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"booking_id\": \"63\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/booking_details",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"booking_details"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Check Booking",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{bearer}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"farm_id\": \"22\",\r\n    \"start_date\": \"2025-05-02\",\r\n    \"start_time\": \"07:00:00\",\r\n    \"end_date\": \"2025-05-02\",\r\n    \"end_time\": \"18:00:00\",\r\n    \"no_of_guest\": \"22\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/check_booking",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"check_booking"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add Booking",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{bearer}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"farm_id\": \"2\",\r\n    \"transaction_id\": \"3\",\r\n    \"check_in_date\": \"2025-04-12\",\r\n    \"check_in_time\": \"09:00:00\",\r\n    \"check_out_date\": \"2025-04-13\",\r\n    \"check_out_time\": \"11:00:00\",\r\n    \"no_of_guest\" : \"10\",\r\n    \"total_price\": \"10000\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/add_booking",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"add_booking"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Cancel Booking",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{bearer}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"booking_id\": \"2\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/cancel_booking",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"cancel_booking"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Order",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{bearer}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"farm_id\": 22,\r\n    \"amount\": 10000,\r\n    \"currency\": \"INR\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/create_order",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"create_order"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Verify Signature",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{bearer}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"payment_id\": \"pay_Q9ODIENPeenrwN\",\r\n    \"order_id\": \"order_Q9OBeD6NoVpGE9\",\r\n    \"signature\": \"f6b23358872201f225cde27b32f25703110fad07756a965771d4f6babdf09c49\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/verify_signature",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"verify_signature"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Payment Status",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{bearer}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"order_id\": \"order_LY6usnhAkqDtoz\",\r\n    \"status\": \"Cancel\" // 2 = Cancel, 3 = Fail(only pass parameter)\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/payment_status",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"payment_status"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Transaction History",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{bearer}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "// status for 0 - Pending | 1 - Complete | 2 - Cancel | 3 - Fail\r\n{\r\n    \"page\": \"1\",\r\n    \"per_page\": \"10\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/transaction_history",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"transaction_history"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Reviews",
+			"item": [
+				{
+					"name": "Review List",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{bearer}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"farm_id\": \"2\",\r\n    \"sort_by\" : \"\", // most_recent | high_rated | low_rated\r\n    \"page\": \"1\",\r\n    \"per_page\": \"2\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/review_list",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"review_list"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add Review",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{bearer}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"farm_id\": \"1\",\r\n    \"review\": \"djashfjfgku\",\r\n    \"star\": \"4\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/add_review",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"add_review"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "FAQ",
+			"item": [
+				{
+					"name": "Get FAQ",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/api/get_faq",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"get_faq"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Owner app",
+			"item": [
+				{
+					"name": "List Farm",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{bearer}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"page\": \"1\",\r\n    \"per_page\": \"10\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/list_farm",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"list_farm"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Booking List",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{bearer}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"farm_id\" : \"22\",\r\n    \"start_date\": \"2025-05-01\",\r\n    \"end_date\" : \"2025-05-31\"\r\n    // \"page\": \"1\",\r\n    // \"per_page\": \"10\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/owner_booking_list",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"owner_booking_list"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add Offline Booking",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{bearer}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"farm_id\" : \"1\",\r\n    \"start_date\": \"2025-04-15\",\r\n    \"start_time\": \"10:00:00\",\r\n    \"end_date\": \"2025-04-17\",\r\n    \"end_time\": \"21:00:00\",\r\n    \"description\" : \"my famaly booking\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/add_offline_booking",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"add_offline_booking"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = JSON.parse(responseBody);\r",
+									"postman.setEnvironmentVariable(\"bearer\",\"Bearer \"+jsonData.data.token);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"phone_number\" : \"7229006983\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/add_user",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"add_user"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Offline Cancel Booking",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{bearer}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"booking_id\": \"17\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/offline_cancel_booking",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"offline_cancel_booking"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

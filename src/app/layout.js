@@ -6,7 +6,6 @@ import { AuthProvider } from '@/contexts/AuthContext';
 import MobileBottomNav from '@/components/Layout/MobileBottomNav';
 import Footer from '@/components/Layout/Footer';
 import Header from '@/components/Layout/Header';
-import '@/styles/globals.css';
 
 export const metadata = {
   title: 'BookMyFarm',

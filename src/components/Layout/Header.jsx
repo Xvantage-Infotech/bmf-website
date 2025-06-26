@@ -24,7 +24,7 @@ export default function Header() {
 
   const navigationItems = [
     { href: '/farms', label: 'Farms' },
-    { href: '/customers', label: 'Happy Customers' },
+    { href: '/customer', label: 'Happy Customers' },
     { href: '/contact', label: 'Contact' },
     { href: '/owner/register', label: 'List Your Farm' },
   ];

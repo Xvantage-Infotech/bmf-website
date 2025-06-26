@@ -1,3 +1,4 @@
+import '@/styles/globals.css';
 
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
@@ -5,7 +6,7 @@ import { AuthProvider } from '@/contexts/AuthContext';
 import MobileBottomNav from '@/components/Layout/MobileBottomNav';
 import Footer from '@/components/Layout/Footer';
 import Header from '@/components/Layout/Header';
-import '../styles/globals.css';
+import '@/styles/globals.css';
 
 export const metadata = {
   title: 'BookMyFarm',

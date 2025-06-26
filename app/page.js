@@ -2,24 +2,24 @@
 
 import { useState, useEffect } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Toaster } from '@/components/ui/toaster';
-import { TooltipProvider } from '@/components/ui/tooltip';
-import { AuthProvider } from '@/contexts/AuthContext';
+import { Toaster } from '../components/ui/toaster';
+import { TooltipProvider } from '../components/ui/tooltip';
+import { AuthProvider } from '../contexts/AuthContext';
 
 // Layout Components
-import Header from '@/components/Layout/Header';
-import Footer from '@/components/Layout/Footer';
-import MobileBottomNav from '@/components/Layout/MobileBottomNav';
+import Header from '../components/Layout/Header';
+import Footer from '../components/Layout/Footer';
+import MobileBottomNav from '../components/Layout/MobileBottomNav';
 
 // Components
-import SearchFilters from '@/components/Search/SearchFilters';
-import CategoryTabs from '@/components/Search/CategoryTabs';
-import SearchResultsPanel from '@/components/Search/SearchResultsPanel';
-import FarmList from '@/components/FarmList/FarmList';
-import VideoGallery from '@/components/VideoGallery/VideoGallery';
-import CustomerReviews from '@/components/Reviews/CustomerReviews';
-import { Button } from '@/components/ui/button';
-import { useResponsive } from '@/hooks/useResponsive';
+import SearchFilters from '../components/Search/SearchFilters';
+import CategoryTabs from '../components/Search/CategoryTabs';
+import SearchResultsPanel from '../components/Search/SearchResultsPanel';
+import FarmList from '../components/FarmList/FarmList';
+import VideoGallery from '../components/VideoGallery/VideoGallery';
+import CustomerReviews from '../components/Reviews/CustomerReviews';
+import { Button } from '../components/ui/button';
+import { useResponsive } from '../hooks/useResponsive';
 
 const queryClient = new QueryClient({
   defaultOptions: {

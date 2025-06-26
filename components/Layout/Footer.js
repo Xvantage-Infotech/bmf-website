@@ -1,5 +1,3 @@
-'use client';
-
 import Link from 'next/link';
 import { MapPin, Phone, Mail, Facebook, Twitter, Instagram } from 'lucide-react';
 
@@ -7,27 +5,27 @@ export default function Footer() {
   return (
     <footer className="bg-gray-900 text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Company Info */}
-          <div className="col-span-1 md:col-span-2">
+          <div className="lg:col-span-1">
             <div className="flex items-center space-x-2 mb-4">
-              <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
-                <span className="text-white font-bold text-sm">BF</span>
+              <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold">B</span>
               </div>
               <span className="text-xl font-bold">BookMyFarm</span>
             </div>
-            <p className="text-gray-400 mb-4 max-w-md">
-              Discover premium farmhouse rentals across India. Experience nature, comfort, and unforgettable memories with our handpicked farm stays.
+            <p className="text-gray-400 mb-4">
+              Premium farmhouse rentals across India. Experience nature, comfort, and unforgettable memories.
             </p>
             <div className="flex space-x-4">
               <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                <Facebook className="h-5 w-5" />
+                <Facebook className="w-5 h-5" />
               </a>
               <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                <Twitter className="h-5 w-5" />
+                <Twitter className="w-5 h-5" />
               </a>
               <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                <Instagram className="h-5 w-5" />
+                <Instagram className="w-5 h-5" />
               </a>
             </div>
           </div>
@@ -42,13 +40,18 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
+                <Link href="/farms" className="text-gray-400 hover:text-white transition-colors">
+                  Browse Farms
+                </Link>
+              </li>
+              <li>
                 <Link href="/how-it-works" className="text-gray-400 hover:text-white transition-colors">
                   How It Works
                 </Link>
               </li>
               <li>
-                <Link href="/customers" className="text-gray-400 hover:text-white transition-colors">
-                  Customer Reviews
+                <Link href="/happy-customers" className="text-gray-400 hover:text-white transition-colors">
+                  Happy Customers
                 </Link>
               </li>
               <li>
@@ -56,15 +59,10 @@ export default function Footer() {
                   Contact Us
                 </Link>
               </li>
-              <li>
-                <Link href="/owner/register" className="text-gray-400 hover:text-white transition-colors">
-                  List Your Farm
-                </Link>
-              </li>
             </ul>
           </div>
 
-          {/* Legal & Support */}
+          {/* Support */}
           <div>
             <h3 className="text-lg font-semibold mb-4">Support</h3>
             <ul className="space-y-2">
@@ -83,32 +81,56 @@ export default function Footer() {
                   Privacy Policy
                 </Link>
               </li>
+              <li>
+                <Link href="/owner-dashboard" className="text-gray-400 hover:text-white transition-colors">
+                  Owner Dashboard
+                </Link>
+              </li>
+              <li>
+                <Link href="/property-registration" className="text-gray-400 hover:text-white transition-colors">
+                  List Your Property
+                </Link>
+              </li>
             </ul>
-            
-            <div className="mt-6">
-              <h4 className="text-sm font-semibold mb-2">Contact Info</h4>
-              <div className="space-y-2 text-sm text-gray-400">
-                <div className="flex items-center space-x-2">
-                  <Phone className="h-4 w-4" />
-                  <span>+91 92777 78778</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Mail className="h-4 w-4" />
-                  <span>info@bookmyfarm.com</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <MapPin className="h-4 w-4" />
-                  <span>Gujarat, India</span>
-                </div>
+          </div>
+
+          {/* Contact Info */}
+          <div>
+            <h3 className="text-lg font-semibold mb-4">Contact Info</h3>
+            <div className="space-y-3">
+              <div className="flex items-center space-x-3">
+                <MapPin className="w-5 h-5 text-green-600" />
+                <span className="text-gray-400">Mumbai, Maharashtra, India</span>
+              </div>
+              <div className="flex items-center space-x-3">
+                <Phone className="w-5 h-5 text-green-600" />
+                <span className="text-gray-400">+91 9277778778</span>
+              </div>
+              <div className="flex items-center space-x-3">
+                <Mail className="w-5 h-5 text-green-600" />
+                <span className="text-gray-400">info@bookmyfarm.com</span>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="border-t border-gray-800 mt-8 pt-8 text-center">
-          <p className="text-gray-400 text-sm">
-            © {new Date().getFullYear()} BookMyFarm. All rights reserved.
-          </p>
+        <div className="border-t border-gray-800 mt-8 pt-8">
+          <div className="flex flex-col md:flex-row justify-between items-center">
+            <p className="text-gray-400 text-sm">
+              © 2025 BookMyFarm. All rights reserved.
+            </p>
+            <div className="flex space-x-6 mt-4 md:mt-0">
+              <Link href="/terms" className="text-gray-400 hover:text-white text-sm transition-colors">
+                Terms
+              </Link>
+              <Link href="/privacy" className="text-gray-400 hover:text-white text-sm transition-colors">
+                Privacy
+              </Link>
+              <Link href="/cookies" className="text-gray-400 hover:text-white text-sm transition-colors">
+                Cookies
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
     </footer>

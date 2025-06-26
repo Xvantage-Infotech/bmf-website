@@ -1,183 +1,108 @@
-'use client';
-
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Star, MapPin, Users, Bed, ChevronDown } from 'lucide-react';
-import { staticFarms, getFarmsByCity, getFarmsByCategory } from '@/lib/staticFarms';
+import { staticFarms } from '../../lib/staticFarms';
+import { Button } from '../ui/button';
+import { Badge } from '../ui/badge';
+import { MapPin, Star, Heart, Users, Bed } from 'lucide-react';
 
 export default function FarmList({ 
   selectedCity, 
   selectedCategory, 
-  searchQuery, 
-  title = "Featured Farm Stays",
-  description = "Discover amazing farm properties"
+  title = "Featured Farms",
+  description = "Discover premium farm stays",
+  limit = 6
 }) {
-  const [farms, setFarms] = useState([]);
-  const [sortBy, setSortBy] = useState('featured');
-  const [displayCount, setDisplayCount] = useState(6);
-
-  useEffect(() => {
-    let filteredFarms = staticFarms;
-
-    if (selectedCity) {
-      filteredFarms = getFarmsByCity(selectedCity);
-    }
-
-    if (selectedCategory) {
-      filteredFarms = getFarmsByCategory(selectedCategory);
-    }
-
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      filteredFarms = filteredFarms.filter(farm =>
-        farm.name.toLowerCase().includes(query) ||
-        farm.city.toLowerCase().includes(query) ||
-        farm.location.toLowerCase().includes(query)
-      );
-    }
-
-    // Sort farms
-    switch (sortBy) {
-      case 'price-low':
-        filteredFarms.sort((a, b) => parseFloat(a.pricePerNight) - parseFloat(b.pricePerNight));
-        break;
-      case 'price-high':
-        filteredFarms.sort((a, b) => parseFloat(b.pricePerNight) - parseFloat(a.pricePerNight));
-        break;
-      case 'rating':
-        filteredFarms.sort((a, b) => parseFloat(b.rating) - parseFloat(a.rating));
-        break;
-      default:
-        // Keep original order for featured
-        break;
-    }
-
-    setFarms(filteredFarms);
-  }, [selectedCity, selectedCategory, searchQuery, sortBy]);
-
-  const displayedFarms = farms.slice(0, displayCount);
-  const hasMore = farms.length > displayCount;
+  const filteredFarms = staticFarms.filter(farm => {
+    const matchesCity = !selectedCity || farm.city === selectedCity;
+    const matchesCategory = !selectedCategory || farm.category === selectedCategory;
+    return matchesCity && matchesCategory;
+  }).slice(0, limit);
 
   return (
-    <section className="py-16">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">{title}</h2>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">{description}</p>
-        </div>
-
-        {/* Sort Controls */}
-        <div className="flex justify-between items-center mb-8">
-          <p className="text-gray-600">
-            {farms.length} {farms.length === 1 ? 'property' : 'properties'} found
-          </p>
-          
-          <div className="flex items-center space-x-2">
-            <span className="text-sm text-gray-600">Sort by:</span>
+    <div className="w-full">
+      <div className="text-center mb-8">
+        <h2 className="text-3xl font-bold text-gray-900 mb-2">{title}</h2>
+        <p className="text-gray-600">{description}</p>
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {filteredFarms.map(farm => (
+          <div key={farm.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow group">
             <div className="relative">
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="appearance-none bg-white border border-gray-300 rounded-lg px-4 py-2 pr-8 focus:ring-2 focus:ring-primary focus:border-transparent"
-              >
-                <option value="featured">Featured</option>
-                <option value="price-low">Price: Low to High</option>
-                <option value="price-high">Price: High to Low</option>
-                <option value="rating">Highest Rated</option>
-              </select>
-              <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+              <img 
+                src={farm.images[0]} 
+                alt={farm.name}
+                className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+              />
+              <button className="absolute top-4 right-4 p-2 bg-white rounded-full shadow-md hover:bg-gray-50 transition-colors">
+                <Heart className="w-5 h-5 text-gray-600 hover:text-red-500" />
+              </button>
+              <Badge className="absolute bottom-4 left-4 bg-green-600 text-white">
+                {farm.category}
+              </Badge>
             </div>
-          </div>
-        </div>
-
-        {/* Farms Grid */}
-        {displayedFarms.length === 0 ? (
-          <div className="text-center py-16">
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">No farms found</h3>
-            <p className="text-gray-600">Try adjusting your search criteria</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {displayedFarms.map((farm) => (
-              <div key={farm.id} className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 group animate-card-hover">
-                <div className="relative aspect-video overflow-hidden">
-                  <img
-                    src={farm.images[0]}
-                    alt={farm.name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                  <div className="absolute top-3 left-3">
-                    <Badge variant="secondary" className="bg-white/90 text-gray-900">
-                      {farm.category}
-                    </Badge>
-                  </div>
-                  <div className="absolute top-3 right-3">
-                    <div className="flex items-center space-x-1 bg-white/90 rounded-full px-2 py-1">
-                      <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                      <span className="text-xs font-medium text-gray-900">{farm.rating}</span>
-                    </div>
-                  </div>
+            
+            <div className="p-6">
+              <h3 className="text-xl font-semibold mb-2 text-gray-900">{farm.name}</h3>
+              <p className="text-gray-600 mb-3 flex items-center">
+                <MapPin className="w-4 h-4 mr-1" />
+                {farm.location}
+              </p>
+              
+              <div className="flex items-center mb-3">
+                <div className="flex items-center">
+                  <Star className="w-4 h-4 text-yellow-400 fill-current" />
+                  <span className="ml-1 text-sm font-medium">{farm.rating}</span>
                 </div>
-
-                <div className="p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-1">
-                    {farm.name}
-                  </h3>
-                  
-                  <div className="flex items-center text-gray-600 mb-3">
-                    <MapPin className="h-4 w-4 mr-1 flex-shrink-0" />
-                    <span className="text-sm line-clamp-1">{farm.location}, {farm.city}</span>
-                  </div>
-
-                  <div className="flex items-center justify-between text-sm text-gray-600 mb-4">
-                    <div className="flex items-center">
-                      <Users className="h-4 w-4 mr-1" />
-                      <span>{farm.maxGuests} guests</span>
-                    </div>
-                    <div className="flex items-center">
-                      <Bed className="h-4 w-4 mr-1" />
-                      <span>{farm.bedrooms} bedrooms</span>
-                    </div>
-                    <span className="text-xs bg-gray-100 px-2 py-1 rounded">
-                      {farm.reviewCount} reviews
-                    </span>
-                  </div>
-
-                  <div className="flex items-center justify-between mb-4">
-                    <div>
-                      <span className="text-lg font-bold text-gray-900">
-                        ₹{parseInt(farm.pricePerNight).toLocaleString('en-IN')}
-                      </span>
-                      <span className="text-gray-600 text-sm"> / night</span>
-                    </div>
-                  </div>
-
-                  <Button className="w-full" asChild>
-                    <Link href={`/farm/${farm.id}`}>
-                      View Details
-                    </Link>
-                  </Button>
+                <span className="text-gray-500 text-sm ml-2">({farm.reviews} reviews)</span>
+              </div>
+              
+              <div className="flex items-center space-x-4 mb-4 text-sm text-gray-600">
+                <div className="flex items-center">
+                  <Users className="w-4 h-4 mr-1" />
+                  {farm.maxGuests} guests
+                </div>
+                <div className="flex items-center">
+                  <Bed className="w-4 h-4 mr-1" />
+                  {farm.bedrooms} bedrooms
                 </div>
               </div>
-            ))}
+              
+              <div className="flex flex-wrap gap-1 mb-4">
+                {farm.amenities.slice(0, 3).map(amenity => (
+                  <Badge key={amenity} variant="secondary" className="text-xs">
+                    {amenity}
+                  </Badge>
+                ))}
+                {farm.amenities.length > 3 && (
+                  <Badge variant="secondary" className="text-xs">
+                    +{farm.amenities.length - 3} more
+                  </Badge>
+                )}
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <div>
+                  <span className="text-2xl font-bold text-gray-900">₹{farm.price.toLocaleString()}</span>
+                  <span className="text-gray-500">/night</span>
+                </div>
+                <Button 
+                  size="sm" 
+                  className="bg-green-600 hover:bg-green-700 text-white"
+                  onClick={() => window.location.href = `/farm/${farm.id}`}
+                >
+                  View Details
+                </Button>
+              </div>
+            </div>
           </div>
-        )}
-
-        {/* Load More Button */}
-        {hasMore && (
-          <div className="text-center mt-12">
-            <Button 
-              variant="outline" 
-              size="lg"
-              onClick={() => setDisplayCount(prev => prev + 6)}
-            >
-              Load More Properties
-            </Button>
-          </div>
-        )}
+        ))}
       </div>
-    </section>
+      
+      {filteredFarms.length === 0 && (
+        <div className="text-center py-16">
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">No farms found</h3>
+          <p className="text-gray-600">Try adjusting your filters or explore all our listings</p>
+        </div>
+      )}
+    </div>
   );
 }

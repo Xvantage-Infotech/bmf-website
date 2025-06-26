@@ -111,6 +111,13 @@ Currently using in-memory storage with plans for session-based authentication us
   - Booking confirmation page with voucher download
   - Three payment states: Processing, Success, Cancelled
   - Enhanced search results layout with detailed farm cards
+- June 26, 2025: Complete framework migration:
+  - Converted entire project from TypeScript React to Next.js with JavaScript
+  - Migrated routing from Wouter to Next.js App Router
+  - Converted all components and pages to JavaScript
+  - Migrated API routes to Next.js format
+  - Updated build configuration for Next.js deployment
+  - Preserved all existing functionality and business logic
 
 ## User Preferences
 

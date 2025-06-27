@@ -43,11 +43,11 @@ export default function Footer() {
           <div>
             <div className="flex items-center space-x-3 mb-4">
               <img 
-                src="/app_logo.png" 
+                src="/bmflogofoot.svg" 
                 alt="BookMyFarm Logo" 
-                className="w-10 h-10"
+                className="w-25 h-20"
               />
-              <span className="text-xl font-bold">BookMyFarm</span>
+              {/* <span className="text-xl font-bold">BookMyFarm</span> */}
             </div>
             <p className="text-neutral-400 mb-4 leading-relaxed">
               Discover premium farmhouses for your perfect getaway. Book memorable experiences in nature's lap.

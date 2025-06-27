@@ -174,11 +174,17 @@ export default function Homes() {
 
       <CategoryTabs selectedCity={selectedCity} onCityChange={setSelectedCity} />
 
-      <FarmList
+      {/* <FarmList
         selectedCity={selectedCity !== 'all' ? selectedCity : undefined}
         selectedCategory={selectedCategory !== 'all' ? selectedCategory : undefined}
         searchQuery={searchFilters?.location || ''}
-      />
+      /> */}
+      <FarmList
+  selectedCity={selectedCity !== 'all' ? selectedCity : undefined}
+  selectedCategory={selectedCategory !== 'all' ? selectedCategory : undefined}
+  searchFilters={searchFilters}
+/>
+
 
       <VideoGallery />
       <CustomerReviews />

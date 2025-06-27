@@ -17,6 +17,7 @@ import { AuthProvider } from '@/contexts/AuthContext';
 import MobileBottomNav from '@/components/Layout/MobileBottomNav';
 import Footer from '@/components/Layout/Footer';
 import Header from '@/components/Layout/Header';
+import ClientOnly from '@/components/Clientonly/ClientOnly';
 
 export const metadata = {
   title: 'BookMyFarm',
@@ -28,15 +29,17 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body className="min-h-screen flex flex-col">
         
+              <ClientOnly>
           <AuthProvider>
             <TooltipProvider>
               <Toaster />
-              <Header />
+        <Header />
               <main className="flex-1">{children}</main>
               <Footer />
               <MobileBottomNav />
             </TooltipProvider>
           </AuthProvider>
+      </ClientOnly>
       </body>
     </html>
   );

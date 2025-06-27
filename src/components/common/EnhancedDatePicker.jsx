@@ -183,7 +183,7 @@ export default function EnhancedDatePicker({
                   >
                     <div className="flex flex-col items-start">
                       <span className="text-xs text-neutral-500">
-                        {checkOut ? 'Selected' : checkIn ? 'Select date' : 'Choose check-in first'}
+                        {checkOut ? 'Selected' : checkIn ? 'Select date' : 'Check-out'}
                       </span>
                       <span className="font-medium">
                         {checkOut ? formatDate(checkOut) : 'Add date'}

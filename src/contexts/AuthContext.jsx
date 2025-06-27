@@ -11,6 +11,7 @@ import {
   signUpWithEmailAndPassword
 } from '../lib/firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { api } from '@/axiosApi';
 
 const AuthContext = createContext(undefined);
 
@@ -81,30 +82,69 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const signup = async (data) => {
-    setLoading(true);
-    setError(null);
-    try {
-      let firebaseUser = null;
-      if (data.email && data.password) {
-        firebaseUser = await signUpWithEmailAndPassword(data.email, data.password);
-      } else if (user) {
-        firebaseUser = user;
-      } else {
-        throw new Error('Email and password or an existing phone login is required for signup.');
-      }
+  // const signup = async (data) => {
+  //   setLoading(true);
+  //   setError(null);
+  //   try {
+  //     let firebaseUser = null;
+  //     if (data.email && data.password) {
+  //       firebaseUser = await signUpWithEmailAndPassword(data.email, data.password);
+  //     } else if (user) {
+  //       firebaseUser = user;
+  //     } else {
+  //       throw new Error('Email and password or an existing phone login is required for signup.');
+  //     }
 
-      if (firebaseUser) {
-        setUser(firebaseUser);
-        const { email, password, ...profileData } = data;
-        await setDoc(doc(db, 'users', firebaseUser.uid), profileData, { merge: true });
-      }
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
+  //     if (firebaseUser) {
+  //       setUser(firebaseUser);
+  //       const { email, password, ...profileData } = data;
+  //       await setDoc(doc(db, 'users', firebaseUser.uid), profileData, { merge: true });
+  //     }
+  //   } catch (err) {
+  //     setError(err.message);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+const signup = async (data) => {
+  setLoading(true);
+  setError(null);
+
+  try {
+    const firebaseUser = user;
+    if (!firebaseUser) throw new Error('OTP verification failed. Please try again.');
+
+    const phoneNumber = firebaseUser.phoneNumber || data.mobileNumber;
+    if (!phoneNumber) throw new Error('Phone number is missing.');
+
+    // ✅ Use your Axios instance with interceptors
+    const response = await api.post('/add_user', {
+      phone_number: phoneNumber,
+    });
+
+    const result = response.data;
+
+    if (result.token) {
+      localStorage.setItem('token', result.token);
+    } else {
+      throw new Error('Token not received from server');
     }
-  };
+
+    // Optionally store profile in Firestore
+    const { email, password, ...profileData } = data;
+    await setDoc(doc(db, 'users', firebaseUser.uid), {
+      ...profileData,
+      phoneNumber,
+    }, { merge: true });
+
+    setUser(firebaseUser);
+  } catch (err) {
+    setError(err.message || 'Signup failed');
+  } finally {
+    setLoading(false);
+  }
+};
 
   const logout = async () => {
     setLoading(true);

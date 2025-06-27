@@ -245,9 +245,9 @@ module.exports = {
           ring: 'hsl(var(--sidebar-ring))',
         },
       },
-      fontFamily: {
-        sans: ['Inter', ...fontFamily.sans],
-      },
+      // fontFamily: {
+      //   sans: ['Inter', ...fontFamily.sans],
+      // },
       borderRadius: {
         lg: 'var(--radius)',
         md: 'calc(var(--radius) - 2px)',

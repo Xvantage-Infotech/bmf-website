@@ -23,9 +23,15 @@ export default function SearchFilters({ onSearch, className = '' }) {
     setFilters(prev => ({ ...prev, [key]: value }));
   };
 
-  const handleSearch = () => {
-    onSearch?.(filters);
-  };
+const handleSearch = () => {
+  onSearch?.(filters);
+
+  // Smooth scroll to farm list section
+  const section = document.getElementById('farm-list');
+  if (section) {
+    section.scrollIntoView({ behavior: 'smooth' });
+  }
+};
 
   const incrementGuests = () => {
     setFilters(prev => ({ ...prev, guests: Math.min((prev.guests || 0) + 1, 20) }));

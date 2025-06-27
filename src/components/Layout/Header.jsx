@@ -30,7 +30,7 @@ export default function Header() {
   ];
 
   const Logo = () => (
-    <Link href="/" className="flex items-center space-x-3">
+    <Link href="/farms" className="flex items-center space-x-3">
       {/* <img 
         src="/app_logo.png" 
         alt="BookMyFarm Logo" 

@@ -1,4 +1,15 @@
-import '@/styles/globals.css';
+// import '../styles/globals.css';
+
+// export default function RootLayout({ children }) {
+//   return (
+//     <html lang="en">
+//       <body>{children}</body>
+//     </html>
+//   );
+// }
+
+
+import '../../styles/globals.css';
 
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
@@ -16,6 +27,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className="min-h-screen flex flex-col">
+        
           <AuthProvider>
             <TooltipProvider>
               <Toaster />

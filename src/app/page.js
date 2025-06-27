@@ -1,3 +1,8 @@
+// export default function Home() {
+//   return <main className="flex items-center justify-center h-screen ">Hello Next.js with Tailwind!</main>;
+// }
+
+
 import BookingModal from '@/components/BookingModal/BookingModal';
 import FarmList from '@/components/FarmList/FarmList';
 import CustomerReviews from '@/components/Reviews/CustomerReviews';
@@ -22,7 +27,7 @@ export default function Home() {
     <main className="flex flex-col items-center justify-center min-h-screen w-full">
       
 
-      {/* <FarmDetail/>
+      <FarmDetail/>
 
 <BookingConfirmation/>
 <HowItWorks/>
@@ -32,20 +37,14 @@ export default function Home() {
 <Profile/>
 
 <SavedFarms/>
-<TermsOfService/> */}
+<TermsOfService/>
 
-<FarmList />
+{/* <FarmList />
 <VideoGallery />
 <CustomerReviews />
-<BookingModal />
+<BookingModal /> */}
 
 
     </main>
   );
 }
-
-
-{/* <PropertyRegistration/> */}
-{/* <HappyCustomers/> */}
- {/* <Homes /> */}
-      {/* <Contact/> */}

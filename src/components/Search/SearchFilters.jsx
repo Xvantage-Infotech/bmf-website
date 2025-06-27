@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -35,7 +37,9 @@ export default function SearchFilters({ onSearch, className = '' }) {
 
   return (
     <div className={`relative ${className}`}>
+
       <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/20 p-8 hover:shadow-3xl transition-all duration-300">
+
         <div className="text-center mb-8">
           <h3 className="text-2xl font-bold text-gray-900 mb-2">Find Your Perfect Getaway</h3>
           <p className="text-gray-600">Search from thousands of beautiful farmhouses</p>
@@ -148,8 +152,8 @@ export default function SearchFilters({ onSearch, className = '' }) {
         </div>
       </div>
 
-      <div className="absolute -top-4 -right-4 w-8 h-8 bg-primary/20 rounded-full animate-pulse"></div>
-      <div className="absolute -bottom-4 -left-4 w-6 h-6 bg-primary/30 rounded-full animate-pulse delay-300"></div>
+      {/* <div className="absolute -top-4 -right-4 w-8 h-8 bg-primary/20 rounded-full animate-pulse"></div> */}
+      {/* <div className="absolute -bottom-4 -left-4 w-6 h-6 bg-primary/30 rounded-full animate-pulse delay-300"></div> */}
     </div>
   );
 }

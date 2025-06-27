@@ -31,7 +31,10 @@ export default function Homes() {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="relative min-h-[80vh] bg-gradient-to-br from-emerald-50 via-blue-50 to-purple-50 overflow-hidden">
+      {/* <section className="relative min-h-[80vh] bg-gradient-to-br from-emerald-50 via-blue-50 to-purple-50 overflow-hidden"> */}
+      {/* <section className="relative min-h-[80vh] bg-gradient-to-br from-[#f0fff4] via-[#f0faff] to-[#f6f0ff] overflow-hidden"> */}
+<section className="relative min-h-[80vh] bg-[#f0f8f4] bg-gradient-to-br from-[#f0fff4] via-[#f0faff] to-[#f6f0ff] overflow-hidden">
+
         <div className="absolute inset-0">
           <div className="absolute top-10 left-10 w-20 h-20 bg-primary/10 rounded-full blur-xl animate-float"></div>
           <div className="absolute top-40 right-20 w-32 h-32 bg-purple-300/20 rounded-full blur-xl animate-float-delayed"></div>

@@ -67,18 +67,25 @@ export default function VideoPlayer({
     setIsPlaying(false);
   };
 
-  const handleMouseEnter = () => {
-    setShowControls(true);
-    const videoElement = videoRef.current;
-    if (videoElement && !isPlaying) {
-      videoElement.play().catch(console.error);
-      setIsPlaying(true);
-    }
-  };
+// REMOVE IntersectionObserver code block entirely
 
-  const handleMouseLeave = () => {
-    setShowControls(false);
-  };
+const handleMouseEnter = () => {
+  setShowControls(true);
+  const videoElement = videoRef.current;
+  if (videoElement) {
+    videoElement.play().catch(console.error);
+    setIsPlaying(true);
+  }
+};
+
+const handleMouseLeave = () => {
+  setShowControls(false);
+  const videoElement = videoRef.current;
+  if (videoElement) {
+    videoElement.pause();
+    setIsPlaying(false);
+  }
+};
 
   return (
     <div 

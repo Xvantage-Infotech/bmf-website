@@ -12,6 +12,7 @@ import {
 } from '../lib/firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { api } from '@/axiosApi';
+import { registerUserWithPhone } from '@/services/Auth/auth.service';
 
 const AuthContext = createContext(undefined);
 
@@ -30,44 +31,77 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const clearError = () => setError(null);
+const sendOtpToPhone = async (phoneNumber) => {
+  setLoading(true);
+  setError(null);
+  try {
+    // 🔥 Just call your backend API
+    const response = await api.post('/api/add_user', {
+      phone_number: phoneNumber,
+    });
 
-  const sendOtpToPhone = async (phoneNumber) => {
-    setLoading(true);
-    setError(null);
-    try {
-      let recaptchaContainer = document.getElementById('recaptcha-container');
-      if (!recaptchaContainer) {
-        recaptchaContainer = document.createElement('div');
-        recaptchaContainer.id = 'recaptcha-container';
-        document.body.appendChild(recaptchaContainer);
-      }
-      const appVerifier = createRecaptchaVerifier('recaptcha-container');
-      const result = await sendOTP(phoneNumber, appVerifier);
-      setConfirmationResult(result);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
+    if (!response.data.success) {
+      throw new Error(response.data.message || 'Failed to send OTP');
     }
-  };
 
-  const verifyOtpAndLogin = async (otp) => {
-    if (!confirmationResult) {
-      setError('No confirmation result available. Please resend OTP.');
-      return;
+    // No Firebase confirmationResult needed
+    setConfirmationResult(true); // Just to mark OTP as sent
+  } catch (err) {
+    setError(err.message || 'Failed to send OTP');
+  } finally {
+    setLoading(false);
+  }
+};
+
+const verifyOtpAndLogin = async (otp, phone) => {
+  if (!confirmationResult) {
+    setError('Please request an OTP first.');
+    return;
+  }
+
+  setLoading(true);
+  setError(null);
+  try {
+    const response = await api.post('/api/verify_otp', {
+      phone_number: phone,
+      otp: otp,
+    });
+
+    if (!response.data.success) {
+      throw new Error(response.data.message || 'Invalid OTP');
     }
-    setLoading(true);
-    setError(null);
-    try {
-      const firebaseUser = await verifyOTP(confirmationResult, otp);
-      setUser(firebaseUser);
-      setConfirmationResult(null);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
+
+    setUser({ phoneNumber: phone }); // Store basic info if needed
+    setConfirmationResult(null);
+  } catch (err) {
+    setError(err.response?.data?.message || err.message || 'OTP verification failed');
+  } finally {
+    setLoading(false);
+  }
+};
+
+const loginWithPhoneOtp = async (phoneNumber) => {
+  try {
+    const response = await api.post('/api/login', {
+      phone_number: phoneNumber,
+    });
+
+    if (!response.data.success) {
+      throw new Error(response.data.message || 'Login failed');
     }
-  };
+
+    // Optionally store token if returned
+    if (response.data.token) {
+      localStorage.setItem('token', response.data.token);
+    }
+
+    setUser({ phoneNumber }); // Set basic user session
+  } catch (err) {
+    setError(err.response?.data?.message || err.message || 'Login failed');
+    throw err;
+  }
+};
+
 
   const login = async (email, password) => {
     setLoading(true);
@@ -118,11 +152,7 @@ const signup = async (data) => {
     const phoneNumber = firebaseUser.phoneNumber || data.mobileNumber;
     if (!phoneNumber) throw new Error('Phone number is missing.');
 
-    const response = await api.post('/add_user', {
-      phone_number: phoneNumber,
-    });
-
-    const result = response.data;
+    const result = await registerUserWithPhone(phoneNumber);
 
     if (result.token) {
       localStorage.setItem('token', result.token);
@@ -187,6 +217,7 @@ const signup = async (data) => {
         confirmationResult,
         sendOtpToPhone,
         verifyOtpAndLogin,
+         loginWithPhoneOtp,
         login,
         signup,
         logout,

@@ -31,7 +31,7 @@ export default function Contact() {
     {
       icon: Phone,
       title: 'Phone',
-      details: ['+91 98765 43210', '+91 98765 43211'],
+      details: ['+91 9277778778', '+91 9277778778'],
       description: 'Call us for immediate assistance'
     },
     {
@@ -111,7 +111,7 @@ export default function Contact() {
                           type="tel"
                           value={formData.phone}
                           onChange={(e) => handleChange('phone', e.target.value)}
-                          placeholder="+91 98765 43210"
+                          placeholder="+91 9277778778"
                         />
                       </div>
                       <div>

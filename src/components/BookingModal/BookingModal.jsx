@@ -235,7 +235,7 @@ const basePrice = pricePerNight * nights;
                     type="tel"
                     value={guestDetails.phone}
                     onChange={(e) => handleInputChange('phone', e.target.value)}
-                    placeholder="+91 98765 43210"
+                    placeholder="+91 9277778778"
                     required
                   />
                 </div>

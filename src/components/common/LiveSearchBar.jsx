@@ -27,11 +27,10 @@ export default function LiveSearchBar({
       return;
     }
 
-    const searchResults = staticFarms.filter(farm => 
-      farm.name.toLowerCase().includes(query.toLowerCase()) ||
-      farm.location.toLowerCase().includes(query.toLowerCase()) ||
-      farm.city.toLowerCase().includes(query.toLowerCase())
-    ).slice(0, 5);
+ const searchResults = staticFarms.filter(farm => 
+  farm.name.toLowerCase().includes(query.toLowerCase())
+).slice(0, 5);
+
 
     setResults(searchResults);
     setIsOpen(searchResults.length > 0);

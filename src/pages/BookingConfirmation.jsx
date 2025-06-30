@@ -26,7 +26,7 @@ export default function BookingConfirmation() {
     totalAmount: 15750,
     guestName: 'John Doe',
     guestEmail: 'john.doe@example.com',
-    guestPhone: '+91 98765 43210',
+    guestPhone: '+91 9277778778',
     bookingDate: new Date()
   };
 

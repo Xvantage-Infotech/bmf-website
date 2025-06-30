@@ -126,7 +126,7 @@ const SearchBar = ({ className = '' }) => (
               setIsAuthModalOpen(true);
             }}
           >
-            Login/Sign Up
+            MJ test
           </Button>
         )
       )}

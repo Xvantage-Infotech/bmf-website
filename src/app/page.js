@@ -4,20 +4,19 @@
 
 
 import BookingModal from '@/components/BookingModal/BookingModal';
+import FarmDetail from '@/components/Farm/FarmDetail';
 import FarmList from '@/components/FarmList/FarmList';
 import CustomerReviews from '@/components/Reviews/CustomerReviews';
 import VideoGallery from '@/components/VideoGallery/VideoGallery';
 import BookingConfirmation from '@/pages/BookingConfirmation';
 import Contact from '@/pages/Contact';
 import FAQ from '@/pages/FAQ';
-import FarmDetail from '@/pages/FarmDetail';
 import HappyCustomers from '@/pages/HappyCustomers';
 import Homes from '@/pages/Home';
 import HowItWorks from '@/pages/HowItWorks';
 import NotFound from '@/pages/not-found';
 import OwnerDashboard from '@/pages/OwnerDashboard';
 import PrivacyPolicy from '@/pages/PrivacyPolicy';
-import Profile from '@/pages/profile';
 import PropertyRegistration from '@/pages/PropertyRegistration';
 import SavedFarms from '@/pages/saved';
 import TermsOfService from '@/pages/TermsOfService';
@@ -34,7 +33,6 @@ export default function Home() {
 <NotFound/>
 <OwnerDashboard/>
 <PrivacyPolicy/>
-<Profile/>
 
 <SavedFarms/>
 <TermsOfService/>

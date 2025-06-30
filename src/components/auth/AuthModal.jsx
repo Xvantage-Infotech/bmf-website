@@ -1,3 +1,4 @@
+'use client';
 import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -9,7 +10,6 @@ import { useForm } from 'react-hook-form';
 import { useAuth } from '@/contexts/AuthContext';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2 } from 'lucide-react';
-import { createRecaptchaVerifier } from '@/lib/firebase';
 
 export default function AuthModal({ isOpen, onClose }) {
   const [activeTab, setActiveTab] = useState('login');

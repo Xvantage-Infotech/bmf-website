@@ -6,7 +6,7 @@ import Cookies from 'js-cookie';
 
 const api = axios.create({
   baseURL: config.BASE_API,
-  withCredentials: true,
+  // withCredentials: true,
 });
 
 // Request Interceptor

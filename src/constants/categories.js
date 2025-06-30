@@ -1,13 +1,31 @@
 export const PROPERTY_CATEGORIES = {
-  FARMS: 'farms',
-  VILLAS: 'villas',
-  RESORTS: 'resorts'
+  RESORTS: 1,
+  FARMS: 2,
+  VILLAS: 3,
+  APARTMENT: 4,
 };
+
 
 export const CATEGORY_LABELS = {
   [PROPERTY_CATEGORIES.FARMS]: 'Farms',
   [PROPERTY_CATEGORIES.VILLAS]: 'Villas',
-  [PROPERTY_CATEGORIES.RESORTS]: 'Resorts'
+  [PROPERTY_CATEGORIES.RESORTS]: 'Resorts',
+  [PROPERTY_CATEGORIES.APARTMENT]: 'Apartment'
+};
+
+
+
+export const  CITY_IDS = {
+  surat: 1,
+  navsari: 2,
+  daman: 3,
+  bharuch: 4,
+  vadodara: 5,
+  valsad: 6,
+  bilimora: 7,
+  sevani: 10,
+  saputara: 13,
+  dang: 12,
 };
 
 export const FACILITY_OPTIONS = [

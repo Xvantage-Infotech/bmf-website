@@ -220,7 +220,7 @@ const SearchBar = ({ className = '' }) => (
                     <div className="space-y-3">
                       <h4 className="font-semibold text-neutral-900">Popular Locations</h4>
                       <div className="flex flex-wrap gap-2">
-                        {['Surat', 'Daman', 'Mumbai', 'Pune', 'Vadodara'].map((city) => (
+                        {['Surat', 'Daman','Navsari','Saputara', 'Vadodara'].map((city) => (
                           <Button
                             key={city}
                             variant="outline"

@@ -153,10 +153,168 @@
 // }
 
 
-"use client";
+// "use client";
 
-import { useState, useMemo } from 'react';
-import { staticFarms } from '@/data/staticFarms';
+// import { useState, useMemo } from 'react';
+// import { staticFarms } from '@/data/staticFarms';
+// import FarmCard from '@/components/FarmCard/FarmCard';
+// import { Button } from '@/components/ui/button';
+// import {
+//   Select,
+//   SelectContent,
+//   SelectItem,
+//   SelectTrigger,
+//   SelectValue,
+// } from '@/components/ui/select';
+
+// export default function FarmList({
+//   selectedCity,
+//   selectedCategory,
+//   searchFilters = {},
+//   title = 'Featured Farmhouses',
+//   description = 'Discover premium properties for your perfect getaway',
+// }) {
+//   const [sortBy, setSortBy] = useState('featured');
+
+//   const filteredAndSortedFarms = useMemo(() => {
+//     let farms = [...staticFarms];
+//     const filters = searchFilters || {};
+
+//     // City filter
+//     if (selectedCity && selectedCity !== 'all') {
+//       farms = farms.filter(
+//         (farm) => farm.city.toLowerCase() === selectedCity.toLowerCase()
+//       );
+//     }
+
+//     // Category filter
+//     if (selectedCategory && selectedCategory !== 'all') {
+//       const categoryMapping = {
+//         farms: 'rustic',
+//         villas: 'luxury',
+//         resorts: 'modern',
+//       };
+//       const mapped = categoryMapping[selectedCategory] || selectedCategory;
+//       farms = farms.filter(
+//         (farm) => farm.category.toLowerCase() === mapped.toLowerCase()
+//       );
+//     }
+
+//     // Search filter (location or name)
+//     if (filters.location?.trim()) {
+//       const query = filters.location.toLowerCase();
+//       farms = farms.filter(
+//         (farm) =>
+//           farm.name.toLowerCase().includes(query) ||
+//           farm.location.toLowerCase().includes(query) ||
+//           farm.city.toLowerCase().includes(query) ||
+//           farm.description.toLowerCase().includes(query)
+//       );
+//     }
+
+//     // Guests filter
+//     if (filters.guests) {
+//       farms = farms.filter((farm) => farm.maxGuests >= filters.guests);
+//     }
+
+//     // Optional: Date filter
+//     if (filters.checkIn && filters.checkOut) {
+//       const checkIn = new Date(filters.checkIn);
+//       const checkOut = new Date(filters.checkOut);
+
+//       farms = farms.filter((farm) => {
+//         if (!farm.availableFrom || !farm.availableTo) return true;
+//         const from = new Date(farm.availableFrom);
+//         const to = new Date(farm.availableTo);
+//         return checkIn >= from && checkOut <= to;
+//       });
+//     }
+
+//     // Sort logic
+//     switch (sortBy) {
+//       case 'price-low':
+//         farms.sort((a, b) => parseFloat(a.pricePerNight) - parseFloat(b.pricePerNight));
+//         break;
+//       case 'price-high':
+//         farms.sort((a, b) => parseFloat(b.pricePerNight) - parseFloat(a.pricePerNight));
+//         break;
+//       case 'rating':
+//         farms.sort((a, b) => parseFloat(b.rating) - parseFloat(a.rating));
+//         break;
+//     }
+
+//     return farms;
+//   }, [selectedCity, selectedCategory, searchFilters, sortBy]);
+
+//   const sortOptions = [
+//     { value: 'featured', label: 'Featured' },
+//     { value: 'price-low', label: 'Price: Low to High' },
+//     { value: 'price-high', label: 'Price: High to Low' },
+//     { value: 'rating', label: 'Guest Rating' },
+//   ];
+
+//   return (
+//     <section id="farm-list" className="section-padding bg-white">
+//       <div className="max-w-7xl mx-auto container-padding">
+//         {/* Header */}
+//         <div className="flex items-center justify-between mb-8">
+//           <div>
+//             <h2 className="text-3xl font-bold text-neutral-900 mb-2">
+//               {title}
+//             </h2>
+//             <p className="text-neutral-600">{description}</p>
+//             {filteredAndSortedFarms.length > 0 && (
+//               <p className="text-sm text-neutral-500 mt-1">
+//                 Showing {filteredAndSortedFarms.length} result
+//                 {filteredAndSortedFarms.length !== 1 ? 's' : ''}
+//               </p>
+//             )}
+//           </div>
+
+//           <Select value={sortBy} onValueChange={setSortBy}>
+//             <SelectTrigger className="w-48">
+//               <SelectValue placeholder="Sort by" />
+//             </SelectTrigger>
+//             <SelectContent>
+//               {sortOptions.map((option) => (
+//                 <SelectItem key={option.value} value={option.value}>
+//                   {option.label}
+//                 </SelectItem>
+//               ))}
+//             </SelectContent>
+//           </Select>
+//         </div>
+
+//         {/* Grid */}
+//         {filteredAndSortedFarms.length > 0 ? (
+//           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+//             {filteredAndSortedFarms.map((farm) => (
+//               <FarmCard key={farm.id} farm={farm} />
+//             ))}
+//           </div>
+//         ) : (
+//           <div className="text-center py-16">
+//             <h3 className="text-xl font-semibold text-neutral-900 mb-2">
+//               No farms found
+//             </h3>
+//             <p className="text-neutral-600 mb-6">
+//               Try changing your search filters or explore other options.
+//             </p>
+//             <Button onClick={() => window.location.reload()}>
+//               Clear Filters
+//             </Button>
+//           </div>
+//         )}
+//       </div>
+//     </section>
+//   );
+// }
+
+
+
+'use client';
+
+import { useState, useEffect } from 'react';
 import FarmCard from '@/components/FarmCard/FarmCard';
 import { Button } from '@/components/ui/button';
 import {
@@ -166,6 +324,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { fetchFarms } from '@/services/Farm/farm.service';
 
 export default function FarmList({
   selectedCity,
@@ -175,76 +334,55 @@ export default function FarmList({
   description = 'Discover premium properties for your perfect getaway',
 }) {
   const [sortBy, setSortBy] = useState('featured');
+  const [farms, setFarms] = useState([]);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [loading, setLoading] = useState(true);
 
-  const filteredAndSortedFarms = useMemo(() => {
-    let farms = [...staticFarms];
-    const filters = searchFilters || {};
-
-    // City filter
-    if (selectedCity && selectedCity !== 'all') {
-      farms = farms.filter(
-        (farm) => farm.city.toLowerCase() === selectedCity.toLowerCase()
-      );
-    }
-
-    // Category filter
-    if (selectedCategory && selectedCategory !== 'all') {
-      const categoryMapping = {
-        farms: 'rustic',
-        villas: 'luxury',
-        resorts: 'modern',
+  const getFarms = async (append = false) => {
+    try {
+      setLoading(true);
+      const payload = {
+        city: selectedCity !== 'all' ? selectedCity : undefined,
+        category: selectedCategory !== 'all' ? selectedCategory : undefined,
+        sort_by: '',
+        page: page.toString(),
+        per_page: '10',
+        ...searchFilters,
       };
-      const mapped = categoryMapping[selectedCategory] || selectedCategory;
-      farms = farms.filter(
-        (farm) => farm.category.toLowerCase() === mapped.toLowerCase()
-      );
+      const data = await fetchFarms(payload);
+      const newFarms = data?.data || [];
+
+      setFarms((prev) => (append ? [...prev, ...newFarms] : newFarms));
+      setHasMore(newFarms.length === 10); // Assume API returns 10 per page
+    } catch (err) {
+      console.error('Error fetching farms:', err);
+    } finally {
+      setLoading(false);
     }
+  };
 
-    // Search filter (location or name)
-    if (filters.location?.trim()) {
-      const query = filters.location.toLowerCase();
-      farms = farms.filter(
-        (farm) =>
-          farm.name.toLowerCase().includes(query) ||
-          farm.location.toLowerCase().includes(query) ||
-          farm.city.toLowerCase().includes(query) ||
-          farm.description.toLowerCase().includes(query)
-      );
-    }
+  useEffect(() => {
+    setPage(1);
+    getFarms(false);
+  }, [selectedCity, selectedCategory, JSON.stringify(searchFilters)]);
 
-    // Guests filter
-    if (filters.guests) {
-      farms = farms.filter((farm) => farm.maxGuests >= filters.guests);
-    }
+  useEffect(() => {
+    if (page > 1) getFarms(true);
+  }, [page]);
 
-    // Optional: Date filter
-    if (filters.checkIn && filters.checkOut) {
-      const checkIn = new Date(filters.checkIn);
-      const checkOut = new Date(filters.checkOut);
-
-      farms = farms.filter((farm) => {
-        if (!farm.availableFrom || !farm.availableTo) return true;
-        const from = new Date(farm.availableFrom);
-        const to = new Date(farm.availableTo);
-        return checkIn >= from && checkOut <= to;
-      });
-    }
-
-    // Sort logic
+  const sortedFarms = [...farms].sort((a, b) => {
     switch (sortBy) {
       case 'price-low':
-        farms.sort((a, b) => parseFloat(a.pricePerNight) - parseFloat(b.pricePerNight));
-        break;
+        return parseFloat(a.final_price) - parseFloat(b.final_price);
       case 'price-high':
-        farms.sort((a, b) => parseFloat(b.pricePerNight) - parseFloat(a.pricePerNight));
-        break;
+        return parseFloat(b.final_price) - parseFloat(a.final_price);
       case 'rating':
-        farms.sort((a, b) => parseFloat(b.rating) - parseFloat(a.rating));
-        break;
+        return parseFloat(b.reviews_avg_star || 0) - parseFloat(a.reviews_avg_star || 0);
+      default:
+        return 0;
     }
-
-    return farms;
-  }, [selectedCity, selectedCategory, searchFilters, sortBy]);
+  });
 
   const sortOptions = [
     { value: 'featured', label: 'Featured' },
@@ -256,17 +394,13 @@ export default function FarmList({
   return (
     <section id="farm-list" className="section-padding bg-white">
       <div className="max-w-7xl mx-auto container-padding">
-        {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h2 className="text-3xl font-bold text-neutral-900 mb-2">
-              {title}
-            </h2>
+            <h2 className="text-3xl font-bold text-neutral-900 mb-2">{title}</h2>
             <p className="text-neutral-600">{description}</p>
-            {filteredAndSortedFarms.length > 0 && (
+            {!loading && sortedFarms.length > 0 && (
               <p className="text-sm text-neutral-500 mt-1">
-                Showing {filteredAndSortedFarms.length} result
-                {filteredAndSortedFarms.length !== 1 ? 's' : ''}
+                Showing {sortedFarms.length} result{sortedFarms.length !== 1 ? 's' : ''}
               </p>
             )}
           </div>
@@ -285,24 +419,28 @@ export default function FarmList({
           </Select>
         </div>
 
-        {/* Grid */}
-        {filteredAndSortedFarms.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredAndSortedFarms.map((farm) => (
-              <FarmCard key={farm.id} farm={farm} />
-            ))}
-          </div>
+        {!loading && sortedFarms.length > 0 ? (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {sortedFarms.map((farm) => (
+                <FarmCard key={farm.id} farm={farm} />
+              ))}
+            </div>
+            {hasMore && (
+              <div className="flex justify-center mt-10">
+                <Button onClick={() => setPage((prev) => prev + 1)}>Load More</Button>
+              </div>
+            )}
+          </>
+        ) : loading ? (
+          <div className="text-center py-16 text-neutral-500">Loading farms...</div>
         ) : (
           <div className="text-center py-16">
-            <h3 className="text-xl font-semibold text-neutral-900 mb-2">
-              No farms found
-            </h3>
+            <h3 className="text-xl font-semibold text-neutral-900 mb-2">No farms found</h3>
             <p className="text-neutral-600 mb-6">
               Try changing your search filters or explore other options.
             </p>
-            <Button onClick={() => window.location.reload()}>
-              Clear Filters
-            </Button>
+            <Button onClick={() => window.location.reload()}>Clear Filters</Button>
           </div>
         )}
       </div>

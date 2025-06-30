@@ -118,7 +118,6 @@ const signup = async (data) => {
     const phoneNumber = firebaseUser.phoneNumber || data.mobileNumber;
     if (!phoneNumber) throw new Error('Phone number is missing.');
 
-    // ✅ Use your Axios instance with interceptors
     const response = await api.post('/add_user', {
       phone_number: phoneNumber,
     });
@@ -131,7 +130,6 @@ const signup = async (data) => {
       throw new Error('Token not received from server');
     }
 
-    // Optionally store profile in Firestore
     const { email, password, ...profileData } = data;
     await setDoc(doc(db, 'users', firebaseUser.uid), {
       ...profileData,

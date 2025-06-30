@@ -28,17 +28,27 @@ export const auth = getAuth(app);
 export const db = getFirestore(app);
 
 // Create a reCAPTCHA verifier
-export const createRecaptchaVerifier = (containerId) => {
-  return new RecaptchaVerifier(auth, containerId, {
-    size: 'invisible',
-    callback: () => {
-      // reCAPTCHA solved
-    },
-    'expired-callback': () => {
-      // Ask user to solve reCAPTCHA again
-    }
-  });
+export const createRecaptchaVerifier = (containerId = 'recaptcha-container') => {
+  if (typeof window !== 'undefined' && !window.recaptchaVerifier) {
+    window.recaptchaVerifier = new RecaptchaVerifier(
+      auth, // ✅ Correct placement
+      containerId,
+      {
+        size: 'invisible',
+        callback: (response) => {
+          console.log('reCAPTCHA solved');
+        },
+        'expired-callback': () => {
+          console.warn('reCAPTCHA expired. Solve again.');
+        },
+      }
+    );
+    window.recaptchaVerifier.render();
+  }
+
+  return window.recaptchaVerifier;
 };
+
 
 // Send OTP
 export const sendOTP = async (phoneNumber, appVerifier) => {

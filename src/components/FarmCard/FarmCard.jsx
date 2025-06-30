@@ -15,7 +15,12 @@ export default function FarmCard({ farm, className = '' }) {
   };
 
   const rating = parseFloat(farm.rating);
-  const mainImage = farm.images[0];
+const mainImage = farm?.farm_images?.[0]?.image
+  ? `https://api.bookmyfarm.net/assets/images/farm_images/${farm.farm_images[0].image}`
+  : '/placeholder.jpg';
+
+
+
 
   return (
     <Link href={`/farm/${farm.id}`}>
@@ -39,7 +44,7 @@ export default function FarmCard({ farm, className = '' }) {
 
           {/* Price Badge */}
           <div className="absolute top-3 left-3 bg-primary text-white px-3 py-1 rounded-full text-sm font-medium">
-            {formatPrice(farm.pricePerNight)}/night
+            {formatPrice(farm.final_price)}
           </div>
 
           {/* Favorite Button */}
@@ -59,17 +64,20 @@ export default function FarmCard({ farm, className = '' }) {
           {/* Category Badge */}
           <div className="absolute bottom-3 left-3">
             <span className="bg-white/90 backdrop-blur-sm text-neutral-700 px-2 py-1 rounded text-xs font-medium capitalize">
-              {farm.category}
+              {farm.category?.name || 'Farm'}
+
             </span>
           </div>
         </div>
 
         <div className="p-4">
           {/* Farm Name and Location */}
-          <h3 className="font-semibold text-lg mb-1 text-neutral-900 truncate">{farm.name}</h3>
+         <h3 className="font-semibold text-lg mb-1 text-neutral-900 truncate">{farm.farm_alias_name || farm.name}</h3>
+
           <p className="text-neutral-600 text-sm mb-3 flex items-center">
             <MapPin className="w-3 h-3 mr-1" />
-            {farm.location}
+            {farm.area?.name}
+
           </p>
 
           {/* Amenities */}
@@ -80,7 +88,7 @@ export default function FarmCard({ farm, className = '' }) {
             </span>
             <span className="flex items-center">
               <Users className="w-4 h-4 mr-1" />
-              {farm.maxGuests} Guest{farm.maxGuests !== 1 ? 's' : ''}
+              {farm.person_limit} Guest{farm.person_limit !== 1 ? 's' : ''}
             </span>
           </div>
 
@@ -91,7 +99,7 @@ export default function FarmCard({ farm, className = '' }) {
                 {generateStars(rating)}
               </div>
               <span className="text-neutral-600">
-                {farm.rating} ({farm.reviewCount} review{farm.reviewCount !== 1 ? 's' : ''})
+                {farm.reviews_avg_star} ({farm.reviews_count} review{farm.reviewCount !== 1 ? 's' : ''})
               </span>
             </div>
           </div>

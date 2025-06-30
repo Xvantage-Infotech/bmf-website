@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Star, Heart, Shield } from 'lucide-react';
@@ -13,6 +13,8 @@ import PropertyCategoryTabs from '@/components/common/PropertyCategoryTabs';
 import VideoGallery from '@/components/VideoGallery/VideoGallery';
 import FarmList from '@/components/FarmList/FarmList';
 import CustomerReviews from '@/components/Reviews/CustomerReviews';
+import { CITY_IDS } from '@/constants/categories';
+import { fetchFarms } from '@/services/Farm/farm.service';
 
 export default function Homes() {
   const [selectedCity, setSelectedCity] = useState('all');
@@ -20,7 +22,37 @@ export default function Homes() {
   const [searchFilters, setSearchFilters] = useState(null);
   const [isSearchMode, setIsSearchMode] = useState(false);
 
-  const featuredFarms = getFeaturedFarms();
+  const [featuredFarms, setFeaturedFarms] = useState([]);
+
+  useEffect(() => {
+  const loadTop3Farms = async () => {
+    try {
+      const res = await fetchFarms({
+        page: '1',
+        per_page: '3', // ✅ Only fetch 3 farms
+        category_id: 2, // Optional: if you want only farmhouses
+      });
+
+      const farms = res?.data || [];
+
+      const topFarms = farms.map(farm => ({
+        id: farm.id,
+        name: farm.farm_alias_name,
+        location: farm.area?.name || farm.city?.name || '',
+        pricePerNight: farm.final_price,
+        images: farm.farm_images.map(img => `https://api.bookmyfarm.net/assets/images/farm_images/${img.image}`),
+        rating: farm.reviews_avg_star || 4.8,
+      }));
+
+      setFeaturedFarms(topFarms);
+    } catch (error) {
+      console.error('Error loading farms:', error);
+    }
+  };
+
+  loadTop3Farms();
+}, []);
+
 
   const handleSearch = (filters) => {
     setSearchFilters(filters);
@@ -31,9 +63,9 @@ export default function Homes() {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      {/* <section className="relative min-h-[80vh] bg-gradient-to-br from-emerald-50 via-blue-50 to-purple-50 overflow-hidden"> */}
+      <section className="relative min-h-[80vh] bg-gradient-to-br from-emerald-50 via-blue-50 to-purple-50 overflow-hidden">
       {/* <section className="relative min-h-[80vh] bg-gradient-to-br from-[#f0fff4] via-[#f0faff] to-[#f6f0ff] overflow-hidden"> */}
-<section className="relative min-h-[80vh] bg-[#f0f8f4] bg-gradient-to-br from-[#f0fff4] via-[#f0faff] to-[#f6f0ff] overflow-hidden">
+{/* <section className="relative min-h-[80vh] bg-[#f0f8f4] bg-gradient-to-br from-[#f0fff4] via-[#f0faff] to-[#f6f0ff] overflow-hidden"> */}
 
         <div className="absolute inset-0">
           <div className="absolute top-10 left-10 w-20 h-20 bg-primary/10 rounded-full blur-xl animate-float"></div>
@@ -179,11 +211,16 @@ export default function Homes() {
         selectedCategory={selectedCategory !== 'all' ? selectedCategory : undefined}
         searchQuery={searchFilters?.location || ''}
       /> */}
-      <FarmList
-  selectedCity={selectedCity !== 'all' ? selectedCity : undefined}
-  selectedCategory={selectedCategory !== 'all' ? selectedCategory : undefined}
-  searchFilters={searchFilters}
+<FarmList
+  searchFilters={{
+    ...(searchFilters || {}),
+    category_id: selectedCategory !== 'all' ? Number(selectedCategory) : '',
+    city_id: selectedCity !== 'all' ? CITY_IDS[selectedCity.toLowerCase()] : '',
+  }}
 />
+
+
+
 
 
       <VideoGallery />

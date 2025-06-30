@@ -1,24 +1,41 @@
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
-import { getCities } from '@/data/staticFarms';
+
+const CITY_IDS = {
+  surat: 1,
+  navsari: 2,
+  daman: 3,
+  // bharuch: 4,
+  // vadodara: 5,
+  // valsad: 6,
+  // bilimora: 7,
+  // sevani: 10,
+  saputara: 13,
+  // dang: 12,
+};
+
+const cityDisplayNames = {
+  all: 'All Farms',
+  surat: 'Surat',
+  navsari: 'Navsari',
+  daman: 'Daman',
+  // bharuch: 'Bharuch',
+  // vadodara: 'Vadodara',
+  // valsad: 'Valsad',
+  // bilimora: 'Bilimora',
+  sevani: 'Sevani',
+  saputara: 'Saputara',
+  dang: 'Dang',
+};
+
+const cities = Object.keys(CITY_IDS);
+const allCities = ['all', ...cities];
 
 export default function CategoryTabs({ 
   selectedCity = 'all', 
   onCityChange,
   className = ''
 }) {
-  const cities = getCities();
-  const allCities = ['all', ...cities];
-
-  const cityDisplayNames = {
-    all: 'All Farms',
-    surat: 'Surat',
-    daman: 'Daman', 
-    mumbai: 'Mumbai',
-    pune: 'Pune',
-    vadodara: 'Vadodara',
-  };
-
   return (
     <section className={`py-8 bg-white border-b border-neutral-100 ${className}`}>
       <div className="max-w-7xl mx-auto container-padding">
@@ -36,8 +53,8 @@ export default function CategoryTabs({
         <div className="flex flex-wrap gap-3">
           {allCities.map((city) => {
             const isActive = selectedCity === city;
-            const displayName = cityDisplayNames[city.toLowerCase()] || city;
-            
+            const displayName = cityDisplayNames[city] || city;
+
             return (
               <Button
                 key={city}
@@ -60,3 +77,5 @@ export default function CategoryTabs({
     </section>
   );
 }
+
+export { CITY_IDS }; // so you can use it in Homes.jsx

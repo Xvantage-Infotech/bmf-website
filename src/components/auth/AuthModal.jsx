@@ -9,6 +9,7 @@ import { useForm } from 'react-hook-form';
 import { useAuth } from '@/contexts/AuthContext';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2 } from 'lucide-react';
+import { createRecaptchaVerifier } from '@/lib/firebase';
 
 export default function AuthModal({ isOpen, onClose }) {
   const [activeTab, setActiveTab] = useState('login');
@@ -62,7 +63,21 @@ export default function AuthModal({ isOpen, onClose }) {
     try {
       const formattedNumber = formatPhoneNumber(mobileNumber);
       setFormattedPhone(formattedNumber);
-      await sendOtpToPhone(formattedNumber);
+      // Ensure recaptcha container exists in DOM
+let recaptchaContainer = document.getElementById('recaptcha-container');
+if (!recaptchaContainer) {
+  recaptchaContainer = document.createElement('div');
+  recaptchaContainer.id = 'recaptcha-container';
+  document.body.appendChild(recaptchaContainer);
+}
+
+// Create and render reCAPTCHA
+const appVerifier = window.recaptchaVerifier || createRecaptchaVerifier('recaptcha-container');
+await appVerifier.render();
+
+// Send OTP
+await sendOtpToPhone(formattedNumber, appVerifier);
+
       setIsOtpSent(true);
     } catch (error) {
       console.error('Error sending OTP:', error);

@@ -1,8 +1,11 @@
 'use client';
 
-import dynamic from 'next/dynamic';
+import _dynamic from 'next/dynamic'; // ✅ Renamed to _dynamic
 
-const FarmDetail = dynamic(() => import('@/pages/FarmDetail'), { ssr: false });
+export const dynamic = 'force-dynamic'; // ✅ No conflict now
+const FarmDetail = _dynamic(() => import('@/components/Farm/FarmDetail'), { ssr: false });
+
+
 
 export default function FarmDetailsPage() {
   return <FarmDetail />;

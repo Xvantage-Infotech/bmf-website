@@ -42,7 +42,7 @@
 // }
 
 
-
+'use client';
 import { Button } from '@/components/ui/button';
 import { PROPERTY_CATEGORIES, CATEGORY_LABELS } from '@/constants/categories';
 import { cn } from '@/lib/utils';

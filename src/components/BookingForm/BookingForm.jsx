@@ -145,7 +145,7 @@ export default function BookingForm({ farm, className = '' }) {
               onClick={() => window.open('tel:+919277778778', '_self')}
             >
               <Phone className="w-4 h-4 mr-3" />
-              Call us: +91 98765 43210
+              Call us: +91 9277778778
             </Button>
             <Button
               variant="outline"

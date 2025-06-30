@@ -22,7 +22,24 @@ export default function FarmDetail() {
   
   const [farm, setFarm] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  // const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+
+const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+
+// Move this declaration above the useEffect
+const farmImages = farm?.farm_images || [];
+
+// Auto-swipe effect (only runs when farm is loaded)
+useEffect(() => {
+  if (!farm || farmImages.length <= 1) return;
+
+  const interval = setInterval(() => {
+    setSelectedImageIndex((prev) => (prev + 1) % farmImages.length);
+  }, 3000);
+
+  return () => clearInterval(interval);
+}, [farm, farmImages]);
+
 
   useEffect(() => {
     if (!farmId) return;
@@ -43,7 +60,6 @@ export default function FarmDetail() {
   if (!farm) return <div className="p-8 text-center text-red-500">Farm not found.</div>;
 
   const rating = parseFloat(farm.reviews_avg_star || 0);
-  const farmImages = farm.farm_images || [];
   const mainImage = farmImages[selectedImageIndex]
     ? `https://api.bookmyfarm.net/assets/images/farm_images/${farmImages[selectedImageIndex].image}`
     : '/placeholder.jpg';
@@ -98,7 +114,7 @@ export default function FarmDetail() {
             <div className="lg:col-span-2">
               {/* Gallery */}
               <div className="mb-8">
-                <div className="relative rounded-2xl overflow-hidden mb-4">
+                {/* <div className="relative rounded-2xl overflow-hidden mb-4">
                   <img src={mainImage} className="w-full h-96 object-cover" />
                 </div>
                 <div className="grid grid-cols-4 gap-3">
@@ -112,16 +128,47 @@ export default function FarmDetail() {
                       onClick={() => setSelectedImageIndex(i)}
                     />
                   ))}
-                </div>
+                </div> */}
+                <div className="relative rounded-2xl overflow-hidden mb-4">
+  <img
+    src={mainImage}
+    alt={`Farm image ${selectedImageIndex + 1}`}
+    className="w-full h-full object-cover transition-all duration-1000 ease-in-out"
+  />
+</div>
+
               </div>
 
               {/* Tabs */}
-              <Tabs defaultValue="description">
+              <Tabs defaultValue="policy">
                 <TabsList>
+                  <TabsTrigger value="policy">House Policy</TabsTrigger>
                   <TabsTrigger value="description">Description</TabsTrigger>
                   <TabsTrigger value="amenities">Amenities</TabsTrigger>
                   <TabsTrigger value="location">Location</TabsTrigger>
                 </TabsList>
+
+  <TabsContent value="policy">
+  {farm.house_rule_policy ? (
+    <ul className="list-disc list-inside text-neutral-700 space-y-1">
+      {farm.house_rule_policy
+        .replace(/<\/?[^>]+(>|$)/g, '') // remove HTML tags
+        .replace(/&nbsp;/g, ' ')        // replace HTML spaces
+        .replace(/([.!?])(?=\S)/g, '$1 ') // ensure space after punctuation
+        .split(/(?<=\.)\s+|(?=✅|❌)/g) // split on ". " OR before ✅/❌
+        .map(line => line.trim())
+        .filter(line => line.length > 0)
+        .map((point, index) => (
+          <li key={index}>{point}</li>
+        ))}
+    </ul>
+  ) : (
+    <p className="text-neutral-700">No house policy provided.</p>
+  )}
+</TabsContent>
+
+
+
             <TabsContent value="description">
   {farm.description ? (
     <ol className="list-decimal list-inside text-neutral-700 space-y-1">
@@ -139,21 +186,25 @@ export default function FarmDetail() {
 </TabsContent>
 
 <TabsContent value="amenities">
-  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-    {(farm.rooms || [])
-      .flatMap(room => room.room_amenities.map(ra => ra.amenities))
-      .map((amenity, i) => (
-        <div key={i} className="flex items-center gap-2 p-2 bg-neutral-50 rounded">
-          <img
-            src={`https://api.bookmyfarm.net/assets/images/amenity-icons/${amenity.icon}`}
-            alt={amenity.name}
-            className="w-5 h-5 object-contain"
-          />
-          <span className="text-sm text-neutral-700 font-medium">{amenity.name}</span>
-        </div>
-      ))}
-  </div>
+  {farm.rooms?.map((room) => (
+    <div key={room.name} className="mb-4">
+      <h4 className="font-semibold text-lg mb-2">{room.name}</h4>
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+        {room.room_amenities.map((ra, idx) => (
+          <div key={idx} className="flex items-center gap-2 p-2 bg-neutral-50 rounded">
+            <img
+              src={`https://api.bookmyfarm.net/assets/images/amenity-icons/${ra.amenities.icon}`}
+              alt={ra.amenities.name}
+              className="w-5 h-5 object-contain"
+            />
+            <span className="text-sm text-neutral-700 font-medium">{ra.amenities.name}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  ))}
 </TabsContent>
+
 
                 {/* <TabsContent value="location">
                   <p className="text-neutral-600">{farm.location}</p>
@@ -187,3 +238,10 @@ export default function FarmDetail() {
     </div>
   );
 }
+
+
+
+
+
+
+

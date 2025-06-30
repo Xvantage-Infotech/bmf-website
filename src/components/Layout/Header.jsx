@@ -114,7 +114,7 @@ const SearchBar = ({ className = '' }) => (
                 }}
               >
                 <LogOut className="mr-2 h-4 w-4" />
-                <span>Logout</span>
+                <span>MJ Test</span>
               </Button>
             </div>
           </div>

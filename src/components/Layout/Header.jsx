@@ -114,7 +114,7 @@ const SearchBar = ({ className = '' }) => (
                 }}
               >
                 <LogOut className="mr-2 h-4 w-4" />
-                <span>MJ Test</span>
+                <span>MJ Test MJ test Checking something</span>
               </Button>
             </div>
           </div>
@@ -126,7 +126,7 @@ const SearchBar = ({ className = '' }) => (
               setIsAuthModalOpen(true);
             }}
           >
-            MJ test
+            MJ test Checking something
           </Button>
         )
       )}

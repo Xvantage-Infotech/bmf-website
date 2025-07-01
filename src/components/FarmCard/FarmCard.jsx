@@ -203,9 +203,26 @@ useEffect(() => {
           </div>
 
           {/* Price Badge */}
-          <div className="absolute top-3 left-3 bg-primary text-white px-3 py-1 rounded-full text-sm font-medium">
-            {formatPrice(farm.final_price)}
-          </div>
+         {(() => {
+  const price = parseFloat(farm.final_price) || 0;
+  const percent = parseFloat(farm.increase_percentage) || 0;
+  const increase = Math.round((price * percent) / 100);
+  const originalPrice = price + increase;
+
+  return (
+    <div className="absolute top-3 left-3 bg-white/90 text-black px-3 py-1 rounded-full text-sm font-medium flex items-center gap-2 backdrop-blur">
+      {percent > 0 && (
+        <span className="text-sm line-through text-black opacity-70">
+          {formatPrice(originalPrice)}
+        </span>
+      )}
+      <span className="text-sm font-semibold text-green-700">
+        {formatPrice(price)}
+      </span>
+    </div>
+  );
+})()}
+
 
           {/* Favorite Button */}
           <Button

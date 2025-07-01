@@ -35,14 +35,22 @@ export default function Homes() {
 
       const farms = res?.data || [];
 
-      const topFarms = farms.map(farm => ({
-        id: farm.id,
-        name: farm.farm_alias_name,
-        location: farm.area?.name || farm.city?.name || '',
-        pricePerNight: farm.final_price,
-        images: farm.farm_images.map(img => `https://api.bookmyfarm.net/assets/images/farm_images/${img.image}`),
-        rating: farm.reviews_avg_star || 4.8,
-      }));
+      const topFarms = farms.map(farm => {
+  const finalPrice = parseInt(farm.final_price) || 0;
+  const increasePercentage = parseInt(farm.increase_percentage) || 0;
+
+  return {
+    id: farm.id,
+    name: farm.farm_alias_name,
+    location: farm.area?.name || farm.city?.name || '',
+    final_price: finalPrice,
+    increase_percentage: increasePercentage,
+    pricePerNight: finalPrice,
+    images: farm.farm_images.map(img => `https://api.bookmyfarm.net/assets/images/farm_images/${img.image}`),
+    rating: farm.reviews_avg_star || 4.8,
+  };
+});
+
 
       setFeaturedFarms(topFarms);
     } catch (error) {
@@ -140,7 +148,7 @@ export default function Homes() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {featuredFarms.map((farm) => (
+            {/* {featuredFarms.map((farm) => (
               <Link key={farm.id} href={`/farm/${farm.id}`}>
                 <div className="group relative overflow-hidden rounded-3xl h-96 cursor-pointer transform transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl">
                   <img 
@@ -162,7 +170,7 @@ export default function Homes() {
                         Premium
                       </span>
                     </div>
-                    <h3 className="text-xl font-bold mb-1 group-hover:text-primary transition-colors">
+                    <h3 className="text-xl font-bold mb-1 group-hover:text-white transition-colors">
                       {farm.name}
                     </h3>
                     <p className="text-sm opacity-90 mb-3">{farm.location}</p>
@@ -178,7 +186,58 @@ export default function Homes() {
                   </div>
                 </div>
               </Link>
-            ))}
+            ))} */}
+            {featuredFarms.map((farm) => {
+  const increase = Math.round((farm.final_price * farm.increase_percentage) / 100);
+  const originalPrice = farm.final_price + increase;
+  return (
+    <Link key={farm.id} href={`/farm/${farm.id}`}>
+      <div className="group relative overflow-hidden rounded-3xl h-96 cursor-pointer transform transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl">
+        <img 
+          src={farm.images[0]}
+          alt={farm.name}
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+        <button className="absolute top-4 right-4 w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-all">
+          <Heart className="w-5 h-5" />
+        </button>
+        <div className="absolute bottom-6 left-6 right-6 text-white">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="flex items-center gap-1">
+              <Star className="w-4 h-4 text-yellow-400 fill-current" />
+              <span className="text-sm font-medium">4.8</span>
+            </div>
+            <span className="text-xs bg-white/20 px-2 py-1 rounded-full backdrop-blur-sm">
+              Premium
+            </span>
+          </div>
+          <h3 className="text-xl font-bold mb-1 group-hover:text-white transition-colors">
+            {farm.name}
+          </h3>
+          <p className="text-sm opacity-90 mb-3">{farm.location}</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-xl text-primary line-through">
+                  {formatPrice(originalPrice)}
+                </span>
+                <span className="text-2xl font-bold">
+                  {formatPrice(farm.pricePerNight)}
+                </span>
+              </div>
+              <span className="text-sm opacity-75">/night</span>
+            </div>
+            <div className="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full">
+              <span className="text-xs font-medium">View Details</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Link>
+  );
+})}
+
           </div>
 
           <div className="text-center mt-12">

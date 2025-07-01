@@ -400,7 +400,7 @@ export default function FarmList({
             <p className="text-neutral-600">{description}</p>
             {!loading && sortedFarms.length > 0 && (
               <p className="text-sm text-neutral-500 mt-1">
-                Showing {sortedFarms.length} result{sortedFarms.length !== 1 ? 's' : ''}
+                {/* {sortedFarms.length} result{sortedFarms.length !== 1 ? 's' : ''} */}
               </p>
             )}
           </div>

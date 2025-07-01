@@ -23,14 +23,14 @@ export default function Header() {
   const { user, isAuthenticated, logout } = useAuth();
 
   const navigationItems = [
-    { href: '/farms', label: 'Farms' },
+    { href: '/', label: 'Farms' },
     { href: '/customers', label: 'Happy Customers' },
     { href: '/contact', label: 'Contact' },
     { href: '/owner/register', label: 'List Your Farm' },
   ];
 
   const Logo = () => (
-    <Link href="/farms" className="flex items-center space-x-3">
+    <Link href="/" className="flex items-center space-x-3">
       {/* <img 
         src="/app_logo.png" 
         alt="BookMyFarm Logo" 

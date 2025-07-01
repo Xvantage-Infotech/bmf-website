@@ -15,8 +15,9 @@ export default function BookingForm({ farm, className = '' }) {
   const [children, setChildren] = useState(0);
 
   const nights = checkIn && checkOut ? calculateNights(checkIn, checkOut) : 0;
-  const pricePerNight = parseFloat(farm.pricePerNight);
-  const pricing = nights > 0 ? calculateTotalPrice(pricePerNight, nights) : null;
+const finalPricePerNight = parseFloat(farm.final_price);
+const pricing = nights > 0 ? calculateTotalPrice(finalPricePerNight, nights) : null;
+
 
   const totalGuests = adults + children;
   const isGuestLimitExceeded = totalGuests > farm.maxGuests;
@@ -97,7 +98,7 @@ export default function BookingForm({ farm, className = '' }) {
           {pricing && (
             <div className="bg-white rounded-lg p-4 border border-neutral-200 space-y-2">
               <div className="flex justify-between text-sm">
-                <span>{formatPrice(pricePerNight)} x {nights} night{nights !== 1 ? 's' : ''}</span>
+                <span>{formatPrice(finalPricePerNight)} x {nights} night{nights !== 1 ? 's' : ''}</span>
                 <span>{formatPrice(pricing.subtotal)}</span>
               </div>
               <div className="flex justify-between text-sm">

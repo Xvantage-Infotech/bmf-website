@@ -10,22 +10,27 @@ import { useForm } from 'react-hook-form';
 import { useAuth } from '@/contexts/AuthContext';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2 } from 'lucide-react';
+import { api } from '@/axiosApi';
+import { createRecaptchaVerifier, sendOTP } from '@/lib/firebase';
 
 export default function AuthModal({ isOpen, onClose }) {
   const [activeTab, setActiveTab] = useState('login');
   const [isOtpSent, setIsOtpSent] = useState(false);
   const [formattedPhone, setFormattedPhone] = useState('');
+  const [localLoading, setLocalLoading] = useState(false);
 
-  const {
-    sendOtpToPhone,
-    signup,
-    loading,
-    error,
-    clearError,
-    verifyOtpAndLogin, 
-    loginWithPhoneOtp,
-    login
-  } = useAuth();
+const {
+  confirmationResult,
+  setConfirmationResult,
+  // ADD THESE ↓
+  user,
+  loading,
+  error,
+  signup,
+  verifyOtpAndLogin,
+  clearError
+} = useAuth();
+
 
   const loginForm = useForm({
     defaultValues: {
@@ -41,6 +46,30 @@ export default function AuthModal({ isOpen, onClose }) {
       otp: ''
     }
   });
+  useEffect(() => {
+  if (typeof window !== 'undefined') {
+    let el = document.getElementById('recaptcha-container');
+    if (!el) {
+      const div = document.createElement('div');
+      div.id = 'recaptcha-container';
+      div.style.display = 'none';
+      document.body.appendChild(div);
+      console.log('✅ Mounted #recaptcha-container manually');
+    }
+  }
+}, []);
+
+
+  // AuthModal.jsx
+// useEffect(() => {
+//   return () => {
+//     if (window.recaptchaVerifier) {
+//       window.recaptchaVerifier.clear();
+//       window.recaptchaVerifier = null;
+//       console.log('🧹 Cleared reCAPTCHA verifier');
+//     }
+//   };
+// }, []);
 
   useEffect(() => {
     if (isOpen && !isOtpSent) {
@@ -51,33 +80,55 @@ export default function AuthModal({ isOpen, onClose }) {
   const formatPhoneNumber = (phone) => {
     const digits = phone.replace(/\D/g, '');
     if (!phone.startsWith('+')) {
-      return `+91${digits}`;
+      return `${digits}`;
     }
     return phone;
   };
 
-const handleSendOtp = async (mobileNumber) => {
-  if (!mobileNumber || mobileNumber.length < 10) {
-    alert('Please enter a valid mobile number');
-    return;
-  }
-
+// AuthModal.jsx
+const handleSendOtp = async (phoneNumber) => {
   try {
-    const formattedNumber = formatPhoneNumber(mobileNumber);
-    setFormattedPhone(formattedNumber);
+    setLocalLoading(true);
 
-    if (activeTab === 'signup') {
-      await sendOtpToPhone(formattedNumber); // 🔥 calls /api/add_user
-    } else {
-      await api.post('/api/login', { phone_number: formattedNumber }); // 🔥 login OTP
+    // ⏳ Give DOM time to mount
+    await new Promise((r) => setTimeout(r, 100));
+
+    if (!window.recaptchaVerifier) {
+      const verifier = createRecaptchaVerifier();
+      if (!verifier) throw new Error('Recaptcha not initialized');
     }
 
+    const confirmation = await sendOTP(phoneNumber);
+    setConfirmationResult(confirmation);
     setIsOtpSent(true);
-  } catch (error) {
-    console.error('Error sending OTP:', error);
+  } catch (err) {
+    console.error('❌ Failed to send OTP:', err);
+    alert(err.message);
+  } finally {
+    setLocalLoading(false);
   }
 };
 
+
+  const handleVerifyOtp = async () => {
+    try {
+      const result = await confirmationResult.confirm(otp);
+      console.log('✅ Logged in user:', result.user);
+      alert('Login successful!');
+    } catch (err) {
+      console.error('❌ Invalid OTP:', err);
+      alert('Invalid OTP');
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      if (window.recaptchaVerifier) {
+        window.recaptchaVerifier.clear();
+        window.recaptchaVerifier = null;
+      }
+    };
+  }, []);
 
 const handleLogin = async (values) => {
   if (!values.otp || values.otp.length < 4) {
@@ -85,14 +136,15 @@ const handleLogin = async (values) => {
     return;
   }
   try {
-    await verifyOtpAndLogin(values.otp, formattedPhone);
-    await loginWithPhoneOtp(formattedPhone); // <-- Now added
+    await verifyOtpAndLogin(values.otp);
     setIsOtpSent(false);
     onClose();
   } catch (error) {
     console.error('Error during login:', error);
   }
 };
+
+
   const handleSignup = async (values) => {
     if (!values.otp || values.otp.length < 4) {
       alert('Please enter a valid OTP');
@@ -119,6 +171,7 @@ const handleLogin = async (values) => {
   };
 
   return (
+    
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
@@ -294,7 +347,10 @@ const handleLogin = async (values) => {
             Privacy Policy
           </a>
         </div>
+
+
       </DialogContent>
     </Dialog>
+    
   );
 }

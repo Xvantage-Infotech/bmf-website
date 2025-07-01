@@ -1,71 +1,80 @@
 "use client";
 
-import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { ArrowRight, Star, Heart, Shield } from 'lucide-react';
-import { getFeaturedFarms } from '@/data/staticFarms';
-import { formatPrice } from '@/lib/utils';
-import SearchFilters from '@/components/Search/SearchFilters';
-import SearchResultsPanel from '@/components/Search/SearchResultsPanel';
-import CategoryTabs from '@/components/Search/CategoryTabs';
-import PropertyCategoryTabs from '@/components/common/PropertyCategoryTabs';
-import VideoGallery from '@/components/VideoGallery/VideoGallery';
-import FarmList from '@/components/FarmList/FarmList';
-import CustomerReviews from '@/components/Reviews/CustomerReviews';
-import { CITY_IDS } from '@/constants/categories';
-import { fetchFarms } from '@/services/Farm/farm.service';
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { ArrowRight, Star, Heart, Shield } from "lucide-react";
+import { getFeaturedFarms } from "@/data/staticFarms";
+import { formatPrice } from "@/lib/utils";
+import SearchFilters from "@/components/Search/SearchFilters";
+import SearchResultsPanel from "@/components/Search/SearchResultsPanel";
+import CategoryTabs from "@/components/Search/CategoryTabs";
+import PropertyCategoryTabs from "@/components/common/PropertyCategoryTabs";
+import VideoGallery from "@/components/VideoGallery/VideoGallery";
+import FarmList from "@/components/FarmList/FarmList";
+import CustomerReviews from "@/components/Reviews/CustomerReviews";
+import { CITY_IDS } from "@/constants/categories";
+import { fetchFarms } from "@/services/Farm/farm.service";
 
 export default function Homes() {
-  const [selectedCity, setSelectedCity] = useState('all');
-  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedCity, setSelectedCity] = useState("all");
+  const [selectedCategory, setSelectedCategory] = useState("all");
   const [searchFilters, setSearchFilters] = useState(null);
   const [isSearchMode, setIsSearchMode] = useState(false);
 
   const [featuredFarms, setFeaturedFarms] = useState([]);
 
   useEffect(() => {
-  const loadTop3Farms = async () => {
-    try {
-      const res = await fetchFarms({
-        page: '1',
-        per_page: '3', // ✅ Only fetch 3 farms
-        category_id: 2, // Optional: if you want only farmhouses
-      });
+    const loadTop3Farms = async () => {
+      try {
+        const res = await fetchFarms({
+          page: "1",
+          per_page: "3", // ✅ Only fetch 3 farms
+          category_id: 2, // Optional: if you want only farmhouses
+        });
 
-      const farms = res?.data || [];
+        const farms = res?.data || [];
 
-      const topFarms = farms.map(farm => ({
-        id: farm.id,
-        name: farm.farm_alias_name,
-        location: farm.area?.name || farm.city?.name || '',
-        pricePerNight: farm.final_price,
-        images: farm.farm_images.map(img => `https://api.bookmyfarm.net/assets/images/farm_images/${img.image}`),
-        rating: farm.reviews_avg_star || 4.8,
-      }));
+        const topFarms = farms.map((farm) => {
+          const finalPrice = parseInt(farm.final_price) || 0;
+          const increasePercentage = parseInt(farm.increase_percentage) || 0;
 
-      setFeaturedFarms(topFarms);
-    } catch (error) {
-      console.error('Error loading farms:', error);
-    }
-  };
+          return {
+            id: farm.id,
+            name: farm.farm_alias_name,
+            location: farm.area?.name || farm.city?.name || "",
+            final_price: finalPrice,
+            increase_percentage: increasePercentage,
+            pricePerNight: finalPrice,
+            images: farm.farm_images.map(
+              (img) =>
+                `https://api.bookmyfarm.net/assets/images/farm_images/${img.image}`
+            ),
+            rating: farm.reviews_avg_star || 4.8,
+          };
+        });
 
-  loadTop3Farms();
-}, []);
+        setFeaturedFarms(topFarms);
+      } catch (error) {
+        console.error("Error loading farms:", error);
+      }
+    };
 
+    loadTop3Farms();
+  }, []);
 
   const handleSearch = (filters) => {
     setSearchFilters(filters);
     setIsSearchMode(true);
-    console.log('Search filters:', filters);
+    console.log("Search filters:", filters);
   };
 
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
       <section className="relative min-h-[80vh] bg-gradient-to-br from-emerald-50 via-blue-50 to-purple-50 overflow-hidden">
-      {/* <section className="relative min-h-[80vh] bg-gradient-to-br from-[#f0fff4] via-[#f0faff] to-[#f6f0ff] overflow-hidden"> */}
-{/* <section className="relative min-h-[80vh] bg-[#f0f8f4] bg-gradient-to-br from-[#f0fff4] via-[#f0faff] to-[#f6f0ff] overflow-hidden"> */}
+        {/* <section className="relative min-h-[80vh] bg-gradient-to-br from-[#f0fff4] via-[#f0faff] to-[#f6f0ff] overflow-hidden"> */}
+        {/* <section className="relative min-h-[80vh] bg-[#f0f8f4] bg-gradient-to-br from-[#f0fff4] via-[#f0faff] to-[#f6f0ff] overflow-hidden"> */}
 
         <div className="absolute inset-0">
           <div className="absolute top-10 left-10 w-20 h-20 bg-primary/10 rounded-full blur-xl animate-float"></div>
@@ -105,13 +114,22 @@ export default function Homes() {
           </div>
 
           <div className="max-w-5xl mx-auto">
-            <SearchFilters onSearch={handleSearch} className="animate-slide-up" />
+            <SearchFilters
+              onSearch={handleSearch}
+              className="animate-slide-up"
+            />
           </div>
 
           <div className="text-center mt-8">
             <p className="text-sm text-gray-500 mb-3">Popular searches:</p>
             <div className="flex flex-wrap items-center justify-center gap-3">
-              {["Weekend Getaway", "Pool Villa", "Pet Friendly", "Near Mumbai", "Family Retreat"].map((tag) => (
+              {[
+                "Weekend Getaway",
+                "Pool Villa",
+                "Pet Friendly",
+                "Near Mumbai",
+                "Family Retreat",
+              ].map((tag) => (
                 <button
                   key={tag}
                   className="px-4 py-2 bg-white/60 backdrop-blur-sm rounded-full text-sm text-gray-600 hover:bg-white hover:text-primary transition-all duration-200 border border-white/20 hover:border-primary/20"
@@ -140,7 +158,7 @@ export default function Homes() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {featuredFarms.map((farm) => (
+            {/* {featuredFarms.map((farm) => (
               <Link key={farm.id} href={`/farm/${farm.id}`}>
                 <div className="group relative overflow-hidden rounded-3xl h-96 cursor-pointer transform transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl">
                   <img 
@@ -162,7 +180,7 @@ export default function Homes() {
                         Premium
                       </span>
                     </div>
-                    <h3 className="text-xl font-bold mb-1 group-hover:text-primary transition-colors">
+                    <h3 className="text-xl font-bold mb-1 group-hover:text-white transition-colors">
                       {farm.name}
                     </h3>
                     <p className="text-sm opacity-90 mb-3">{farm.location}</p>
@@ -178,11 +196,69 @@ export default function Homes() {
                   </div>
                 </div>
               </Link>
-            ))}
+            ))} */}
+            {featuredFarms.map((farm) => {
+              const increase = Math.round(
+                (farm.final_price * farm.increase_percentage) / 100
+              );
+              const originalPrice = farm.final_price + increase;
+              return (
+                <Link key={farm.id} href={`/farm/${farm.id}`}>
+                  <div className="group relative overflow-hidden rounded-3xl h-96 cursor-pointer transform transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl">
+                    <img
+                      src={farm.images[0]}
+                      alt={farm.name}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+                    <button className="absolute top-4 right-4 w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-all">
+                      <Heart className="w-5 h-5" />
+                    </button>
+                    <div className="absolute bottom-6 left-6 right-6 text-white">
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="flex items-center gap-1">
+                          <Star className="w-4 h-4 text-yellow-400 fill-current" />
+                          <span className="text-sm font-medium">4.8</span>
+                        </div>
+                        <span className="text-xs bg-white/20 px-2 py-1 rounded-full backdrop-blur-sm">
+                          Premium
+                        </span>
+                      </div>
+                      <h3 className="text-xl font-bold mb-1 group-hover:text-white transition-colors">
+                        {farm.name}
+                      </h3>
+                      <p className="text-sm opacity-90 mb-3">{farm.location}</p>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xl text-primary line-through">
+                              {formatPrice(originalPrice)}
+                            </span>
+                            <span className="text-2xl font-bold">
+                              {formatPrice(farm.pricePerNight)}
+                            </span>
+                          </div>
+                          <span className="text-sm opacity-75">/night</span>
+                        </div>
+                        <div className="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full">
+                          <span className="text-xs font-medium">
+                            View Details
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              );
+            })}
           </div>
 
           <div className="text-center mt-12">
-            <Button size="lg" variant="outline" className="border-2 hover:bg-primary hover:text-white transition-all">
+            <Button
+              size="lg"
+              variant="outline"
+              className="border-2 hover:bg-primary hover:text-white transition-all"
+            >
               View All Properties
               <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
@@ -194,8 +270,12 @@ export default function Homes() {
       <section className="py-20 bg-gradient-to-br from-gray-50 to-gray-100">
         <div className="max-w-7xl mx-auto container-padding">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">Browse by Property Type</h2>
-            <p className="text-lg text-gray-600">Find the perfect accommodation for your getaway</p>
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+              Browse by Property Type
+            </h2>
+            <p className="text-lg text-gray-600">
+              Find the perfect accommodation for your getaway
+            </p>
           </div>
           <PropertyCategoryTabs
             selectedCategory={selectedCategory}
@@ -204,24 +284,25 @@ export default function Homes() {
         </div>
       </section>
 
-      <CategoryTabs selectedCity={selectedCity} onCityChange={setSelectedCity} />
+      <CategoryTabs
+        selectedCity={selectedCity}
+        onCityChange={setSelectedCity}
+      />
 
       {/* <FarmList
         selectedCity={selectedCity !== 'all' ? selectedCity : undefined}
         selectedCategory={selectedCategory !== 'all' ? selectedCategory : undefined}
         searchQuery={searchFilters?.location || ''}
       /> */}
-<FarmList
-  searchFilters={{
-    ...(searchFilters || {}),
-    category_id: selectedCategory !== 'all' ? Number(selectedCategory) : '',
-    city_id: selectedCity !== 'all' ? CITY_IDS[selectedCity.toLowerCase()] : '',
-  }}
-/>
-
-
-
-
+      <FarmList
+        searchFilters={{
+          ...(searchFilters || {}),
+          category_id:
+            selectedCategory !== "all" ? Number(selectedCategory) : "",
+          city_id:
+            selectedCity !== "all" ? CITY_IDS[selectedCity.toLowerCase()] : "",
+        }}
+      />
 
       <VideoGallery />
       <CustomerReviews />
@@ -236,7 +317,8 @@ export default function Homes() {
               Ready to List Your Property?
             </h2>
             <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
-              Join thousands of property owners who are earning extra income by hosting guests...
+              Join thousands of property owners who are earning extra income by
+              hosting guests...
             </p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
               <div className="text-center">
@@ -261,7 +343,10 @@ export default function Homes() {
                 <p className="text-sm text-gray-600">Simple dashboard</p>
               </div>
             </div>
-            <Button size="lg" className="bg-gradient-to-r from-primary to-emerald-600 text-white hover:from-primary/90 hover:to-emerald-600/90 px-8 py-6 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:scale-105">
+            <Button
+              size="lg"
+              className="bg-gradient-to-r from-primary to-emerald-600 text-white hover:from-primary/90 hover:to-emerald-600/90 px-8 py-6 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:scale-105"
+            >
               List Your Farm Today
               <ArrowRight className="w-5 h-5 ml-2" />
             </Button>

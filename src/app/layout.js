@@ -26,21 +26,23 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
-      <body className="min-h-screen flex flex-col">
-        
-              <ClientOnly>
-          <AuthProvider>
-            <TooltipProvider>
-              <Toaster />
-        <Header />
-              <main className="flex-1">{children}</main>
-              <Footer />
-              <MobileBottomNav />
-            </TooltipProvider>
-          </AuthProvider>
-      </ClientOnly>
-      </body>
-    </html>
+   <html lang="en">
+  <body className="min-h-screen flex flex-col">
+ <div id="recaptcha-container" style={{ display: 'none' }} />
+
+    <ClientOnly>
+      <AuthProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Header />
+          <main className="flex-1">{children}</main>
+          <Footer />
+          <MobileBottomNav />
+        </TooltipProvider>
+      </AuthProvider>
+    </ClientOnly>
+  </body>
+</html>
+
   );
 }

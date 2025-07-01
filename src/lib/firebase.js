@@ -1,110 +1,58 @@
-// Firebase configuration
-import { initializeApp } from 'firebase/app';
-import {
-  getAuth,
-  RecaptchaVerifier,
-  signInWithPhoneNumber,
-  signOut,
-  onAuthStateChanged,
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword
-} from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+import { initializeApp, getApps, getApp } from 'firebase/app';
+import { getAuth, RecaptchaVerifier, signInWithPhoneNumber } from 'firebase/auth';
 
-// Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyCLWllbelIfPj5owYzZBiXAK7gJcCrgLsE",
-  authDomain: "book-my-farm-87452.firebaseapp.com",
-  projectId: "book-my-farm-87452",
-  storageBucket: "book-my-farm-87452.firebasestorage.app",
-  messagingSenderId: "40957217895",
-  appId: "1:40957217895:web:7c196b5a39d402f8bc58c2",
-  measurementId: "G-BM86YHT7T8"
+  apiKey: 'AIzaSyCLWllbelIfPj5owYzZBiXAK7gJcCrgLsE',
+  authDomain: 'book-my-farm-87452.firebaseapp.com',
+  projectId: 'book-my-farm-87452',
+  storageBucket: 'book-my-farm-87452.appspot.com',
+  messagingSenderId: '40957217895',
+  appId: '1:40957217895:web:7c196b5a39d402f8bc58c2',
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
-export const db = getFirestore(app);
+const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+const auth = typeof window !== 'undefined' ? getAuth(app) : null;
+if (auth) auth.useDeviceLanguage();
 
-// Create a reCAPTCHA verifier
-export const createRecaptchaVerifier = (containerId = 'recaptcha-container') => {
-  if (typeof window !== 'undefined' && !window.recaptchaVerifier) {
-    window.recaptchaVerifier = new RecaptchaVerifier(
-      auth, // ✅ Correct placement
-      containerId,
-      {
-        size: 'invisible',
-        callback: (response) => {
-          console.log('reCAPTCHA solved');
+export { auth };
+
+export const createRecaptchaVerifier = () => {
+  if (typeof window === 'undefined' || !auth) return null;
+
+  if (!window.recaptchaVerifier) {
+    const container = document.getElementById('recaptcha-container');
+    if (!container) {
+      console.warn('❌ #recaptcha-container not found');
+      return null;
+    }
+
+    try {
+      window.recaptchaVerifier = new RecaptchaVerifier(
+        'recaptcha-container',
+        {
+          size: 'invisible',
+          callback: () => console.log('✅ reCAPTCHA solved'),
+          'expired-callback': () => console.warn('⚠️ reCAPTCHA expired'),
         },
-        'expired-callback': () => {
-          console.warn('reCAPTCHA expired. Solve again.');
-        },
-      }
-    );
-    window.recaptchaVerifier.render();
+        auth
+      );
+
+      window.recaptchaVerifier.render().then((widgetId) => {
+        console.log('📌 reCAPTCHA widget ID:', widgetId);
+      });
+    } catch (err) {
+      console.error('❌ Failed to create RecaptchaVerifier:', err);
+      return null;
+    }
   }
 
   return window.recaptchaVerifier;
 };
 
-
-// Send OTP
-export const sendOTP = async (phoneNumber, appVerifier) => {
-  try {
-    const confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, appVerifier);
-    return confirmationResult;
-  } catch (error) {
-    console.error('Error sending OTP:', error);
-    throw error;
+export const sendOTP = async (phoneNumber) => {
+  if (!window.recaptchaVerifier) {
+    throw new Error('Recaptcha not initialized');
   }
-};
 
-// Verify OTP
-export const verifyOTP = async (confirmationResult, otp) => {
-  try {
-    const result = await confirmationResult.confirm(otp);
-    return result.user;
-  } catch (error) {
-    console.error('Error verifying OTP:', error);
-    throw error;
-  }
-};
-
-// Sign out
-export const signOutUser = async () => {
-  try {
-    await signOut(auth);
-  } catch (error) {
-    console.error('Error signing out:', error);
-    throw error;
-  }
-};
-
-// Auth state listener
-export const listenToAuthChanges = (callback) => {
-  return onAuthStateChanged(auth, callback);
-};
-
-// Sign up with email/password
-export const signUpWithEmailAndPassword = async (email, password) => {
-  try {
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    return userCredential.user;
-  } catch (error) {
-    console.error('Error signing up with email and password:', error);
-    throw error;
-  }
-};
-
-// Sign in with email/password
-export const signInWithEmailPassword = async (email, password) => {
-  try {
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    return userCredential.user;
-  } catch (error) {
-    console.error('Error signing in with email and password:', error);
-    throw error;
-  }
+  return await signInWithPhoneNumber(auth, phoneNumber, window.recaptchaVerifier);
 };

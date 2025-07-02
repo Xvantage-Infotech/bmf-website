@@ -155,39 +155,24 @@
 
 
 
+// firebaseConfig.js
 import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getAuth, connectAuthEmulator } from 'firebase/auth';
+import { getAuth } from 'firebase/auth';
 
 const firebaseConfig = {
-  apiKey: 'AIzaSyCLWllbelIfPj5owYzZBiXAK7gJcCrgLsE',
-  authDomain: 'book-my-farm-87452.firebaseapp.com',
-  projectId: 'book-my-farm-87452',
-  storageBucket: 'book-my-farm-87452.appspot.com',
-  messagingSenderId: '40957217895',
-  appId: '1:40957217895:web:7c196b5a39d402f8bc58c2',
+  apiKey: "AIzaSyCLWllbelIfPj5owYzZBiXAK7gJcCrgLsE",
+  authDomain: "book-my-farm-87452.firebaseapp.com",
+  projectId: "book-my-farm-87452",
+  storageBucket: "book-my-farm-87452.firebasestorage.app",
+  messagingSenderId: "40957217895",
+  appId: "1:40957217895:web:7c196b5a39d402f8bc58c2",
+  measurementId: "G-BM86YHT7T8"
 };
 
-const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 const auth = getAuth(app);
-
-// ✅ Emulator config (for localhost only)
-if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
-  if (!auth._canInitEmulator) {
-    connectAuthEmulator(auth, 'http://127.0.0.1:9099');
-  }
-
-  // Delay setting appVerificationDisabledForTesting
-  setTimeout(() => {
-    if (auth?.settings) {
-      auth.settings.appVerificationDisabledForTesting = true;
-      console.log('✅ Emulator mode enabled for OTP');
-    } else {
-      console.warn('⚠️ auth.settings is not available yet');
-    }
-  }, 200); // gives enough time for internal setup
-}
+auth.useDeviceLanguage();
 
 export { auth };
-
 
 

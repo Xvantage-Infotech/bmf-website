@@ -28,7 +28,6 @@ export default function RootLayout({ children }) {
   return (
    <html lang="en">
   <body className="min-h-screen flex flex-col">
- <div id="recaptcha-container" style={{ display: 'none' }} />
 
     <ClientOnly>
       <AuthProvider>

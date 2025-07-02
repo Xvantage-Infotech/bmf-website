@@ -154,9 +154,13 @@
 
 
 
-// firebaseConfig.js
-import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
+// lib/firebaseConfig.js
+import { initializeApp } from 'firebase/app';
+import { 
+  getAuth,
+  RecaptchaVerifier,
+  signInWithPhoneNumber
+} from 'firebase/auth';
 
 const firebaseConfig = {
   apiKey: "AIzaSyCLWllbelIfPj5owYzZBiXAK7gJcCrgLsE",
@@ -168,18 +172,11 @@ const firebaseConfig = {
   measurementId: "G-BM86YHT7T8"
 };
 
-let firebaseApp;
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
 
-export const getFirebaseAuth = () => {
-  if (typeof window === 'undefined') return null;
-
-  if (!firebaseApp) {
-    firebaseApp = getApps().length ? getApp() : initializeApp(firebaseConfig);
-  }
-
-  const auth = getAuth(firebaseApp);
-  auth.useDeviceLanguage();
-  return auth;
+export { 
+  auth,
+  RecaptchaVerifier,
+  signInWithPhoneNumber 
 };
-
-

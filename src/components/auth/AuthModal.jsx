@@ -31,7 +31,6 @@
 //   clearError
 // } = useAuth();
 
-
 //   const loginForm = useForm({
 //     defaultValues: {
 //       mobileNumber: '',
@@ -58,7 +57,6 @@
 //     }
 //   }
 // }, []);
-
 
 //   // AuthModal.jsx
 // // useEffect(() => {
@@ -109,7 +107,6 @@
 //   }
 // };
 
-
 //   const handleVerifyOtp = async () => {
 //     try {
 //       const result = await confirmationResult.confirm(otp);
@@ -144,7 +141,6 @@
 //   }
 // };
 
-
 //   const handleSignup = async (values) => {
 //     if (!values.otp || values.otp.length < 4) {
 //       alert('Please enter a valid OTP');
@@ -171,7 +167,7 @@
 //   };
 
 //   return (
-    
+
 //     <Dialog open={isOpen} onOpenChange={onClose}>
 //       <DialogContent className="sm:max-w-[425px]">
 //         <DialogHeader>
@@ -348,47 +344,37 @@
 //           </a>
 //         </div>
 
-
 //       </DialogContent>
 //     </Dialog>
-    
+
 //   );
 // }
 
+"use client";
 
-
-'use client';
-
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from "react";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '@/components/ui/tabs';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
-import { Form } from '@/components/ui/form';
-import { useForm } from 'react-hook-form';
-import { useAuth } from '@/contexts/AuthContext';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2 } from 'lucide-react';
-import { sendOTP } from '@/lib/firebase';
-import { RecaptchaVerifier } from 'firebase/auth';
-import { auth, getFirebaseAuth } from '@/lib/firebaseConfig';
-
+} from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Form } from "@/components/ui/form";
+import { useForm } from "react-hook-form";
+import { useAuth } from "@/contexts/AuthContext";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Loader2 } from "lucide-react";
+import { sendOTP } from "@/lib/firebase";
+import { auth, RecaptchaVerifier } from "@/lib/firebaseConfig";
 
 export default function AuthModal({ isOpen, onClose }) {
-  const [activeTab, setActiveTab] = useState('login');
+  const [activeTab, setActiveTab] = useState("login");
   const [isOtpSent, setIsOtpSent] = useState(false);
-  const [formattedPhone, setFormattedPhone] = useState('');
+  const [formattedPhone, setFormattedPhone] = useState("");
   const [localLoading, setLocalLoading] = useState(false);
 
   const {
@@ -403,94 +389,140 @@ export default function AuthModal({ isOpen, onClose }) {
   } = useAuth();
 
   const loginForm = useForm({
-    defaultValues: { mobileNumber: '', otp: '' },
+    defaultValues: { mobileNumber: "", otp: "" },
   });
 
   const signupForm = useForm({
-    defaultValues: { name: '', mobileNumber: '', otp: '' },
+    defaultValues: { name: "", mobileNumber: "", otp: "" },
   });
 
-const recaptchaRef = useRef(null);
-
-useEffect(() => {
-  if (!isOpen || recaptchaRef.current) return;
-
-  if (!document.getElementById('recaptcha-container')) {
-    const div = document.createElement('div');
-    div.id = 'recaptcha-container';
-    document.body.appendChild(div);
-  }
-
-  const auth = getFirebaseAuth();
-  if (!auth) return;
-
-  recaptchaRef.current = new RecaptchaVerifier(
-    'recaptcha-container',
-    {
-      size: 'invisible',
-      callback: (token) => {
-        console.log('✅ reCAPTCHA solved:', token);
-      },
-    },
-    auth
-  );
-
-  recaptchaRef.current.render().then(() => {
-    console.log('🔒 reCAPTCHA rendered');
-  });
-
-  return () => {
-    if (recaptchaRef.current) {
-      recaptchaRef.current.clear();
-      recaptchaRef.current = null;
-    }
-  };
-}, [isOpen]);
-
-
-
-
-
+  const recaptchaRef = useRef(null);
+  const [isRecaptchaReady, setIsRecaptchaReady] = useState(false); // Add this state
+  const [recaptchaError, setRecaptchaError] = useState(null);
 
   useEffect(() => {
-    if (isOpen && !isOtpSent) clearError();
-  }, [isOpen, isOtpSent, clearError]);
+    if (!isOpen || recaptchaRef.current) return;
 
+    const initializeRecaptcha = async () => {
+      try {
+        // Ensure container exists
+        let container = document.getElementById("recaptcha-container");
+        if (!container) {
+          container = document.createElement("div");
+          container.id = "recaptcha-container";
+          container.style.display = "none";
+          document.body.appendChild(container);
+          await new Promise((resolve) => setTimeout(resolve, 100));
+        }
 
-const handleSendOtp = async (phoneNumber) => {
-  try {
-    const raw = phoneNumber.replace(/\D/g, '');
-    if (!raw || raw.length !== 10) {
-      alert('Enter a valid 10-digit number');
-      return;
+        // Initialize with proper verification
+        recaptchaRef.current = new RecaptchaVerifier(
+          "recaptcha-container",
+          {
+            size: "invisible",
+            callback: (response) => {
+              console.log("reCAPTCHA verified:", response);
+            },
+            "expired-callback": () => {
+              console.warn("reCAPTCHA expired");
+              setIsRecaptchaReady(false);
+            },
+          },
+          auth
+        );
+
+        // Verify the verifier was created with all needed methods
+        if (
+          !recaptchaRef.current ||
+          typeof recaptchaRef.current.verify !== "function" ||
+          typeof recaptchaRef.current.clear !== "function"
+        ) {
+          throw new Error("reCAPTCHA verifier not properly initialized");
+        }
+
+        setIsRecaptchaReady(true);
+      } catch (err) {
+        console.error("reCAPTCHA initialization failed:", {
+          error: err,
+          message: err.message,
+          stack: err.stack,
+        });
+
+        // Development fallback
+        if (process.env.NODE_ENV === "development") {
+          console.warn("Using reCAPTCHA mock for development");
+          recaptchaRef.current = {
+            verify: () => Promise.resolve("mocked-recaptcha-token"),
+            clear: () => {},
+            render: () => Promise.resolve(),
+            _reset: () => {},
+          };
+          setIsRecaptchaReady(true);
+        } else {
+          setRecaptchaError(
+            "Security verification failed. Please refresh the page."
+          );
+        }
+      }
+    };
+
+    initializeRecaptcha();
+
+    return () => {
+      if (recaptchaRef.current?.clear) {
+        recaptchaRef.current
+          .clear()
+          .catch((e) => console.warn("reCAPTCHA cleanup error:", e));
+      }
+      recaptchaRef.current = null;
+      setIsRecaptchaReady(false);
+    };
+  }, [isOpen, auth]);
+
+  const handleSendOtp = async (phoneNumber) => {
+    try {
+      const raw = phoneNumber.replace(/\D/g, "");
+      if (!raw || raw.length !== 10) {
+        throw new Error("Enter a valid 10-digit number");
+      }
+
+      setLocalLoading(true);
+
+      // Verify recaptcha is ready
+      if (
+        !recaptchaRef.current ||
+        typeof recaptchaRef.current.verify !== "function"
+      ) {
+        throw new Error("Security verification not ready. Please try again.");
+      }
+
+      const confirmation = await sendOTP(raw, recaptchaRef.current);
+      setConfirmationResult(confirmation);
+      setIsOtpSent(true);
+    } catch (err) {
+      console.error("❌ Failed to send OTP:", {
+        error: err,
+        message: err.message,
+        stack: err.stack,
+      });
+
+      // User-friendly error messages
+      let errorMessage = err.message;
+      if (err.code === "auth/too-many-requests") {
+        errorMessage = "Too many attempts. Please try again later.";
+      } else if (err.code === "auth/invalid-phone-number") {
+        errorMessage = "Invalid phone number format.";
+      }
+
+      alert(errorMessage || "Failed to send OTP");
+    } finally {
+      setLocalLoading(false);
     }
-
-    setLocalLoading(true);
-    const formatted = `+91${raw}`;
-    setFormattedPhone(formatted);
-
-    if (!recaptchaRef.current) {
-      alert('reCAPTCHA is not ready yet. Please try again.');
-      return;
-    }
-
-    const confirmation = await sendOTP(raw, recaptchaRef.current); // ✅ correct usage
-    setConfirmationResult(confirmation);
-    setIsOtpSent(true);
-  } catch (err) {
-    console.error('❌ Failed to send OTP:', err);
-    alert(err.message || 'Failed to send OTP');
-  } finally {
-    setLocalLoading(false);
-  }
-};
-
-
-
+  };
 
   const handleLogin = async (values) => {
     if (!values.otp || values.otp.length < 4) {
-      alert('Please enter a valid OTP');
+      alert("Please enter a valid OTP");
       return;
     }
     try {
@@ -498,13 +530,13 @@ const handleSendOtp = async (phoneNumber) => {
       setIsOtpSent(false);
       onClose();
     } catch (error) {
-      console.error('Login failed:', error);
+      console.error("Login failed:", error);
     }
   };
 
   const handleSignup = async (values) => {
     if (!values.name || !values.otp) {
-      alert('Name and OTP are required');
+      alert("Name and OTP are required");
       return;
     }
 
@@ -517,12 +549,17 @@ const handleSendOtp = async (phoneNumber) => {
       setIsOtpSent(false);
       onClose();
     } catch (error) {
-      console.error('Signup failed:', error);
+      console.error("Signup failed:", error);
     }
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
+      {recaptchaError && (
+        <Alert variant="destructive" className="mb-4">
+          <AlertDescription>{recaptchaError}</AlertDescription>
+        </Alert>
+      )}
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle className="text-center text-xl font-semibold">
@@ -545,7 +582,10 @@ const handleSendOtp = async (phoneNumber) => {
           {/* Login Tab */}
           <TabsContent value="login" className="space-y-4 py-4">
             <Form {...loginForm}>
-              <form onSubmit={loginForm.handleSubmit(handleLogin)} className="space-y-4">
+              <form
+                onSubmit={loginForm.handleSubmit(handleLogin)}
+                className="space-y-4"
+              >
                 <div className="space-y-2">
                   <Label htmlFor="login-mobile">Mobile Number</Label>
                   <div className="flex">
@@ -557,7 +597,7 @@ const handleSendOtp = async (phoneNumber) => {
                       type="tel"
                       placeholder="Mobile Number"
                       className="rounded-l-none"
-                      {...loginForm.register('mobileNumber')}
+                      {...loginForm.register("mobileNumber")}
                     />
                   </div>
                 </div>
@@ -570,24 +610,36 @@ const handleSendOtp = async (phoneNumber) => {
                         id="login-otp"
                         type="text"
                         placeholder="Enter OTP"
-                        {...loginForm.register('otp')}
+                        {...loginForm.register("otp")}
                       />
                     </div>
                     <Button type="submit" className="w-full" disabled={loading}>
-                      {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Login'}
+                      {loading ? (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      ) : (
+                        "Login"
+                      )}
                     </Button>
                   </>
                 ) : (
                   <Button
                     type="button"
                     className="w-full"
-                    onClick={() => handleSendOtp(loginForm.getValues('mobileNumber'))}
-                    disabled={localLoading}
+                    onClick={() =>
+                      handleSendOtp(loginForm.getValues("mobileNumber"))
+                    }
+                    disabled={
+                      localLoading || !isRecaptchaReady || recaptchaError
+                    }
                   >
                     {localLoading ? (
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : recaptchaError ? (
+                      "Security Error"
+                    ) : isRecaptchaReady ? (
+                      "Get OTP"
                     ) : (
-                      'Get OTP'
+                      "Preparing security..."
                     )}
                   </Button>
                 )}
@@ -598,14 +650,17 @@ const handleSendOtp = async (phoneNumber) => {
           {/* Signup Tab */}
           <TabsContent value="signup" className="space-y-4 py-4">
             <Form {...signupForm}>
-              <form onSubmit={signupForm.handleSubmit(handleSignup)} className="space-y-4">
+              <form
+                onSubmit={signupForm.handleSubmit(handleSignup)}
+                className="space-y-4"
+              >
                 <div className="space-y-2">
                   <Label htmlFor="signup-name">Full Name</Label>
                   <Input
                     id="signup-name"
                     type="text"
                     placeholder="Your Name"
-                    {...signupForm.register('name')}
+                    {...signupForm.register("name")}
                   />
                 </div>
 
@@ -620,7 +675,7 @@ const handleSendOtp = async (phoneNumber) => {
                       type="tel"
                       placeholder="Mobile Number"
                       className="rounded-l-none"
-                      {...signupForm.register('mobileNumber')}
+                      {...signupForm.register("mobileNumber")}
                     />
                   </div>
                 </div>
@@ -633,24 +688,36 @@ const handleSendOtp = async (phoneNumber) => {
                         id="signup-otp"
                         type="text"
                         placeholder="Enter OTP"
-                        {...signupForm.register('otp')}
+                        {...signupForm.register("otp")}
                       />
                     </div>
                     <Button type="submit" className="w-full" disabled={loading}>
-                      {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Create Account'}
+                      {loading ? (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      ) : (
+                        "Create Account"
+                      )}
                     </Button>
                   </>
                 ) : (
                   <Button
                     type="button"
                     className="w-full"
-                    onClick={() => handleSendOtp(signupForm.getValues('mobileNumber'))}
-                    disabled={localLoading}
+                    onClick={() =>
+                      handleSendOtp(loginForm.getValues("mobileNumber"))
+                    }
+                    disabled={
+                      localLoading || !isRecaptchaReady || recaptchaError
+                    }
                   >
                     {localLoading ? (
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : recaptchaError ? (
+                      "Security Error"
+                    ) : isRecaptchaReady ? (
+                      "Get OTP"
                     ) : (
-                      'Get OTP'
+                      "Preparing security..."
                     )}
                   </Button>
                 )}
@@ -660,11 +727,11 @@ const handleSendOtp = async (phoneNumber) => {
         </Tabs>
 
         <div className="mt-4 text-center text-sm text-muted-foreground">
-          By clicking, I accept the{' '}
+          By clicking, I accept the{" "}
           <a href="#" className="text-primary hover:underline">
             Terms & Conditions
-          </a>{' '}
-          and{' '}
+          </a>{" "}
+          and{" "}
           <a href="#" className="text-primary hover:underline">
             Privacy Policy
           </a>

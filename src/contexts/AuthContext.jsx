@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 import { onAuthStateChanged } from "firebase/auth";
-import { getFirebaseAuth } from "@/lib/firebaseConfig"; // ✅ use dynamic fetch
+import { auth } from "@/lib/firebaseConfig"; // ✅ use dynamic fetch
 
 const AuthContext = createContext(null);
 
@@ -14,7 +14,6 @@ export const AuthProvider = ({ children }) => {
 
   // ✅ Monitor login state safely client-side
   useEffect(() => {
-    const auth = getFirebaseAuth();
     if (!auth) return;
 
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {

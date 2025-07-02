@@ -400,84 +400,59 @@ export default function AuthModal({ isOpen, onClose }) {
   const [isRecaptchaReady, setIsRecaptchaReady] = useState(false); // Add this state
   const [recaptchaError, setRecaptchaError] = useState(null);
 
-  useEffect(() => {
-    if (!isOpen || recaptchaRef.current) return;
+useEffect(() => {
+  if (!isOpen || recaptchaRef.current) return;
 
-    const initializeRecaptcha = async () => {
-      try {
-        // Ensure container exists
-        let container = document.getElementById("recaptcha-container");
-        if (!container) {
-          container = document.createElement("div");
-          container.id = "recaptcha-container";
-          container.style.display = "none";
-          document.body.appendChild(container);
-          await new Promise((resolve) => setTimeout(resolve, 100));
-        }
+  const initializeRecaptcha = async () => {
+    try {
+      let container = document.getElementById("recaptcha-container");
+      if (!container) {
+        container = document.createElement("div");
+        container.id = "recaptcha-container";
+        container.style.display = "none";
+        document.body.appendChild(container);
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      }
 
-        // Initialize with proper verification
-        recaptchaRef.current = new RecaptchaVerifier(
-          "recaptcha-container",
-          {
-            size: "invisible",
-            callback: (response) => {
-              console.log("reCAPTCHA verified:", response);
-            },
-            "expired-callback": () => {
-              console.warn("reCAPTCHA expired");
-              setIsRecaptchaReady(false);
-            },
+      recaptchaRef.current = new RecaptchaVerifier(
+        "recaptcha-container",
+        {
+          size: "invisible",
+          callback: (response) => {
+            console.log("reCAPTCHA verified:", response);
           },
-          auth
-        );
+          "expired-callback": () => {
+            console.warn("reCAPTCHA expired");
+            setIsRecaptchaReady(false);
+          },
+        },
+        auth
+      );
 
-        // Verify the verifier was created with all needed methods
-        if (
-          !recaptchaRef.current ||
-          typeof recaptchaRef.current.verify !== "function" ||
-          typeof recaptchaRef.current.clear !== "function"
-        ) {
-          throw new Error("reCAPTCHA verifier not properly initialized");
-        }
+      await recaptchaRef.current.render(); // 👈 Ensure rendering completes
+      setIsRecaptchaReady(true);
+    } catch (err) {
+      console.error("reCAPTCHA initialization failed:", {
+        error: err,
+        message: err.message,
+        stack: err.stack,
+      });
+      setRecaptchaError("Security verification failed. Please refresh the page.");
+    }
+  };
 
-        setIsRecaptchaReady(true);
-      } catch (err) {
-        console.error("reCAPTCHA initialization failed:", {
-          error: err,
-          message: err.message,
-          stack: err.stack,
-        });
+  initializeRecaptcha();
 
-        // Development fallback
-        if (process.env.NODE_ENV === "development") {
-          console.warn("Using reCAPTCHA mock for development");
-          recaptchaRef.current = {
-            verify: () => Promise.resolve("mocked-recaptcha-token"),
-            clear: () => {},
-            render: () => Promise.resolve(),
-            _reset: () => {},
-          };
-          setIsRecaptchaReady(true);
-        } else {
-          setRecaptchaError(
-            "Security verification failed. Please refresh the page."
-          );
-        }
-      }
-    };
+  return () => {
+    if (recaptchaRef.current?.clear) {
+      recaptchaRef.current.clear().catch((e) => console.warn("reCAPTCHA cleanup error:", e));
+    }
+    recaptchaRef.current = null;
+    setIsRecaptchaReady(false);
+  };
+}, [isOpen, auth]);
 
-    initializeRecaptcha();
 
-    return () => {
-      if (recaptchaRef.current?.clear) {
-        recaptchaRef.current
-          .clear()
-          .catch((e) => console.warn("reCAPTCHA cleanup error:", e));
-      }
-      recaptchaRef.current = null;
-      setIsRecaptchaReady(false);
-    };
-  }, [isOpen, auth]);
 
   const handleSendOtp = async (phoneNumber) => {
     try {
@@ -628,9 +603,7 @@ export default function AuthModal({ isOpen, onClose }) {
                     onClick={() =>
                       handleSendOtp(loginForm.getValues("mobileNumber"))
                     }
-                    disabled={
-                      localLoading || !isRecaptchaReady || recaptchaError
-                    }
+                    
                   >
                     {localLoading ? (
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />

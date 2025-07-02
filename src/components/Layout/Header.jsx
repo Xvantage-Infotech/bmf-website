@@ -26,7 +26,9 @@ export default function Header() {
     { href: '/', label: 'Farms' },
     { href: '/customers', label: 'Happy Customers' },
     { href: '/contact', label: 'Contact' },
+    { href: '/test', label: 'Test' },
     { href: '/owner/register', label: 'List Your Farm' },
+    
   ];
 
   const Logo = () => (

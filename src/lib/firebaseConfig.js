@@ -172,11 +172,16 @@ const firebaseConfig = {
   measurementId: "G-BM86YHT7T8"
 };
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
+let auth = null;
 
-export { 
+if (typeof window !== 'undefined') {
+  const app = initializeApp(firebaseConfig);
+  auth = getAuth(app);
+  auth.useDeviceLanguage();
+}
+
+export {
   auth,
   RecaptchaVerifier,
-  signInWithPhoneNumber 
+  signInWithPhoneNumber
 };

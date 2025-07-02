@@ -15,14 +15,31 @@ import FarmList from "@/components/FarmList/FarmList";
 import CustomerReviews from "@/components/Reviews/CustomerReviews";
 import { CITY_IDS } from "@/constants/categories";
 import { fetchFarms } from "@/services/Farm/farm.service";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function Homes() {
-  const [selectedCity, setSelectedCity] = useState("all");
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // const [selectedCity, setSelectedCity] = useState("all");
+
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [searchFilters, setSearchFilters] = useState(null);
   const [isSearchMode, setIsSearchMode] = useState(false);
 
   const [featuredFarms, setFeaturedFarms] = useState([]);
+
+  const selectedCity = searchParams.get("city") || "all";
+
+  const handleCityChange = (city) => {
+    const params = new URLSearchParams(searchParams);
+    if (city === "all") {
+      params.delete("city");
+    } else {
+      params.set("city", city);
+    }
+    router.push(`?${params.toString()}`, { scroll: false });
+  };
 
   useEffect(() => {
     const loadTop3Farms = async () => {
@@ -70,7 +87,7 @@ export default function Homes() {
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen pb-20">
       {/* Hero Section */}
       <section className="relative min-h-[80vh] bg-gradient-to-br from-emerald-50 via-blue-50 to-purple-50 overflow-hidden">
         {/* <section className="relative min-h-[80vh] bg-gradient-to-br from-[#f0fff4] via-[#f0faff] to-[#f6f0ff] overflow-hidden"> */}
@@ -286,7 +303,7 @@ export default function Homes() {
 
       <CategoryTabs
         selectedCity={selectedCity}
-        onCityChange={setSelectedCity}
+        onCityChange={handleCityChange}
       />
 
       {/* <FarmList
@@ -353,6 +370,42 @@ export default function Homes() {
           </div>
         </div>
       </section>
+      <a
+        href="https://wa.me/919277778778"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="
+    fixed
+    bottom-[80px]          // Push above profile icon or nav
+    right-4
+    md:bottom-6
+    md:right-6
+    z-[9999]               // Make sure it's on top
+    w-12
+    h-12
+    md:w-14
+    md:h-14
+    bg-green-500
+    hover:bg-green-600
+    text-white
+    rounded-full
+    shadow-lg
+    flex
+    items-center
+    justify-center
+    transition-all
+  "
+        aria-label="Chat on WhatsApp"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 32 32"
+          fill="currentColor"
+          className="w-6 h-6 md:w-7 md:h-7"
+        >
+          <path d="M16.004 2.986C8.82 2.986 3 8.735 3 15.884c0 2.55.753 5.017 2.157 7.151L3 29l6.14-2.09a13.71 13.71 0 006.865 1.75h.002c7.183 0 13.003-5.748 13.003-12.898.001-7.149-5.82-12.876-13.006-12.876zm0 23.564a11.26 11.26 0 01-5.765-1.595l-.414-.246-3.648 1.24 1.208-3.555-.269-.406a10.235 10.235 0 01-1.632-5.62c0-5.715 4.675-10.367 10.373-10.367 5.697 0 10.335 4.652 10.335 10.367.002 5.715-4.637 10.182-10.188 10.182zm5.632-7.653c-.308-.155-1.82-.896-2.1-.997-.281-.1-.485-.155-.688.156-.203.309-.79.996-.968 1.201-.178.204-.357.229-.664.077-.308-.155-1.297-.479-2.47-1.528-.912-.812-1.528-1.816-1.707-2.125-.178-.308-.019-.475.135-.63.139-.138.308-.357.46-.536.154-.179.203-.309.308-.513.102-.204.051-.383-.025-.537-.077-.155-.688-1.66-.942-2.273-.248-.597-.502-.514-.688-.523l-.587-.01c-.204 0-.536.077-.817.383-.281.308-1.072 1.045-1.072 2.547s1.097 2.951 1.249 3.156c.154.204 2.157 3.293 5.227 4.62.731.316 1.3.504 1.744.644.733.234 1.4.2 1.927.122.588-.087 1.82-.743 2.077-1.46.256-.716.256-1.33.179-1.46-.077-.128-.281-.204-.587-.357z" />
+        </svg>
+      </a>
     </div>
   );
 }

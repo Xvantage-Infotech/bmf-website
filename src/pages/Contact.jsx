@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from 'react';
+import emailjs from 'emailjs-com';
+
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -17,11 +19,38 @@ export default function Contact() {
     message: ''
   });
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log('Contact form submitted:', formData);
-    // TODO: Implement form submission
-  };
+const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  try {
+    await emailjs.send(
+      'service_8lfomk4', // 🔁 Replace with your actual Service ID
+      'template_zxhhmyx', // Template ID (keep same if named like in your screenshot)
+      {
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        subject: formData.subject,
+        message: formData.message
+      },
+      'wvwJX6k0s712hImO9' // 🔁 Replace with your actual Public Key from EmailJS
+    );
+
+    alert('Message sent successfully!');
+    setFormData({
+      name: '',
+      email: '',
+      phone: '',
+      subject: '',
+      message: ''
+    });
+  } catch (error) {
+    console.error('EmailJS error:', error);
+    alert('Failed to send message. Please try again later.');
+  }
+};
+
+
 
   const handleChange = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -31,19 +60,19 @@ export default function Contact() {
     {
       icon: Phone,
       title: 'Phone',
-      details: ['+91 9277778778', '+91 9277778778'],
+      details: ['+91 9277778778'],
       description: 'Call us for immediate assistance'
     },
     {
       icon: Mail,
       title: 'Email',
-      details: ['info@bookmyfarm.com', 'support@bookmyfarm.com'],
+      details: ['support@bookmyfarm.net'],
       description: 'Send us an email anytime'
     },
     {
       icon: MapPin,
       title: 'Office',
-      details: ['123 Farm Street', 'Surat, Gujarat 395001'],
+      details: ['Platinum point, 319, opp. CNG Pump, Sudama Chowk, Mota Varachha, Surat, Gujarat'],
       description: 'Visit our main office'
     },
     {

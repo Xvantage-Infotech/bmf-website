@@ -1,0 +1,32 @@
+[debug] [2025-07-02T06:05:56.605Z] ----------------------------------------------------------------------
+[debug] [2025-07-02T06:05:56.608Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\DREAMWORLD\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js emulators:start --only auth
+[debug] [2025-07-02T06:05:56.610Z] CLI Version:   14.9.0
+[debug] [2025-07-02T06:05:56.611Z] Platform:      win32
+[debug] [2025-07-02T06:05:56.611Z] Node Version:  v22.14.0
+[debug] [2025-07-02T06:05:56.613Z] Time:          Wed Jul 02 2025 11:35:56 GMT+0530 (India Standard Time)
+[debug] [2025-07-02T06:05:56.613Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2025-07-02T06:05:56.865Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-07-02T06:05:56.866Z] > authorizing via signed-in user (patelharsh503503@gmail.com)
+[info] i  emulators: Starting emulators: auth {"metadata":{"emulator":{"name":"hub"},"message":"Starting emulators: auth"}}
+[debug] [2025-07-02T06:05:56.898Z] [logging] Logging Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2025-07-02T06:05:56.898Z] [auth] Authentication Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2025-07-02T06:05:56.898Z] assigned listening specs for emulators {"user":{"hub":[{"address":"127.0.0.1","family":"IPv4","port":4400},{"address":"::1","family":"IPv6","port":4400}],"ui":[{"address":"127.0.0.1","family":"IPv4","port":4000},{"address":"::1","family":"IPv6","port":4000}],"logging":[{"address":"127.0.0.1","family":"IPv4","port":4500}],"auth":[{"address":"127.0.0.1","family":"IPv4","port":9099}]},"metadata":{"message":"assigned listening specs for emulators"}}
+[debug] [2025-07-02T06:05:56.902Z] [hub] writing locator at C:\Users\DREAMW~1\AppData\Local\Temp\hub-book-my-farm-87452.json
+[debug] [2025-07-02T06:06:03.477Z] Could not find VSCode notification endpoint: FetchError: request to http://localhost:40001/vscode/notify failed, reason: . If you are not running the Firebase Data Connect VSCode extension, this is expected and not an issue.
+[info] 
+┌─────────────────────────────────────────────────────────────┐
+│ ✔  All emulators ready! It is now safe to connect your app. │
+│ i  View Emulator UI at http://127.0.0.1:4000/               │
+└─────────────────────────────────────────────────────────────┘
+
+┌────────────────┬────────────────┬────────────────────────────┐
+│ Emulator       │ Host:Port      │ View in Emulator UI        │
+├────────────────┼────────────────┼────────────────────────────┤
+│ Authentication │ 127.0.0.1:9099 │ http://127.0.0.1:4000/auth │
+└────────────────┴────────────────┴────────────────────────────┘
+  Emulator Hub host: 127.0.0.1 port: 4400
+  Other reserved ports: 4500
+
+Issues? Report them at https://github.com/firebase/firebase-tools/issues and attach the *-debug.log files.
+ 

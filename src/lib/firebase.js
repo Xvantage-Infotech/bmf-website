@@ -30,35 +30,25 @@
 
 
 
+import { signInWithPhoneNumber } from 'firebase/auth';
+import { getFirebaseAuth } from './firebaseConfig';
 
-import { signInWithPhoneNumber, RecaptchaVerifier } from 'firebase/auth';
-import { auth } from './firebaseConfig';
+export const sendOTP = async (phoneNumber, verifier) => {
+  const cleaned = phoneNumber.replace(/\D/g, '');
+  const full = cleaned.startsWith('+') ? cleaned : `+91${cleaned}`;
+  if (!/^\+91\d{10}$/.test(full)) throw new Error('Invalid phone number');
 
-export const sendOTP = async (rawPhone) => {
-  const cleaned = rawPhone.replace(/\D/g, '');
-  const phoneNumber = cleaned.startsWith('+') ? cleaned : `+91${cleaned}`;
-
-  if (!/^\+91\d{10}$/.test(phoneNumber)) {
-    throw new Error('Invalid phone number');
-  }
-
-  console.log('📞 Sending OTP to:', phoneNumber);
+  const auth = getFirebaseAuth();
+  if (!auth) throw new Error('Firebase auth not available');
 
   try {
-    const isLocalhost = typeof window !== 'undefined' && location.hostname === 'localhost';
-
-    if (isLocalhost) {
-      // ✅ No recaptcha on emulator
-      return await signInWithPhoneNumber(auth, phoneNumber);
-    } else {
-      // ✅ Production flow with reCAPTCHA
-      const verifier = new RecaptchaVerifier('recaptcha-container', {
-        size: 'invisible',
-      }, auth);
-      return await signInWithPhoneNumber(auth, phoneNumber, verifier);
-    }
+    console.log('📞 Using phone:', full);
+    console.log('🪟 Verifier valid:', !!verifier);
+    await verifier.verify();
+    return await signInWithPhoneNumber(auth, full, verifier);
   } catch (err) {
-    console.error('❌ Error sending OTP:', err);
+    console.error('❌ Error sending OTP:', err.code, err.message, err);
     throw err;
   }
 };
+

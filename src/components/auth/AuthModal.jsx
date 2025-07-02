@@ -359,7 +359,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -381,6 +381,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2 } from 'lucide-react';
 import { sendOTP } from '@/lib/firebase';
+import { RecaptchaVerifier } from 'firebase/auth';
+import { auth, getFirebaseAuth } from '@/lib/firebaseConfig';
 
 
 export default function AuthModal({ isOpen, onClose }) {
@@ -408,20 +410,44 @@ export default function AuthModal({ isOpen, onClose }) {
     defaultValues: { name: '', mobileNumber: '', otp: '' },
   });
 
+const recaptchaRef = useRef(null);
+
 useEffect(() => {
+  if (!isOpen || recaptchaRef.current) return;
+
   if (!document.getElementById('recaptcha-container')) {
     const div = document.createElement('div');
     div.id = 'recaptcha-container';
     document.body.appendChild(div);
   }
 
+  const auth = getFirebaseAuth();
+  if (!auth) return;
+
+  recaptchaRef.current = new RecaptchaVerifier(
+    'recaptcha-container',
+    {
+      size: 'invisible',
+      callback: (token) => {
+        console.log('✅ reCAPTCHA solved:', token);
+      },
+    },
+    auth
+  );
+
+  recaptchaRef.current.render().then(() => {
+    console.log('🔒 reCAPTCHA rendered');
+  });
+
   return () => {
-    if (window.recaptchaVerifier) {
-      window.recaptchaVerifier.clear();
-      window.recaptchaVerifier = null;
+    if (recaptchaRef.current) {
+      recaptchaRef.current.clear();
+      recaptchaRef.current = null;
     }
   };
-}, []);
+}, [isOpen]);
+
+
 
 
 
@@ -443,7 +469,12 @@ const handleSendOtp = async (phoneNumber) => {
     const formatted = `+91${raw}`;
     setFormattedPhone(formatted);
 
-    const confirmation = await sendOTP(raw); // just 10-digit input
+    if (!recaptchaRef.current) {
+      alert('reCAPTCHA is not ready yet. Please try again.');
+      return;
+    }
+
+    const confirmation = await sendOTP(raw, recaptchaRef.current); // ✅ correct usage
     setConfirmationResult(confirmation);
     setIsOtpSent(true);
   } catch (err) {
@@ -453,6 +484,7 @@ const handleSendOtp = async (phoneNumber) => {
     setLocalLoading(false);
   }
 };
+
 
 
 

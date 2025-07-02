@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "@/lib/firebaseConfig";
+import { getFirebaseAuth } from "@/lib/firebaseConfig"; // ✅ use dynamic fetch
 
 const AuthContext = createContext(null);
 
@@ -12,11 +12,15 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // ✅ Monitor login state
+  // ✅ Monitor login state safely client-side
   useEffect(() => {
+    const auth = getFirebaseAuth();
+    if (!auth) return;
+
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
       setUser(firebaseUser);
     });
+
     return () => unsubscribe();
   }, []);
 
@@ -29,6 +33,7 @@ export const AuthProvider = ({ children }) => {
       setError("No OTP confirmation session found");
       return;
     }
+
     setLoading(true);
     try {
       const result = await confirmationResult.confirm(otp);
@@ -43,16 +48,16 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // ✅ Optional: Send user to backend after signup
+  // ✅ Optional: Send user data to backend after signup
   const signup = async ({ name, mobileNumber }) => {
     try {
-      await fetch('/api/signup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      await fetch("/api/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, mobileNumber }),
       });
     } catch (err) {
-      console.error('Signup error:', err);
+      console.error("Signup error:", err);
     }
   };
 

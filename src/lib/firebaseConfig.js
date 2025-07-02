@@ -154,7 +154,6 @@
 
 
 
-
 // firebaseConfig.js
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
@@ -163,18 +162,24 @@ const firebaseConfig = {
   apiKey: "AIzaSyCLWllbelIfPj5owYzZBiXAK7gJcCrgLsE",
   authDomain: "book-my-farm-87452.firebaseapp.com",
   projectId: "book-my-farm-87452",
-  storageBucket: "book-my-farm-87452.firebasestorage.app",
+  storageBucket: "book-my-farm-87452.appspot.com",
   messagingSenderId: "40957217895",
   appId: "1:40957217895:web:7c196b5a39d402f8bc58c2",
   measurementId: "G-BM86YHT7T8"
 };
 
-const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
-const auth = getAuth(app);
-auth.useDeviceLanguage();
+let firebaseApp;
 
+export const getFirebaseAuth = () => {
+  if (typeof window === 'undefined') return null;
 
+  if (!firebaseApp) {
+    firebaseApp = getApps().length ? getApp() : initializeApp(firebaseConfig);
+  }
 
-export { auth };
+  const auth = getAuth(firebaseApp);
+  auth.useDeviceLanguage();
+  return auth;
+};
 
 

@@ -112,12 +112,12 @@ export default function Footer() {
               </li>
               <li className="flex items-center">
                 <Mail className="w-4 h-4 text-primary mr-3 flex-shrink-0" />
-                <span className="text-neutral-400">info@bookmyfarm.com</span>
+                <span className="text-neutral-400">support@bookmyfarm.net</span>
               </li>
               <li className="flex items-start">
                 <MapPin className="w-4 h-4 text-primary mr-3 flex-shrink-0 mt-0.5" />
-                <span className="text-neutral-400">
-                  123 Farm Street, Surat, Gujarat 395001
+                <span  className="text-neutral-400">
+                  Platinum point, 319, opp. CNG Pump, Sudama Chowk, Mota Varachha, Surat, Gujarat
                 </span>
               </li>
             </ul>

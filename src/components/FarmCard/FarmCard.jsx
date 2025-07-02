@@ -117,7 +117,7 @@ import { Button } from "@/components/ui/button";
 export default function FarmCard({ farm, className = "" }) {
   const [isFavorited, setIsFavorited] = useState(false);
   const [imageIndex, setImageIndex] = useState(0);
-  const [imageLoaded, setImageLoaded] = useState(false);
+  const [loadedImages, setLoadedImages] = useState({});
   const [isHovered, setIsHovered] = useState(false);
 
   const intervalRef = useRef(null);
@@ -128,15 +128,18 @@ export default function FarmCard({ farm, className = "" }) {
       ? `https://api.bookmyfarm.net/assets/images/farm_images/${images[0].image}`
       : "/placeholder.jpg";
 
-  useEffect(() => {
-    if (!isHovered || images.length <= 1) return;
+useEffect(() => {
+  if (!isHovered || images.length <= 1) return;
 
-    intervalRef.current = setInterval(() => {
-      setImageIndex((prev) => (prev + 1) % images.length);
-    }, 2000);
+  if (intervalRef.current) clearInterval(intervalRef.current); // ✅ Prevent overlapping intervals
 
-    return () => clearInterval(intervalRef.current);
-  }, [isHovered, images.length]);
+  intervalRef.current = setInterval(() => {
+    setImageIndex((prevIndex) => (prevIndex + 1) % images.length);
+  }, 2000);
+
+  return () => clearInterval(intervalRef.current); // ✅ Clean up properly
+}, [isHovered, images.length]);
+
 
   const toggleFavorite = (e) => {
     e.preventDefault();
@@ -154,7 +157,7 @@ export default function FarmCard({ farm, className = "" }) {
         <div className="relative">
           {/* Auto-scroll image carousel */}
           {/* <div className="relative h-48 w-full bg-neutral-200 overflow-hidden rounded-t-lg"> */}
-          <div
+          {/* <div
             className="relative h-48 w-full bg-neutral-200 overflow-hidden rounded-t-lg"
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
@@ -163,36 +166,88 @@ export default function FarmCard({ farm, className = "" }) {
               className="flex transition-transform duration-700 ease-in-out h-full"
               style={{
                 transform: `translateX(-${imageIndex * 100}%)`,
-                width: `${images.length * 16.7}%`,
+                width: `${images.length * 100}%`,
               }}
             >
-              {images.map((img, idx) => (
-                <div
-                  key={idx}
-                  className="relative w-full h-full flex-shrink-0"
-                  style={{ flex: "0 0 100%" }}
-                >
-                  {!imageLoaded && (
-                    <div className="absolute inset-0 bg-neutral-200 animate-pulse" />
-                  )}
-                  <img
-                    src={`https://api.bookmyfarm.net/assets/images/farm_images/${img.image}`}
-                    alt={`${farm.name} - Image ${idx + 1}`}
-                    className={`w-full h-full object-cover transition-opacity duration-300 ${
-                      imageLoaded ? "opacity-100" : "opacity-0"
-                    }`}
-                    onLoad={() => setImageLoaded(true)}
-                    loading="lazy"
-                  />
-                </div>
-              ))}
-              {images.length === 0 && (
+              {images.length > 0 ? (
+                images.map((img, idx) => (
+                  <div
+                    key={idx}
+                    className="relative h-full flex-shrink-0"
+                    style={{ width: `${100 / images.length}%` }}
+                  >
+                    {!loadedImages[idx] && (
+                      <div className="absolute inset-0 bg-neutral-200 animate-pulse" />
+                    )}
+                    <img
+                      src={`https://api.bookmyfarm.net/assets/images/farm_images/${img.image}`}
+                      alt={`${farm.name} - Image ${idx + 1}`}
+                      className={`w-full h-full object-cover transition-opacity duration-300 ${
+                        loadedImages[idx] ? "opacity-100" : "opacity-0"
+                      }`}
+                      onLoad={() =>
+                        setLoadedImages((prev) => ({ ...prev, [idx]: true }))
+                      }
+                      loading="lazy"
+                    />
+                  </div>
+                ))
+              ) : (
                 <div className="w-full h-full flex items-center justify-center bg-neutral-200">
                   <span>No Image</span>
                 </div>
               )}
             </div>
-          </div>
+          </div> */}
+ <div
+  className="relative h-48 w-full bg-neutral-200 overflow-hidden rounded-t-lg"
+  onMouseEnter={() => setIsHovered(true)}
+  onMouseLeave={() => {
+    setIsHovered(false);
+    setImageIndex(0); // reset to first image
+  }}
+>
+  {images.length > 0 ? (
+    images.map((img, idx) => (
+      <img
+        key={idx}
+        src={`https://api.bookmyfarm.net/assets/images/farm_images/${img.image}`}
+        alt={`${farm.name} - Image ${idx + 1}`}
+        className={`absolute top-0 left-0 w-full h-full object-cover transition-opacity duration-700 ${
+          idx === imageIndex ? "opacity-100 z-10" : "opacity-0 z-0"
+        }`}
+        loading="lazy"
+      />
+    ))
+  ) : (
+    <div className="w-full h-full flex items-center justify-center bg-neutral-200">
+      <span>No Image</span>
+    </div>
+  )}
+
+  {/* Heart icon */}
+  <Button
+    size="icon"
+    variant="secondary"
+    className="absolute top-3 right-3 w-8 h-8 bg-white/80 backdrop-blur-sm hover:bg-white z-20"
+    onClick={toggleFavorite}
+  >
+    <Heart
+      className={`w-4 h-4 ${
+        isFavorited ? "fill-red-500 text-red-500" : "text-neutral-600"
+      }`}
+    />
+  </Button>
+
+  {/* Category badge */}
+  <div className="absolute bottom-3 left-3 z-20">
+    <span className="bg-white/90 backdrop-blur-sm text-neutral-700 px-2 py-1 rounded text-xs font-medium capitalize">
+      {farm.category?.name || "Farm"}
+    </span>
+  </div>
+</div>
+
+
 
           {/* Price Badge
          {(() => {

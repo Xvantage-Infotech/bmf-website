@@ -106,7 +106,7 @@ export default function FarmDetail() {
         }
         return next;
       });
-    }, 3000); 
+    }, 3000);
 
     return () => {
       clearInterval(autoScrollRef.current);
@@ -190,7 +190,41 @@ export default function FarmDetail() {
   }, [farmId]);
 
   if (loading)
-    return <div className="p-8 text-center">Loading farm details...</div>;
+    return (
+      <div className="max-w-7xl mx-auto container-padding py-8">
+        <div className="bg-white rounded-3xl overflow-hidden shadow-lg p-8 animate-pulse space-y-6">
+          {/* Title */}
+          <div className="h-8 bg-neutral-200 rounded w-1/2"></div>
+          {/* Subheading */}
+          <div className="h-4 bg-neutral-200 rounded w-1/3"></div>
+
+          {/* Badges */}
+          <div className="flex gap-2">
+            <div className="h-6 w-20 bg-neutral-200 rounded"></div>
+            <div className="h-6 w-16 bg-neutral-200 rounded"></div>
+            <div className="h-6 w-24 bg-neutral-200 rounded"></div>
+          </div>
+
+          {/* Image skeleton */}
+          <div className="w-full h-64 bg-neutral-200 rounded-lg"></div>
+
+          {/* Tabs */}
+          <div className="flex gap-4 mt-4">
+            <div className="h-8 w-24 bg-neutral-200 rounded"></div>
+            <div className="h-8 w-24 bg-neutral-200 rounded"></div>
+            <div className="h-8 w-24 bg-neutral-200 rounded"></div>
+          </div>
+
+          {/* Content */}
+          <div className="space-y-2">
+            <div className="h-4 bg-neutral-200 rounded w-full"></div>
+            <div className="h-4 bg-neutral-200 rounded w-5/6"></div>
+            <div className="h-4 bg-neutral-200 rounded w-2/3"></div>
+          </div>
+        </div>
+      </div>
+    );
+
   if (!farm)
     return <div className="p-8 text-center text-red-500">Farm not found.</div>;
 

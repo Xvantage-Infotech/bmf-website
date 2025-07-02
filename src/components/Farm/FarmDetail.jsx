@@ -38,33 +38,46 @@ export default function FarmDetail() {
   const farmImages = farm?.farm_images || [];
 
   const scrollRef = useRef(null);
+  const autoScrollRef = useRef(null);
 
   const scrollToIndex = (index) => {
     const container = scrollRef.current;
     if (!container || !container.children.length) return;
 
-    const actualIndex = index + 1; // because of the cloned start image
+    const actualIndex = index + 1;
     const child = container.children[actualIndex];
     if (child) {
-      child.scrollIntoView({
+      const offset = child.offsetLeft - container.offsetLeft;
+      const scrollPos =
+        offset - container.clientWidth / 2 + child.clientWidth / 2;
+      container.scrollTo({
+        left: scrollPos,
         behavior: "smooth",
-        inline: "center",
-        block: "nearest",
       });
-      setSelectedImageIndex(index);
+    }
+    setSelectedImageIndex(index);
+  };
+
+  const stopAutoScroll = () => {
+    if (autoScrollRef.current) {
+      clearInterval(autoScrollRef.current);
+      autoScrollRef.current = null;
     }
   };
 
   const handleNext = () => {
+    stopAutoScroll();
     const nextIndex = (selectedImageIndex + 1) % farmImages.length;
     scrollToIndex(nextIndex);
   };
 
   const handlePrev = () => {
+    stopAutoScroll();
     const prevIndex =
       (selectedImageIndex - 1 + farmImages.length) % farmImages.length;
     scrollToIndex(prevIndex);
   };
+
   const loopCount = 10; // or any large number
   const extendedImages = Array.from(
     { length: loopCount },
@@ -75,25 +88,29 @@ export default function FarmDetail() {
   useEffect(() => {
     if (!farm || farmImages.length <= 1) return;
 
-    const interval = setInterval(() => {
+    autoScrollRef.current = setInterval(() => {
       setSelectedImageIndex((prevIndex) => {
         const next = prevIndex + 1;
-        if (scrollRef.current) {
-          const child = scrollRef.current.children[next + 1]; // adjust for +1 index shift
-
+        const container = scrollRef.current;
+        if (container) {
+          const child = container.children[next + 1];
           if (child) {
-            child.scrollIntoView({
+            const offset = child.offsetLeft - container.offsetLeft;
+            const scrollPos =
+              offset - container.clientWidth / 2 + child.clientWidth / 2;
+            container.scrollTo({
+              left: scrollPos,
               behavior: "smooth",
-              inline: "center",
-              block: "nearest",
             });
           }
         }
         return next;
       });
-    }, 3000);
+    }, 3000); 
 
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(autoScrollRef.current);
+    };
   }, [farm, farmImages.length]);
 
   useEffect(() => {
@@ -188,16 +205,30 @@ export default function FarmDetail() {
         <div className="bg-white rounded-3xl overflow-hidden shadow-lg">
           {/* Header */}
           <div className="p-8 border-b border-neutral-100">
-            <div className="flex justify-between mb-4">
-              <div>
-                <h1 className="text-3xl font-bold">
-                  {farm.farm_alias_name || farm.name}
-                </h1>
-                <p className="text-lg text-neutral-600 flex items-center">
-                  <MapPin className="w-4 h-4 mr-2" />
-                  {farm.area?.name}, {farm.city?.name}
-                </p>
+            {/* Main content container */}
+            <div className="grid grid-cols-2 md:flex md:justify-between gap-x-4 gap-y-1 mb-4">
+              {/* Left side - farm name, location, and mobile rating */}
+              <div className="md:flex-1">
+                <div>
+                  <h1 className="text-3xl font-bold">
+                    {farm.farm_alias_name || farm.name}
+                  </h1>
+                  <p className="text-lg text-neutral-600 flex items-center">
+                    <MapPin className="w-4 h-4 mr-2" />
+                    {farm.area?.name}, {farm.city?.name}
+                  </p>
+                </div>
+
+                {/* Mobile rating - under location */}
+                <div className="flex items-center text-sm mt-1 md:hidden">
+                  <div className="flex mr-2">{generateStars(rating)}</div>
+                  <span className="text-neutral-600">
+                    {rating} ({farm.reviews_count} reviews)
+                  </span>
+                </div>
               </div>
+
+              {/* Right side - price and discount */}
               <div className="text-right">
                 {(() => {
                   const price = parseFloat(farm.final_price) || 0;
@@ -206,35 +237,37 @@ export default function FarmDetail() {
                   const originalPrice = price + increase;
 
                   return (
-                    <div className="text-right">
-                      <div className="text-3xl font-bold text-primary flex items-center gap-3 justify-end">
-                        {percent > 0 && (
-                          <span className="text-xl line-through text-neutral-800 font-semibold">
-                            ₹{originalPrice.toLocaleString("en-IN")}
-                          </span>
-                        )}
-                        <span className="flex items-center gap-2">
-                          ₹{price.toLocaleString("en-IN")}
+                    <div>
+                      {/* Price section */}
+                      <div className="text-3xl font-bold text-primary flex flex-col md:flex-row md:items-center gap-1 justify-end">
+                        <div className="flex items-center justify-end gap-3">
                           {percent > 0 && (
-                            <div className="inline-flex items-center gap-1 px-2 py-0.5 border border-yellow-300 border-dashed rounded-full bg-yellow-50 text-yellow-700 text-sm font-medium">
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                className="h-4 w-4 fill-current"
-                                viewBox="0 0 24 24"
-                              >
-                                <path d="M21.41 11.58l-9-9A2 2 0 0 0 11 2H4a2 2 0 0 0-2 2v7a2 2 0 0 0 .59 1.41l9 9a2 2 0 0 0 2.83 0l7-7a2 2 0 0 0-.01-2.83ZM7.5 7A1.5 1.5 0 1 1 9 5.5 1.5 1.5 0 0 1 7.5 7Z" />
-                              </svg>
-                              {percent}% off
-                            </div>
+                            <span className="text-xl line-through text-neutral-800 font-semibold">
+                              ₹{originalPrice.toLocaleString("en-IN")}
+                            </span>
                           )}
-                        </span>
+                          <span>₹{price.toLocaleString("en-IN")}</span>
+                        </div>
+                        {/* Discount badge - consistent size */}
+                        {percent > 0 && (
+                          <div className="inline-flex items-center gap-1 px-2 py-0.5 border border-yellow-300 border-dashed rounded-full bg-yellow-50 text-yellow-700 text-sm font-medium mt-1 md:mt-0 w-fit ml-auto md:ml-0">
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="h-4 w-4 fill-current"
+                              viewBox="0 0 24 24"
+                            >
+                              <path d="M21.41 11.58l-9-9A2 2 0 0 0 11 2H4a2 2 0 0 0-2 2v7a2 2 0 0 0 .59 1.41l9 9a2 2 0 0 0 2.83 0l7-7a2 2 0 0 0-.01-2.83ZM7.5 7A1.5 1.5 0 1 1 9 5.5 1.5 1.5 0 0 1 7.5 7Z" />
+                            </svg>
+                            {percent}% off
+                          </div>
+                        )}
                       </div>
-                      <span className="text-lg font-normal text-neutral-600"></span>
                     </div>
                   );
                 })()}
 
-                <div className="flex items-center text-sm mt-1">
+                {/* Desktop rating - under price */}
+                <div className="hidden md:flex items-center text-sm mt-1 justify-end">
                   <div className="flex mr-2">{generateStars(rating)}</div>
                   <span className="text-neutral-600">
                     {rating} ({farm.reviews_count} reviews)
@@ -243,6 +276,7 @@ export default function FarmDetail() {
               </div>
             </div>
 
+            {/* Badges section */}
             <div className="flex flex-wrap gap-4">
               <Badge variant="secondary">
                 <Bed className="w-4 h-4 mr-1" /> {farm.bedrooms} Bedroom

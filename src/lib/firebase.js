@@ -29,26 +29,43 @@
 // };
 
 
-import { auth } from './firebase';
-import { signInWithPhoneNumber } from 'firebase/auth';
+
+
+// sendOTP.js
+import { signInWithPhoneNumber, RecaptchaVerifier } from 'firebase/auth';
+import { auth } from './firebaseConfig';
 
 export const sendOTP = async (rawPhone) => {
   const cleaned = rawPhone.replace(/\D/g, '');
   const phoneNumber = cleaned.startsWith('+') ? cleaned : `+91${cleaned}`;
 
   if (!/^\+91\d{10}$/.test(phoneNumber)) {
-    throw new Error('Invalid phone number format');
+    throw new Error('Invalid phone number');
   }
 
   console.log('📞 Sending OTP to:', phoneNumber);
 
   try {
-    // ✅ In emulator mode, third param must be undefined
-    const confirmation = await signInWithPhoneNumber(auth, phoneNumber, undefined);
+    // 🔐 Wait for auth.app to exist before using RecaptchaVerifier
+    if (!auth.app) {
+      throw new Error('Firebase auth.app is not initialized yet');
+    }
+
+    // 🛡️ Create only once and reuse
+    if (!window.recaptchaVerifier) {
+      window.recaptchaVerifier = new RecaptchaVerifier(
+        'recaptcha-container',
+        { size: 'invisible' },
+        auth
+      );
+    }
+
+    await window.recaptchaVerifier.verify(); // optional, triggers reCAPTCHA
+
+    const confirmation = await signInWithPhoneNumber(auth, phoneNumber, window.recaptchaVerifier);
     return confirmation;
   } catch (err) {
-    console.error('❌ Error sending OTP:', err.code, err.message);
+    console.error('❌ Error sending OTP:', err);
     throw err;
   }
 };
-

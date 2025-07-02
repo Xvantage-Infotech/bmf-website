@@ -408,30 +408,28 @@ export default function AuthModal({ isOpen, onClose }) {
     defaultValues: { name: '', mobileNumber: '', otp: '' },
   });
 
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      let el = document.getElementById('recaptcha-container');
-      if (!el) {
-        const div = document.createElement('div');
-        div.id = 'recaptcha-container';
-        div.style.display = 'none';
-        document.body.appendChild(div);
-      }
+useEffect(() => {
+  if (!document.getElementById('recaptcha-container')) {
+    const div = document.createElement('div');
+    div.id = 'recaptcha-container';
+    document.body.appendChild(div);
+  }
+
+  return () => {
+    if (window.recaptchaVerifier) {
+      window.recaptchaVerifier.clear();
+      window.recaptchaVerifier = null;
     }
-  }, []);
+  };
+}, []);
+
+
+
 
   useEffect(() => {
     if (isOpen && !isOtpSent) clearError();
   }, [isOpen, isOtpSent, clearError]);
 
-  useEffect(() => {
-    return () => {
-      if (window.recaptchaVerifier) {
-        window.recaptchaVerifier.clear();
-        window.recaptchaVerifier = null;
-      }
-    };
-  }, []);
 
 const handleSendOtp = async (phoneNumber) => {
   try {
@@ -641,7 +639,6 @@ const handleSendOtp = async (phoneNumber) => {
         </div>
       </DialogContent>
 
-      {/* Invisible captcha container */}
       <div id="recaptcha-container" />
     </Dialog>
   );

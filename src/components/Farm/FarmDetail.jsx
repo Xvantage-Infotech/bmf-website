@@ -343,6 +343,7 @@ export default function FarmDetail() {
                   <TabsTrigger value="description">Description</TabsTrigger>
                   <TabsTrigger value="amenities">Amenities</TabsTrigger>
                   <TabsTrigger value="location">Location</TabsTrigger>
+                  <TabsTrigger value="CancelPolicy">Cancellation Policy</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="policy">
@@ -361,6 +362,24 @@ export default function FarmDetail() {
                     </p>
                   )}
                 </TabsContent>
+                
+                <TabsContent value="CancelPolicy">
+  {farm.house_cancellation_policy ? (
+    <div
+      className="prose prose-sm text-neutral-700"
+      dangerouslySetInnerHTML={{
+        __html: farm.house_cancellation_policy
+          .replace(/<p><br><\/p>/g, '') // remove empty lines
+          .replace(/&nbsp;/g, ' '), // normalize spacing
+      }}
+    />
+  ) : (
+    <p className="text-neutral-700">
+      No cancellation policy provided.
+    </p>
+  )}
+</TabsContent>
+
 
                 <TabsContent value="description">
                   {farm.description ? (

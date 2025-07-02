@@ -121,7 +121,7 @@ export default function Header() {
                 }}
               >
                 <LogOut className="mr-2 h-4 w-4" />
-                <span>Logout</span>
+                <span>MJ Test MJ test Checking something</span>
               </Button>
             </div>
           </div>
@@ -133,7 +133,7 @@ export default function Header() {
               setIsAuthModalOpen(true);
             }}
           >
-            Login/Sign Up
+            MJ test Checking something
           </Button>
         ))}
     </nav>

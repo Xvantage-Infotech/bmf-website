@@ -312,11 +312,8 @@ export default function FarmDetail() {
                     {extendedImages.map((img, index) => (
                       <div
                         key={index}
-                        className={`flex-shrink-0 w-[100%] md:w-[80%] lg:w-[80%] snap-center transition-transform duration-300 ${
-                          index === selectedImageIndex
-                            ? "scale-100"
-                            : "scale-95 opacity-80"
-                        }`}
+                       className="flex-shrink-0 w-[100%] md:w-[80%] lg:w-[80%] snap-center transition-transform duration-300"
+
                       >
                         <img
                           src={`https://api.bookmyfarm.net/assets/images/farm_images/${img.image}`}

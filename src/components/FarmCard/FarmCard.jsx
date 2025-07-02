@@ -117,7 +117,7 @@ import { Button } from "@/components/ui/button";
 export default function FarmCard({ farm, className = "" }) {
   const [isFavorited, setIsFavorited] = useState(false);
   const [imageIndex, setImageIndex] = useState(0);
-  const [imageLoaded, setImageLoaded] = useState(false);
+  const [loadedImages, setLoadedImages] = useState({});
   const [isHovered, setIsHovered] = useState(false);
 
   const intervalRef = useRef(null);
@@ -163,30 +163,33 @@ export default function FarmCard({ farm, className = "" }) {
               className="flex transition-transform duration-700 ease-in-out h-full"
               style={{
                 transform: `translateX(-${imageIndex * 100}%)`,
-                width: `${images.length * 16.7}%`,
+                width: `${images.length * 100}%`,
               }}
             >
-              {images.map((img, idx) => (
-                <div
-                  key={idx}
-                  className="relative w-full h-full flex-shrink-0"
-                  style={{ flex: "0 0 100%" }}
-                >
-                  {!imageLoaded && (
-                    <div className="absolute inset-0 bg-neutral-200 animate-pulse" />
-                  )}
-                  <img
-                    src={`https://api.bookmyfarm.net/assets/images/farm_images/${img.image}`}
-                    alt={`${farm.name} - Image ${idx + 1}`}
-                    className={`w-full h-full object-cover transition-opacity duration-300 ${
-                      imageLoaded ? "opacity-100" : "opacity-0"
-                    }`}
-                    onLoad={() => setImageLoaded(true)}
-                    loading="lazy"
-                  />
-                </div>
-              ))}
-              {images.length === 0 && (
+              {images.length > 0 ? (
+                images.map((img, idx) => (
+                  <div
+                    key={idx}
+                    className="relative h-full flex-shrink-0"
+                    style={{ width: `${100 / images.length}%` }}
+                  >
+                    {!loadedImages[idx] && (
+                      <div className="absolute inset-0 bg-neutral-200 animate-pulse" />
+                    )}
+                    <img
+                      src={`https://api.bookmyfarm.net/assets/images/farm_images/${img.image}`}
+                      alt={`${farm.name} - Image ${idx + 1}`}
+                      className={`w-full h-full object-cover transition-opacity duration-300 ${
+                        loadedImages[idx] ? "opacity-100" : "opacity-0"
+                      }`}
+                      onLoad={() =>
+                        setLoadedImages((prev) => ({ ...prev, [idx]: true }))
+                      }
+                      loading="lazy"
+                    />
+                  </div>
+                ))
+              ) : (
                 <div className="w-full h-full flex items-center justify-center bg-neutral-200">
                   <span>No Image</span>
                 </div>

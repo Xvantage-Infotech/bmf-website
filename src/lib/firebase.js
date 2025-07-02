@@ -31,7 +31,6 @@
 
 
 
-// sendOTP.js
 import { signInWithPhoneNumber, RecaptchaVerifier } from 'firebase/auth';
 import { auth } from './firebaseConfig';
 
@@ -46,24 +45,18 @@ export const sendOTP = async (rawPhone) => {
   console.log('📞 Sending OTP to:', phoneNumber);
 
   try {
-    // 🔐 Wait for auth.app to exist before using RecaptchaVerifier
-    if (!auth.app) {
-      throw new Error('Firebase auth.app is not initialized yet');
+    const isLocalhost = typeof window !== 'undefined' && location.hostname === 'localhost';
+
+    if (isLocalhost) {
+      // ✅ No recaptcha on emulator
+      return await signInWithPhoneNumber(auth, phoneNumber);
+    } else {
+      // ✅ Production flow with reCAPTCHA
+      const verifier = new RecaptchaVerifier('recaptcha-container', {
+        size: 'invisible',
+      }, auth);
+      return await signInWithPhoneNumber(auth, phoneNumber, verifier);
     }
-
-    // 🛡️ Create only once and reuse
-    if (!window.recaptchaVerifier) {
-      window.recaptchaVerifier = new RecaptchaVerifier(
-        'recaptcha-container',
-        { size: 'invisible' },
-        auth
-      );
-    }
-
-    await window.recaptchaVerifier.verify(); // optional, triggers reCAPTCHA
-
-    const confirmation = await signInWithPhoneNumber(auth, phoneNumber, window.recaptchaVerifier);
-    return confirmation;
   } catch (err) {
     console.error('❌ Error sending OTP:', err);
     throw err;

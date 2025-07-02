@@ -1,0 +1,23 @@
+
+
+User-agent: *
+Allow: /
+
+# Block sensitive areas (adjust based on your site structure)
+Disallow: /admin/
+Disallow: /api/
+Disallow: /login/
+Disallow: /dashboard/
+Disallow: /private/
+Disallow: /wp-admin/
+
+# Allow important files
+Allow: /css/
+Allow: /js/
+Allow: /images/
+Allow: /assets/
+
+# Sitemap location
+Sitemap: https://bookmyfarm.net/sitemap.xml
+
+---

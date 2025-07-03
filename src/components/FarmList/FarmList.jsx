@@ -322,7 +322,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { fetchFarms } from "@/services/Farm/farm.service";
-import { Skeleton } from '@/components/ui/skeleton';
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function FarmList({
   selectedCity,
@@ -335,7 +335,8 @@ export default function FarmList({
   const [farms, setFarms] = useState([]);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  
 
   const getFarms = async (append = false) => {
     try {
@@ -384,6 +385,40 @@ export default function FarmList({
         return 0;
     }
   });
+
+  // Add this effect to restore scroll position
+  useEffect(() => {
+    const restoreScrollPosition = () => {
+      // Wait for farms to load and render
+      if (!loading && farms.length > 0) {
+        const savedPosition = sessionStorage.getItem("farmScrollPosition");
+        if (savedPosition) {
+          // Use setTimeout to ensure restoration happens after render
+          setTimeout(() => {
+            window.scrollTo({
+              top: parseInt(savedPosition),
+              behavior: "auto", // Instant scroll
+            });
+
+            // Optional: Highlight last clicked card
+            const lastCard = document.querySelector(".last-clicked-farm");
+            if (lastCard) {
+              lastCard.scrollIntoView({ block: "nearest", behavior: "auto" });
+              lastCard.classList.remove("last-clicked-farm");
+            }
+
+            sessionStorage.removeItem("farmScrollPosition");
+          }, 50); // Short delay to ensure DOM is ready
+        }
+      }
+    };
+
+    restoreScrollPosition();
+
+    // Handle browser back/forward navigation
+    window.addEventListener("popstate", restoreScrollPosition);
+    return () => window.removeEventListener("popstate", restoreScrollPosition);
+  }, [loading, farms]);
 
   const sortOptions = [
     { value: "featured", label: "Featured" },
@@ -463,7 +498,7 @@ export default function FarmList({
           </>
         ) : loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {Array.from({ length: 8 }).map((_, index) => (
+            {Array.from({ length: 10 }).map((_, index) => (
               <FarmCardSkeleton key={index} />
             ))}
           </div>

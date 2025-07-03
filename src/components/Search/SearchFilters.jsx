@@ -1,54 +1,152 @@
 "use client";
 
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Users, MapPin, Calendar, Plus, Minus } from 'lucide-react';
-import { getCities } from '@/data/staticFarms';
-import EnhancedDatePicker from '@/components/common/EnhancedDatePicker';
+import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Search, Users, MapPin, Calendar, Plus, Minus } from "lucide-react";
+import { fetchFarms } from "@/services/Farm/farm.service";
+import EnhancedDatePicker from "@/components/common/EnhancedDatePicker";
 
-export default function SearchFilters({ onSearch, className = '' }) {
+export default function SearchFilters({ onSearch, className = "" }) {
   const [filters, setFilters] = useState({
-    location: '',
-    checkIn: undefined,
-    checkOut: undefined,
-    guests: 2,
+    city_id: "",
+    start_date: undefined,
+    end_date: undefined,
+    no_of_guest: 2,
   });
 
-  const cities = getCities();
+  const [cities, setCities] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  // 🟢 Fetch cities on mount
+  useEffect(() => {
+    const loadCities = async () => {
+      setLoading(true);
+      try {
+        const response = await fetchFarms({});
+        const farms = response?.data || [];
+
+        const seen = new Set();
+        const uniqueCities = [];
+
+        for (const farm of farms) {
+          if (farm.city_id && !seen.has(farm.city_id)) {
+            uniqueCities.push({
+              id: farm.city_id.toString(),
+              name: farm.city.name,
+            });
+            seen.add(farm.city_id);
+          }
+        }
+
+        setCities(uniqueCities);
+      } catch (error) {
+        console.error("Error fetching cities:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadCities();
+  }, []);
 
   const handleFilterChange = (key, value) => {
-    setFilters(prev => ({ ...prev, [key]: value }));
+    setFilters((prev) => ({
+      ...prev,
+      [key]: value === "all" ? "" : value,
+    }));
   };
 
-const handleSearch = () => {
-  onSearch?.(filters);
+  const handleSearch = () => {
+    const formatDate = (date) => {
+      if (!date) return "";
+      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
+        2,
+        "0"
+      )}-${String(date.getDate()).padStart(2, "0")}`;
+    };
 
-  // Smooth scroll to farm list section
-  const section = document.getElementById('farm-list');
-  if (section) {
-    section.scrollIntoView({ behavior: 'smooth' });
-  }
-};
+    // console.log("start_date raw:", filters.start_date);
+    // console.log("end_date raw:", filters.end_date);
+
+    // If neither date is selected, just scroll
+    if (!filters.start_date && !filters.end_date) {
+      const section = document.getElementById("farm-list");
+      if (section) {
+        section.scrollIntoView({ behavior: "smooth" });
+      }
+      return;
+    }
+
+    // If only one date is selected, also just scroll
+    if (
+      (filters.start_date && !filters.end_date) ||
+      (!filters.start_date && filters.end_date)
+    ) {
+      const section = document.getElementById("farm-list");
+      if (section) {
+        section.scrollIntoView({ behavior: "smooth" });
+      }
+      return;
+    }
+
+    // Both dates are selected => perform search
+    const payload = {
+      city_id: filters.city_id || "",
+      no_of_guest: filters.no_of_guest?.toString() || "",
+      start_date: formatDate(filters.start_date),
+      start_time: "",
+      end_date: formatDate(filters.end_date),
+      end_time: "",
+      min_price: "",
+      max_price: "",
+      category_id: "",
+      farm_id: "",
+      sort_by: "",
+      page: "1",
+      per_page: "50",
+    };
+    // console.log("Payload being sent:", payload);
+    onSearch?.(payload);
+
+    const section = document.getElementById("farm-list");
+    if (section) {
+      section.scrollIntoView({ behavior: "smooth" });
+    }
+  };
 
   const incrementGuests = () => {
-    setFilters(prev => ({ ...prev, guests: Math.min((prev.guests || 0) + 1, 20) }));
+    setFilters((prev) => ({
+      ...prev,
+      no_of_guest: Math.min((prev.no_of_guest || 0) + 1, 20),
+    }));
   };
 
   const decrementGuests = () => {
-    setFilters(prev => ({ ...prev, guests: Math.max((prev.guests || 0) - 1, 1) }));
+    setFilters((prev) => ({
+      ...prev,
+      no_of_guest: Math.max((prev.no_of_guest || 0) - 1, 1),
+    }));
   };
 
   return (
     <div className={`relative ${className}`}>
-
       <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/20 p-8 hover:shadow-3xl transition-all duration-300">
-
         <div className="text-center mb-8">
-          <h3 className="text-2xl font-bold text-gray-900 mb-2">Find Your Perfect Getaway</h3>
-          <p className="text-gray-600">Search from thousands of beautiful farmhouses</p>
+          <h3 className="text-2xl font-bold text-gray-900 mb-2">
+            Find Your Perfect Getaway
+          </h3>
+          <p className="text-gray-600">
+            Search from thousands of beautiful farmhouses
+          </p>
         </div>
 
         <div className="space-y-6">
@@ -58,15 +156,24 @@ const handleSearch = () => {
               Where do you want to go?
             </Label>
             <div className="relative group">
-              <Select value={filters.location} onValueChange={(value) => handleFilterChange('location', value)}>
+              <Select
+                value={filters.city_id}
+                onValueChange={(value) => handleFilterChange("city_id", value)}
+              >
                 <SelectTrigger className="h-14 text-lg border-2 border-gray-200 rounded-xl hover:border-primary/50 focus:border-primary transition-colors bg-gray-50/50 hover:bg-white">
                   <SelectValue placeholder="Search destinations..." />
                 </SelectTrigger>
                 <SelectContent className="rounded-xl border-2">
-                  <SelectItem value="all" className="py-3 text-base">🌍 All Locations</SelectItem>
+                  <SelectItem value="all" className="py-3 text-base">
+                    🌍 All Locations
+                  </SelectItem>
                   {cities.map((city) => (
-                    <SelectItem key={city} value={city} className="py-3 text-base">
-                      📍 {city}
+                    <SelectItem
+                      key={city.id}
+                      value={city.id}
+                      className="py-3 text-base"
+                    >
+                      📍 {city.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -82,10 +189,14 @@ const handleSearch = () => {
               </Label>
               <div className="bg-gray-50/50 p-4 rounded-xl border-2 border-gray-200 hover:border-primary/50 transition-colors">
                 <EnhancedDatePicker
-                  checkIn={filters.checkIn}
-                  checkOut={filters.checkOut}
-                  onCheckInChange={(date) => handleFilterChange('checkIn', date)}
-                  onCheckOutChange={(date) => handleFilterChange('checkOut', date)}
+                  checkIn={filters.start_date}
+                  checkOut={filters.end_date}
+                  onCheckInChange={(date) =>
+                    handleFilterChange("start_date", date)
+                  }
+                  onCheckOutChange={(date) =>
+                    handleFilterChange("end_date", date)
+                  }
                   compact
                 />
               </div>
@@ -100,7 +211,9 @@ const handleSearch = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <div className="font-medium text-gray-900">Guests</div>
-                    <div className="text-sm text-gray-500">Ages 13 or above</div>
+                    <div className="text-sm text-gray-500">
+                      Ages 13 or above
+                    </div>
                   </div>
                   <div className="flex items-center gap-3">
                     <Button
@@ -108,19 +221,19 @@ const handleSearch = () => {
                       size="icon"
                       className="h-10 w-10 rounded-full border-2"
                       onClick={decrementGuests}
-                      disabled={(filters.guests || 0) <= 1}
+                      disabled={(filters.no_of_guest || 0) <= 1}
                     >
                       <Minus className="w-4 h-4" />
                     </Button>
                     <span className="text-lg font-semibold min-w-[3rem] text-center">
-                      {filters.guests || 0}
+                      {filters.no_of_guest || 0}
                     </span>
                     <Button
                       variant="outline"
                       size="icon"
                       className="h-10 w-10 rounded-full border-2"
                       onClick={incrementGuests}
-                      disabled={(filters.guests || 0) >= 20}
+                      disabled={(filters.no_of_guest || 0) >= 20}
                     >
                       <Plus className="w-4 h-4" />
                     </Button>

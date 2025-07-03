@@ -33,7 +33,9 @@ export default function Homes() {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [searchFilters, setSearchFilters] = useState(null);
   const [isSearchMode, setIsSearchMode] = useState(false);
-
+  const [farms, setFarms] = useState([]);
+  const [searchResults, setSearchResults] = useState([]);
+const [showSearchResults, setShowSearchResults] = useState(false);
   const [featuredFarms, setFeaturedFarms] = useState([]);
   const [open, setOpen] = useState(false);
 
@@ -88,10 +90,18 @@ export default function Homes() {
     loadTop3Farms();
   }, []);
 
-  const handleSearch = (filters) => {
+  const handleSearch = async (filters) => {
     setSearchFilters(filters);
     setIsSearchMode(true);
-    console.log("Search filters:", filters);
+    // console.log("Search filters:", filters);
+
+    try {
+      const farmsData = await fetchFarms(filters);
+      // console.log("Fetched farms:", farmsData);
+      setFarms(farmsData?.data || []);
+    } catch (error) {
+      console.error("Error fetching farms:", error);
+    }
   };
 
   return (

@@ -358,6 +358,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
@@ -397,62 +398,92 @@ export default function AuthModal({ isOpen, onClose }) {
   });
 
   const recaptchaRef = useRef(null);
-  const [isRecaptchaReady, setIsRecaptchaReady] = useState(false); // Add this state
+  const [isRecaptchaReady, setIsRecaptchaReady] = useState(false);
   const [recaptchaError, setRecaptchaError] = useState(null);
 
-useEffect(() => {
-  if (!isOpen || recaptchaRef.current) return;
+  useEffect(() => {
+    if (!isOpen) return;
 
-  const initializeRecaptcha = async () => {
-    try {
-      let container = document.getElementById("recaptcha-container");
-      if (!container) {
-        container = document.createElement("div");
-        container.id = "recaptcha-container";
-        container.style.display = "none";
-        document.body.appendChild(container);
+    const initializeRecaptcha = async () => {
+      try {
+        // Clean up existing recaptcha
+        if (recaptchaRef.current) {
+          try {
+            await recaptchaRef.current.clear();
+          } catch (e) {
+            console.warn("Error clearing existing recaptcha:", e);
+          }
+          recaptchaRef.current = null;
+        }
+
+        // Ensure auth is available
+        if (!auth) {
+          throw new Error("Firebase auth not initialized");
+        }
+
+        // Create container if it doesn't exist
+        let container = document.getElementById("recaptcha-container");
+        if (!container) {
+          container = document.createElement("div");
+          container.id = "recaptcha-container";
+          container.style.display = "none";
+          document.body.appendChild(container);
+        }
+
+        // Wait a bit for DOM to be ready
         await new Promise((resolve) => setTimeout(resolve, 100));
+
+        // Create new RecaptchaVerifier with your reCAPTCHA key
+        recaptchaRef.current = new RecaptchaVerifier(
+          auth,
+          "recaptcha-container",
+          {
+            size: "invisible",
+            callback: (response) => {
+              console.log("reCAPTCHA verified:", response);
+            },
+            "expired-callback": () => {
+              console.warn("reCAPTCHA expired");
+              setIsRecaptchaReady(false);
+            },
+            "error-callback": (error) => {
+              console.error("reCAPTCHA error:", error);
+              setRecaptchaError("Security verification failed. Please try again.");
+              setIsRecaptchaReady(false);
+            }
+          }
+        );
+
+        // Render the recaptcha
+        await recaptchaRef.current.render();
+        setIsRecaptchaReady(true);
+        setRecaptchaError(null);
+        
+      } catch (err) {
+        console.error("reCAPTCHA initialization failed:", {
+          error: err,
+          message: err.message,
+          stack: err.stack,
+        });
+        setRecaptchaError("Security verification failed. Please refresh the page.");
+        setIsRecaptchaReady(false);
       }
+    };
 
-      recaptchaRef.current = new RecaptchaVerifier(
-        "recaptcha-container",
-        {
-          size: "invisible",
-          callback: (response) => {
-            console.log("reCAPTCHA verified:", response);
-          },
-          "expired-callback": () => {
-            console.warn("reCAPTCHA expired");
-            setIsRecaptchaReady(false);
-          },
-        },
-        auth
-      );
+    initializeRecaptcha();
 
-      await recaptchaRef.current.render(); // 👈 Ensure rendering completes
-      setIsRecaptchaReady(true);
-    } catch (err) {
-      console.error("reCAPTCHA initialization failed:", {
-        error: err,
-        message: err.message,
-        stack: err.stack,
-      });
-      setRecaptchaError("Security verification failed. Please refresh the page.");
-    }
-  };
-
-  initializeRecaptcha();
-
-  return () => {
-    if (recaptchaRef.current?.clear) {
-      recaptchaRef.current.clear().catch((e) => console.warn("reCAPTCHA cleanup error:", e));
-    }
-    recaptchaRef.current = null;
-    setIsRecaptchaReady(false);
-  };
-}, [isOpen, auth]);
-
-
+    return () => {
+      if (recaptchaRef.current) {
+        try {
+          recaptchaRef.current.clear();
+        } catch (e) {
+          console.warn("reCAPTCHA cleanup error:", e);
+        }
+        recaptchaRef.current = null;
+      }
+      setIsRecaptchaReady(false);
+    };
+  }, [isOpen]);
 
   const handleSendOtp = async (phoneNumber) => {
     try {
@@ -462,18 +493,17 @@ useEffect(() => {
       }
 
       setLocalLoading(true);
+      setFormattedPhone(`+91${raw}`);
 
       // Verify recaptcha is ready
-      if (
-        !recaptchaRef.current ||
-        typeof recaptchaRef.current.verify !== "function"
-      ) {
+      if (!recaptchaRef.current || !isRecaptchaReady) {
         throw new Error("Security verification not ready. Please try again.");
       }
 
       const confirmation = await sendOTP(raw, recaptchaRef.current);
       setConfirmationResult(confirmation);
       setIsOtpSent(true);
+      
     } catch (err) {
       console.error("❌ Failed to send OTP:", {
         error: err,
@@ -487,6 +517,8 @@ useEffect(() => {
         errorMessage = "Too many attempts. Please try again later.";
       } else if (err.code === "auth/invalid-phone-number") {
         errorMessage = "Invalid phone number format.";
+      } else if (err.code === "auth/captcha-check-failed") {
+        errorMessage = "Security verification failed. Please try again.";
       }
 
       alert(errorMessage || "Failed to send OTP");
@@ -530,17 +562,21 @@ useEffect(() => {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      {recaptchaError && (
-        <Alert variant="destructive" className="mb-4">
-          <AlertDescription>{recaptchaError}</AlertDescription>
-        </Alert>
-      )}
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px]" aria-describedby="auth-modal-description">
         <DialogHeader>
           <DialogTitle className="text-center text-xl font-semibold">
             Log In or Sign Up
           </DialogTitle>
+          <DialogDescription id="auth-modal-description" className="text-center">
+            Enter your mobile number to continue with OTP verification
+          </DialogDescription>
         </DialogHeader>
+
+        {recaptchaError && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertDescription>{recaptchaError}</AlertDescription>
+          </Alert>
+        )}
 
         {error && (
           <Alert variant="destructive" className="mb-4">
@@ -585,6 +621,7 @@ useEffect(() => {
                         id="login-otp"
                         type="text"
                         placeholder="Enter OTP"
+                        maxLength={6}
                         {...loginForm.register("otp")}
                       />
                     </div>
@@ -603,7 +640,9 @@ useEffect(() => {
                     onClick={() =>
                       handleSendOtp(loginForm.getValues("mobileNumber"))
                     }
-                    
+                    disabled={
+                      localLoading || !isRecaptchaReady || recaptchaError
+                    }
                   >
                     {localLoading ? (
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -661,6 +700,7 @@ useEffect(() => {
                         id="signup-otp"
                         type="text"
                         placeholder="Enter OTP"
+                        maxLength={6}
                         {...signupForm.register("otp")}
                       />
                     </div>
@@ -677,7 +717,7 @@ useEffect(() => {
                     type="button"
                     className="w-full"
                     onClick={() =>
-                      handleSendOtp(loginForm.getValues("mobileNumber"))
+                      handleSendOtp(signupForm.getValues("mobileNumber"))
                     }
                     disabled={
                       localLoading || !isRecaptchaReady || recaptchaError

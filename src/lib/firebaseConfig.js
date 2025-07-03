@@ -152,14 +152,12 @@
 //   );
 // };
 
-
-
-// lib/firebaseConfig.js
 import { initializeApp } from 'firebase/app';
 import { 
   getAuth,
   RecaptchaVerifier,
-  signInWithPhoneNumber
+  signInWithPhoneNumber,
+  connectAuthEmulator
 } from 'firebase/auth';
 
 const firebaseConfig = {
@@ -172,12 +170,26 @@ const firebaseConfig = {
   measurementId: "G-BM86YHT7T8"
 };
 
-let auth = null;
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
 
+// Initialize Auth
+const auth = getAuth(app);
+
+// Configure auth settings
 if (typeof window !== 'undefined') {
-  const app = initializeApp(firebaseConfig);
-  auth = getAuth(app);
+  // Set language to device language
   auth.useDeviceLanguage();
+  
+  // Configure reCAPTCHA settings
+  auth.settings = {
+    appVerificationDisabledForTesting: false
+  };
+  
+  // For development - uncomment if you want to test with emulator
+  // if (process.env.NODE_ENV === 'development') {
+  //   connectAuthEmulator(auth, "http://localhost:9099");
+  // }
 }
 
 export {

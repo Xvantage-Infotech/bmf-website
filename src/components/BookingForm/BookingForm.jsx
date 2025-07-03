@@ -157,6 +157,13 @@ if (res?.status === 0) {
 };
 
 
+const extraGuests = totalGuests > farm.person_limit
+  ? totalGuests - farm.person_limit
+  : 0;
+
+const extraGuestCharge = extraGuests * (farm.person_price_weekday || 0);
+
+
 
   return (
     <div className={`sticky top-8 ${className}`}>
@@ -212,13 +219,14 @@ if (res?.status === 0) {
           </div>
 
           {/* Guest Limit Warning */}
-          {isGuestLimitExceeded && (
+      
             <div className="bg-red-50 border border-red-200 rounded-lg p-3">
               <p className="text-sm text-red-600">
-                This property accommodates up to {farm.maxGuests} guests. Please reduce the number of guests.
-              </p>
+  {farm.person_limit} Person above will charges ₹{farm.person_price_weekday} per person.
+</p>
+
             </div>
-          )}
+ 
 
           {/* Pricing Breakdown */}
 {nights > 0 && (

@@ -22,10 +22,13 @@ import {
 export default function Header() {
   const pathname = usePathname();
 
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const { isMobile } = useResponsive();
-  const { user, isAuthenticated, logout } = useAuth();
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+    const { isMobile } = useResponsive();
+const { user, isAuthenticated, logout, authInitialized } = useAuth();
+
+// if (!authInitialized) return null; // or a skeleton if you want
+const isLoggedIn = !!user?.token;
 
   const navigationItems = [
 
@@ -121,7 +124,7 @@ export default function Header() {
                 }}
               >
                 <LogOut className="mr-2 h-4 w-4" />
-                <span>MJ Test MJ test Checking something</span>
+                <span>LogOut</span>
               </Button>
             </div>
           </div>
@@ -133,7 +136,7 @@ export default function Header() {
               setIsAuthModalOpen(true);
             }}
           >
-            MJ test Checking something
+            Login
           </Button>
         ))}
     </nav>
@@ -153,7 +156,7 @@ export default function Header() {
           {!isMobile && (
             <div className="flex items-center space-x-6">
               <Navigation className="flex items-center space-x-6" />
-              {isAuthenticated ? (
+              {/* {isAuthenticated ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <div className="flex items-center space-x-2 cursor-pointer">
@@ -165,7 +168,8 @@ export default function Header() {
                           />
                         ) : (
                           <AvatarFallback className="bg-primary text-white">
-                            {user?.name.charAt(0).toUpperCase()}
+                            {(user?.name || "U").charAt(0).toUpperCase()}
+
                           </AvatarFallback>
                         )}
                       </Avatar>
@@ -209,7 +213,39 @@ export default function Header() {
                 >
                   Login/Sign Up
                 </Button>
-              )}
+              )} */}
+{isLoggedIn ? (
+  <DropdownMenu>
+    <DropdownMenuTrigger asChild>
+      <div className="flex items-center space-x-2 cursor-pointer">
+        <Avatar className="h-8 w-8">
+          <AvatarFallback className="bg-primary text-white">U</AvatarFallback>
+        </Avatar>
+        {/* <span className="text-sm font-medium">User</span> */}
+      </div>
+    </DropdownMenuTrigger>
+    <DropdownMenuContent align="end">
+      <DropdownMenuItem onClick={() => (window.location.href = "/profile")}>
+        <User className="mr-2 h-4 w-4" />
+        Profile
+      </DropdownMenuItem>
+      <DropdownMenuItem onClick={logout}>
+        <LogOut className="mr-2 h-4 w-4" />
+        Logout
+      </DropdownMenuItem>
+    </DropdownMenuContent>
+  </DropdownMenu>
+) : (
+  <Button
+    className="bg-primary text-white hover:bg-primary/90 transition-colors"
+    onClick={() => setIsAuthModalOpen(true)}
+  >
+    Login/Sign Up
+  </Button>
+)}
+
+
+
             </div>
           )}
 

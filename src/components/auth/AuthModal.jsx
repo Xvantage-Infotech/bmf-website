@@ -35,6 +35,7 @@ export default function AuthModal({ isOpen, onClose }) {
     error,
     signup,
     verifyOtpAndLogin,
+    updateUser,
     clearError,
   } = useAuth();
 
@@ -177,10 +178,10 @@ const handleLogin = async (values) => {
   }
 
   try {
-    // 🔥 Step 1: Verify OTP with Firebase
+    // ✅ Step 1: Verify OTP with Firebase
     await verifyOtpAndLogin(values.otp);
 
-    // 🔥 Step 2: Call backend to register/login user
+    // ✅ Step 2: Call backend to login and get custom JWT
     const response = await fetch("https://api.bookmyfarm.net/api/add_user", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -190,9 +191,23 @@ const handleLogin = async (values) => {
     const result = await response.json();
 
     if (result?.status === 1 && result?.data?.token) {
-      // ✅ Store token in localStorage
-      localStorage.setItem("accessToken", result.data.token);
-      console.log("✅ Token saved to localStorage");
+      const backendToken = result.data.token;
+
+      // ✅ Save backend token in localStorage (for future API calls)
+      localStorage.setItem("accessToken", backendToken);
+
+      // ✅ Optional: store in user context for access inside app
+      updateUser({
+        token: backendToken,
+        id: result.data.id,
+        phone_number: result.data.phone_number,
+        name: result.data.name,
+        date_of_birth: result.data.date_of_birth,
+        profile_image: result.data.profile_image,
+        // Add more user fields if needed
+      });
+
+      console.log("✅ Backend token saved and user updated");
     } else {
       console.warn("❌ Token not received from backend");
     }
@@ -204,6 +219,7 @@ const handleLogin = async (values) => {
     alert("Login failed. Please try again.");
   }
 };
+
 
 
 

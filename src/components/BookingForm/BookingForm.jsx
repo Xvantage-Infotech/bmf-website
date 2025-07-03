@@ -182,6 +182,9 @@ import { Separator } from '@/components/ui/separator';
 import { Phone, MessageCircle } from 'lucide-react';
 import { formatPrice, calculateTotalPrice, calculateNights } from '@/lib/utils';
 import ImprovedDatePicker from './ImprovedDatePicker';
+import { useAuth } from '@/contexts/AuthContext';
+import AuthModal from '../auth/AuthModal';
+
 
 export default function BookingForm({ farm, className = '' }) {
   const [checkIn, setCheckIn] = useState();
@@ -190,6 +193,10 @@ export default function BookingForm({ farm, className = '' }) {
   const [checkOutTime, setCheckOutTime] = useState("9:00 AM");
   const [adults, setAdults] = useState(2);
   const [children, setChildren] = useState(0);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+const { user } = useAuth();
+const isLoggedIn = !!user?.token;
+
 
   const nights = checkIn && checkOut ? calculateNights(checkIn, checkOut) : 0;
   const finalPricePerNight = parseFloat(farm.final_price);
@@ -199,11 +206,15 @@ export default function BookingForm({ farm, className = '' }) {
   const isGuestLimitExceeded = totalGuests > farm.maxGuests;
   const isBookingValid = checkIn && checkOut && nights > 0 && !isGuestLimitExceeded;
 
- const handleBooking = () => {
+const handleBooking = () => {
+  if (!isLoggedIn) {
+    setIsAuthModalOpen(true);
+    return;
+  }
+
   if (!checkIn || !checkOut || isGuestLimitExceeded) return;
 
-  const formatDate = (date) =>
-    date.toISOString().split('T')[0]; // "YYYY-MM-DD"
+  const formatDate = (date) => date.toISOString().split('T')[0];
 
   const payload = {
     farm_id: String(farm.id),
@@ -211,7 +222,7 @@ export default function BookingForm({ farm, className = '' }) {
     start_time: checkInTime || '',
     end_date: formatDate(checkOut),
     end_time: checkOutTime || '',
-    user_id: '' // You can populate this if user info is available
+    user_id: '' // Populate later with user info
   };
 
   console.log('Booking payload:', payload);
@@ -345,6 +356,8 @@ export default function BookingForm({ farm, className = '' }) {
           </div>
         </div>
       </div>
+      <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
     </div>
+
   );
 }

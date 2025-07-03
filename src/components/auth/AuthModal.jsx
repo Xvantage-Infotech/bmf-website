@@ -746,7 +746,7 @@ export default function AuthModal({ isOpen, onClose }) {
           </a>{" "}
           and{" "}
           <a href="#" className="text-primary hover:underline">
-            Privacy Policy
+            Privacy Policy MJ test
           </a>
         </div>
       </DialogContent>

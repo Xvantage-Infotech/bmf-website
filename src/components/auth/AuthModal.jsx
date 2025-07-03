@@ -349,7 +349,6 @@
 
 //   );
 // }
-
 "use client";
 
 import { useState, useEffect, useRef } from "react";
@@ -371,6 +370,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2 } from "lucide-react";
 import { sendOTP } from "@/lib/firebase";
 import { auth, RecaptchaVerifier } from "@/lib/firebaseConfig";
+import { authAPI } from "@/lib/api"; // Import your API
 
 export default function AuthModal({ isOpen, onClose }) {
   const [activeTab, setActiveTab] = useState("login");
@@ -433,7 +433,7 @@ export default function AuthModal({ isOpen, onClose }) {
         // Wait a bit for DOM to be ready
         await new Promise((resolve) => setTimeout(resolve, 100));
 
-        // Create new RecaptchaVerifier with your reCAPTCHA key
+        // Create new RecaptchaVerifier
         recaptchaRef.current = new RecaptchaVerifier(
           auth,
           "recaptcha-container",
@@ -460,11 +460,7 @@ export default function AuthModal({ isOpen, onClose }) {
         setRecaptchaError(null);
         
       } catch (err) {
-        console.error("reCAPTCHA initialization failed:", {
-          error: err,
-          message: err.message,
-          stack: err.stack,
-        });
+        console.error("reCAPTCHA initialization failed:", err);
         setRecaptchaError("Security verification failed. Please refresh the page.");
         setIsRecaptchaReady(false);
       }
@@ -500,16 +496,25 @@ export default function AuthModal({ isOpen, onClose }) {
         throw new Error("Security verification not ready. Please try again.");
       }
 
+      // 🔥 STEP 1: Send OTP via Firebase (for frontend verification)
+      console.log("Sending Firebase OTP...");
       const confirmation = await sendOTP(raw, recaptchaRef.current);
       setConfirmationResult(confirmation);
+      
+      // 🔥 STEP 2: Also call your backend API (for backend processing)
+      console.log("Calling backend API...");
+      try {
+        await authAPI.sendOTP(`+91${raw}`);
+        console.log("Backend API called successfully");
+      } catch (backendError) {
+        console.warn("Backend API failed (continuing with Firebase):", backendError);
+        // Continue with Firebase flow even if backend fails
+      }
+
       setIsOtpSent(true);
       
     } catch (err) {
-      console.error("❌ Failed to send OTP:", {
-        error: err,
-        message: err.message,
-        stack: err.stack,
-      });
+      console.error("❌ Failed to send OTP:", err);
 
       // User-friendly error messages
       let errorMessage = err.message;
@@ -533,7 +538,18 @@ export default function AuthModal({ isOpen, onClose }) {
       return;
     }
     try {
+      // 🔥 STEP 1: Verify OTP with Firebase
       await verifyOtpAndLogin(values.otp);
+      
+      // 🔥 STEP 2: Also verify with your backend
+      try {
+        await authAPI.verifyOTP(formattedPhone, values.otp);
+        console.log("Backend OTP verification successful");
+      } catch (backendError) {
+        console.warn("Backend OTP verification failed:", backendError);
+        // Continue with Firebase flow
+      }
+      
       setIsOtpSent(false);
       onClose();
     } catch (error) {
@@ -548,11 +564,23 @@ export default function AuthModal({ isOpen, onClose }) {
     }
 
     try {
+      // 🔥 STEP 1: Verify OTP with Firebase
       await verifyOtpAndLogin(values.otp);
+      
+      // 🔥 STEP 2: Also verify with your backend
+      try {
+        await authAPI.verifyOTP(formattedPhone, values.otp);
+        console.log("Backend OTP verification successful");
+      } catch (backendError) {
+        console.warn("Backend OTP verification failed:", backendError);
+      }
+      
+      // 🔥 STEP 3: Create user account
       await signup({
         name: values.name,
         mobileNumber: formattedPhone,
       });
+      
       setIsOtpSent(false);
       onClose();
     } catch (error) {
@@ -746,7 +774,7 @@ export default function AuthModal({ isOpen, onClose }) {
           </a>{" "}
           and{" "}
           <a href="#" className="text-primary hover:underline">
-            Privacy Policy MJ test
+            Privacy Policy
           </a>
         </div>
       </DialogContent>

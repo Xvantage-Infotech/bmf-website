@@ -320,6 +320,8 @@ export default function Homes() {
         searchQuery={searchFilters?.location || ''}
       /> */}
       <FarmList
+        selectedCity={selectedCity} // Make sure to pass these if they're available
+        selectedCategory={selectedCategory}
         searchFilters={{
           ...(searchFilters || {}),
           category_id:

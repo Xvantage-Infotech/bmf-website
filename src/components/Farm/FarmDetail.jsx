@@ -24,6 +24,7 @@ import VideoPlayer from "@/components/VideoGallery/VideoPlayer";
 import { fetchFarmById } from "@/services/Farm/farm.service";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useRef } from "react";
+import { useRouter } from "next/navigation";
 
 export default function FarmDetail() {
   const params = useParams();
@@ -39,6 +40,19 @@ export default function FarmDetail() {
 
   const scrollRef = useRef(null);
   const autoScrollRef = useRef(null);
+  const router = useRouter();
+
+  useEffect(() => {
+    if ("scrollRestoration" in window.history) {
+      window.history.scrollRestoration = "manual";
+    }
+
+    return () => {
+      if ("scrollRestoration" in window.history) {
+        window.history.scrollRestoration = "auto";
+      }
+    };
+  }, []);
 
   const scrollToIndex = (index) => {
     const container = scrollRef.current;
@@ -83,32 +97,42 @@ export default function FarmDetail() {
     { length: loopCount },
     () => farmImages
   ).flat();
+  
+
+  useEffect(() => {
+    // Scroll to top when detail page loads
+    window.scrollTo(0, 0);
+
+    // Disable browser's automatic scroll restoration
+    if ("scrollRestoration" in window.history) {
+      window.history.scrollRestoration = "manual";
+    }
+
+    return () => {
+      // Re-enable when component unmounts
+      if ("scrollRestoration" in window.history) {
+        window.history.scrollRestoration = "auto";
+      }
+    };
+  }, []);
 
   // Auto-scroll carousel every 3s
   useEffect(() => {
     if (!farm || farmImages.length <= 1) return;
 
-    autoScrollRef.current = setInterval(() => {
-      setSelectedImageIndex((prevIndex) => {
-        const next = prevIndex + 1;
-        const container = scrollRef.current;
-        if (container) {
-          const child = container.children[next + 1];
-          if (child) {
-            const offset = child.offsetLeft - container.offsetLeft;
-            const scrollPos =
-              offset - container.clientWidth / 2 + child.clientWidth / 2;
-            container.scrollTo({
-              left: scrollPos,
-              behavior: "smooth",
-            });
-          }
-        }
-        return next;
-      });
-    }, 3000);
+    // Add delay before starting auto-scroll
+    const timer = setTimeout(() => {
+      autoScrollRef.current = setInterval(() => {
+        setSelectedImageIndex((prevIndex) => {
+          const nextIndex = (prevIndex + 1) % farmImages.length;
+          scrollToIndex(nextIndex);
+          return nextIndex;
+        });
+      }, 3000);
+    }, 1000); // 1 second delay
 
     return () => {
+      clearTimeout(timer);
       clearInterval(autoScrollRef.current);
     };
   }, [farm, farmImages.length]);
@@ -136,7 +160,6 @@ export default function FarmDetail() {
       const resetIndex = farmImages.length;
 
       if (selectedImageIndex >= total - 2) {
-        // Jump back to second set to simulate loop
         const resetTo = resetIndex;
         const child = container.children[resetTo];
         if (child) {
@@ -151,7 +174,10 @@ export default function FarmDetail() {
     };
 
     container.addEventListener("scrollend", handleScrollEnd);
-    return () => container.removeEventListener("scrollend", handleScrollEnd);
+    return () => {
+      container.removeEventListener("scrollend", handleScrollEnd);
+      clearInterval(autoScrollRef.current); // Additional cleanup
+    };
   }, [selectedImageIndex, extendedImages.length]);
 
   useEffect(() => {
@@ -189,20 +215,22 @@ export default function FarmDetail() {
     loadFarm();
   }, [farmId]);
 
-  if (loading)
-   if (loading)
-  return (
-    <div className="min-h-screen flex flex-col justify-center items-center bg-white">
-     <img
-  src="/bmflogofoot.svg"
-  alt="Book My Farm Logo"
-  style={{ width: "350px", height: "350px" }}
-  className="mb-4"
-/>
+  
 
-      {/* <p className="text-neutral-500 text-sm animate-pulse">Loading farm details...</p> */}
-    </div>
-  );
+  
+    if (loading)
+      return (
+        <div className="min-h-screen flex flex-col justify-center items-center bg-white">
+          <img
+            src="/bmflogofoot.svg"
+            alt="Book My Farm Logo"
+            style={{ width: "350px", height: "350px" }}
+            className="mb-4"
+          />
+
+          {/* <p className="text-neutral-500 text-sm animate-pulse">Loading farm details...</p> */}
+        </div>
+      );
 
   if (!farm)
     return <div className="p-8 text-center text-red-500">Farm not found.</div>;
@@ -325,8 +353,7 @@ export default function FarmDetail() {
                     {extendedImages.map((img, index) => (
                       <div
                         key={index}
-                       className="flex-shrink-0 w-[100%] md:w-[80%] lg:w-[80%] snap-center transition-transform duration-300"
-
+                        className="flex-shrink-0 w-[100%] md:w-[80%] lg:w-[80%] snap-center transition-transform duration-300"
                       >
                         <img
                           src={`https://api.bookmyfarm.net/assets/images/farm_images/${img.image}`}
@@ -353,7 +380,9 @@ export default function FarmDetail() {
                   <TabsTrigger value="description">Description</TabsTrigger>
                   <TabsTrigger value="amenities">Amenities</TabsTrigger>
                   <TabsTrigger value="location">Location</TabsTrigger>
-                  <TabsTrigger value="CancelPolicy">Cancellation Policy</TabsTrigger>
+                  <TabsTrigger value="CancelPolicy">
+                    Cancellation Policy
+                  </TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="policy">
@@ -372,24 +401,23 @@ export default function FarmDetail() {
                     </p>
                   )}
                 </TabsContent>
-                
-                <TabsContent value="CancelPolicy">
-  {farm.house_cancellation_policy ? (
-    <div
-      className="prose prose-sm text-neutral-700"
-      dangerouslySetInnerHTML={{
-        __html: farm.house_cancellation_policy
-          .replace(/<p><br><\/p>/g, '') // remove empty lines
-          .replace(/&nbsp;/g, ' '), // normalize spacing
-      }}
-    />
-  ) : (
-    <p className="text-neutral-700">
-      No cancellation policy provided.
-    </p>
-  )}
-</TabsContent>
 
+                <TabsContent value="CancelPolicy">
+                  {farm.house_cancellation_policy ? (
+                    <div
+                      className="prose prose-sm text-neutral-700"
+                      dangerouslySetInnerHTML={{
+                        __html: farm.house_cancellation_policy
+                          .replace(/<p><br><\/p>/g, "") // remove empty lines
+                          .replace(/&nbsp;/g, " "), // normalize spacing
+                      }}
+                    />
+                  ) : (
+                    <p className="text-neutral-700">
+                      No cancellation policy provided.
+                    </p>
+                  )}
+                </TabsContent>
 
                 <TabsContent value="description">
                   {farm.description ? (

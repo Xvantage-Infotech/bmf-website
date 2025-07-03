@@ -110,6 +110,7 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Heart, Bed, Users, Star, MapPin } from "lucide-react";
 import { formatPrice, generateStars } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -121,6 +122,7 @@ export default function FarmCard({ farm, className = "" }) {
   const [isHovered, setIsHovered] = useState(false);
 
   const intervalRef = useRef(null);
+  const router = useRouter();
 
   const images = farm.farm_images || [];
   const mainImage =
@@ -128,18 +130,27 @@ export default function FarmCard({ farm, className = "" }) {
       ? `https://api.bookmyfarm.net/assets/images/farm_images/${images[0].image}`
       : "/placeholder.jpg";
 
-useEffect(() => {
-  if (!isHovered || images.length <= 1) return;
+  const handleClick = (e) => {
+  const scrollPosition = window.scrollY || document.documentElement.scrollTop;
+  const scrollHeight = document.documentElement.scrollHeight;
+  sessionStorage.setItem("farmScrollPosition", scrollPosition.toString());
+  sessionStorage.setItem("farmScrollHeight", scrollHeight.toString());
 
-  if (intervalRef.current) clearInterval(intervalRef.current); // ✅ Prevent overlapping intervals
+  e.currentTarget.classList.add("last-clicked-farm");
+};
 
-  intervalRef.current = setInterval(() => {
-    setImageIndex((prevIndex) => (prevIndex + 1) % images.length);
-  }, 2000);
 
-  return () => clearInterval(intervalRef.current); // ✅ Clean up properly
-}, [isHovered, images.length]);
+  useEffect(() => {
+    if (!isHovered || images.length <= 1) return;
 
+    if (intervalRef.current) clearInterval(intervalRef.current); // ✅ Prevent overlapping intervals
+
+    intervalRef.current = setInterval(() => {
+      setImageIndex((prevIndex) => (prevIndex + 1) % images.length);
+    }, 2000);
+
+    return () => clearInterval(intervalRef.current); // ✅ Clean up properly
+  }, [isHovered, images.length]);
 
   const toggleFavorite = (e) => {
     e.preventDefault();
@@ -150,7 +161,12 @@ useEffect(() => {
   const rating = parseFloat(farm.rating);
 
   return (
-    <Link href={`/farm/${farm.id}`}>
+    <Link 
+      href={`/farm/${farm.id}`}
+      scroll={false} // Disable Next.js automatic scroll
+      onClick={handleClick}
+      className="block" // Ensure Link doesn't affect layout
+    >
       <div
         className={`farm-card animate-card-hover cursor-pointer ${className}`}
       >
@@ -199,55 +215,53 @@ useEffect(() => {
               )}
             </div>
           </div> */}
- <div
-  className="relative h-48 w-full bg-neutral-200 overflow-hidden rounded-t-lg"
-  onMouseEnter={() => setIsHovered(true)}
-  onMouseLeave={() => {
-    setIsHovered(false);
-    setImageIndex(0); // reset to first image
-  }}
->
-  {images.length > 0 ? (
-    images.map((img, idx) => (
-      <img
-        key={idx}
-        src={`https://api.bookmyfarm.net/assets/images/farm_images/${img.image}`}
-        alt={`${farm.name} - Image ${idx + 1}`}
-        className={`absolute top-0 left-0 w-full h-full object-cover transition-opacity duration-700 ${
-          idx === imageIndex ? "opacity-100 z-10" : "opacity-0 z-0"
-        }`}
-        loading="lazy"
-      />
-    ))
-  ) : (
-    <div className="w-full h-full flex items-center justify-center bg-neutral-200">
-      <span>No Image</span>
-    </div>
-  )}
+          <div
+            className="relative h-48 w-full bg-neutral-200 overflow-hidden rounded-t-lg"
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => {
+              setIsHovered(false);
+              setImageIndex(0); // reset to first image
+            }}
+          >
+            {images.length > 0 ? (
+              images.map((img, idx) => (
+                <img
+                  key={idx}
+                  src={`https://api.bookmyfarm.net/assets/images/farm_images/${img.image}`}
+                  alt={`${farm.name} - Image ${idx + 1}`}
+                  className={`absolute top-0 left-0 w-full h-full object-cover transition-opacity duration-700 ${
+                    idx === imageIndex ? "opacity-100 z-10" : "opacity-0 z-0"
+                  }`}
+                  loading="lazy"
+                />
+              ))
+            ) : (
+              <div className="w-full h-full flex items-center justify-center bg-neutral-200">
+                <span>No Image</span>
+              </div>
+            )}
 
-  {/* Heart icon */}
-  <Button
-    size="icon"
-    variant="secondary"
-    className="absolute top-3 right-3 w-8 h-8 bg-white/80 backdrop-blur-sm hover:bg-white z-20"
-    onClick={toggleFavorite}
-  >
-    <Heart
-      className={`w-4 h-4 ${
-        isFavorited ? "fill-red-500 text-red-500" : "text-neutral-600"
-      }`}
-    />
-  </Button>
+            {/* Heart icon */}
+            <Button
+              size="icon"
+              variant="secondary"
+              className="absolute top-3 right-3 w-8 h-8 bg-white/80 backdrop-blur-sm hover:bg-white z-20"
+              onClick={toggleFavorite}
+            >
+              <Heart
+                className={`w-4 h-4 ${
+                  isFavorited ? "fill-red-500 text-red-500" : "text-neutral-600"
+                }`}
+              />
+            </Button>
 
-  {/* Category badge */}
-  <div className="absolute bottom-3 left-3 z-20">
-    <span className="bg-white/90 backdrop-blur-sm text-neutral-700 px-2 py-1 rounded text-xs font-medium capitalize">
-      {farm.category?.name || "Farm"}
-    </span>
-  </div>
-</div>
-
-
+            {/* Category badge */}
+            <div className="absolute bottom-3 left-3 z-20">
+              <span className="bg-white/90 backdrop-blur-sm text-neutral-700 px-2 py-1 rounded text-xs font-medium capitalize">
+                {farm.category?.name || "Farm"}
+              </span>
+            </div>
+          </div>
 
           {/* Price Badge
          {(() => {

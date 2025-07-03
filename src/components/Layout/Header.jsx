@@ -219,7 +219,12 @@ const isLoggedIn = !!user?.token;
     <DropdownMenuTrigger asChild>
       <div className="flex items-center space-x-2 cursor-pointer">
         <Avatar className="h-8 w-8">
-          <AvatarFallback className="bg-primary text-white">U</AvatarFallback>
+       
+
+<AvatarFallback className="bg-primary text-white flex items-center justify-center">
+  <User className="w-5 h-5" />
+</AvatarFallback>
+
         </Avatar>
         {/* <span className="text-sm font-medium">User</span> */}
       </div>

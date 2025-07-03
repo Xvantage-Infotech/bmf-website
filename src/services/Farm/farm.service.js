@@ -47,3 +47,16 @@ export const fetchFarmById = async (farmId) => {
     throw error;
   }
 };
+
+
+
+
+export const checkBookingAvailability = async (payload, token) => {
+  const response = await api.post('/api/check_booking', payload, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return response.data; // expected to return { available: true/false }
+};

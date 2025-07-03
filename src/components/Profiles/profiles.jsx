@@ -33,19 +33,20 @@ export default function Profiles() {
           <Pencil className="h-5 w-5 text-primary" />
         </button>
         
-       {user?.profileImage ? (
-  <img src={user.profileImage}
-            alt="Profile"
-            className="w-24 h-24 rounded-full object-cover mb-4 border-4 border-primary"
-          />
-        ) : (
-          <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center mb-4 border-4 border-primary">
-            <span className="text-2xl font-bold text-primary">
-  {user?.name?.charAt(0)?.toUpperCase() || 'U'}
-</span>
+    {user?.profile_image ? (
+  <img
+    src={`https://api.bookmyfarm.net/assets/images/user_profiles/${user.profile_image}`}
+    alt="Profile"
+    className="w-24 h-24 rounded-full object-cover mb-4 border-4 border-primary"
+  />
+) : (
+  <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center mb-4 border-4 border-primary">
+    <span className="text-2xl font-bold text-primary">
+      {user?.name?.charAt(0)?.toUpperCase() || 'U'}
+    </span>
+  </div>
+)}
 
-          </div>
-        )}
         
         <h2 className="text-xl font-bold mb-1">{user?.name}</h2>
       <p className="text-neutral-600 mb-2">{user?.city || 'No location set'}</p>

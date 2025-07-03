@@ -22,7 +22,7 @@ export default function ProfileEditDialog({ isOpen, onClose }) {
   const [street, setStreet] = useState(user?.street || '');
   const [city, setCity] = useState(user?.city || '');
 const [dob, setDob] = useState(user?.dob ? new Date(user.dob) : undefined);
-  const [profileImage, setProfileImage] = useState(user?.profileImage);
+  const [profile_image, setProfile_image] = useState(user?.profile_image);
   const [previewImage, setPreviewImage] = useState(user?.profileImage);
 
   // Reset form when dialog opens
@@ -32,81 +32,64 @@ const [dob, setDob] = useState(user?.dob ? new Date(user.dob) : undefined);
       setStreet(user.street || '');
       setCity(user.city || '');
       setDob(user.dob ? new Date(user.dob) : undefined);
-      setProfileImage(user.profileImage);
-      setPreviewImage(user.profileImage);
+      setProfile_image(user.profile_image);
+      setPreviewImage(user.profile_image);
     }
   }, [isOpen, user]);
 
-  const handleImageChange = (e) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      // Create a preview URL for the selected image
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const result = reader.result;
-
-        setPreviewImage(result);
-        setProfileImage(result); // In a real app, you would upload this to a server
-      };
-      reader.readAsDataURL(file);
-    }
-  };
 
 
 const handleSubmit = async (e) => {
   e.preventDefault();
-
   const token = localStorage.getItem("accessToken");
-  if (!token) {
-    alert("You must be logged in to update your profile.");
-    return;
-  }
+  if (!token) return alert("You must be logged in to update your profile.");
 
-const payload = {
-  name,
-  street,
-  city: city,
-  date_of_birth: dob ? dob.toISOString().split("T")[0] : null,
-  profile_image: profileImage || null,
-};
+  const payload = {
+    name,
+    street,
+    city,
+    date_of_birth: dob ? dob.toISOString().split("T")[0] : "",
+    profile_image: previewImage, // will be a File if new image selected
+  };
 
   try {
-    // 🔄 Update user profile
     const res = await updateUserProfile(payload, token);
     const newToken = res?.data?.token;
-
-    if (newToken) {
-      localStorage.setItem("accessToken", newToken);
-    }
-
-    const finalToken = newToken || token;
-
-    // 🔁 Re-fetch latest user info
-    const userRes = await getUserProfile(finalToken);
-    const fullUser = userRes?.data;
-
-    // ✅ Update context
-updateUser({
-  token: finalToken,
-  name: fullUser?.name,
-  street: fullUser?.street,
-  city: fullUser?.city, // ← correct key
-  dob: fullUser?.date_of_birth, // ← correct key
-  profileImage: fullUser?.profile_image, // ← correct key
-  email: fullUser?.email,
-  phone_number: fullUser?.phone_number,
-  isOwner: fullUser?.is_owner === 1,
-});
-
-
-
-
+    if (newToken) localStorage.setItem("accessToken", newToken);
+    
+    // refetch user
+    const userRes = await getUserProfile(newToken || token);
+    updateUser(userRes?.data);
     onClose();
-  } catch (error) {
-    console.error("❌ Profile update failed:", error);
-    alert("Failed to update profile. Please try again later.");
+  } catch (err) {
+    console.error("❌ Failed to update profile", err);
+    alert("Update failed. Please try again.");
   }
 };
+
+
+const handleImageChange = (e) => {
+  const file = e.target.files?.[0];
+  if (file) {
+    setPreviewImage(file); // for upload
+    const reader = new FileReader();
+    reader.onloadend = () => setProfile_image(reader.result); // just for preview
+    reader.readAsDataURL(file);
+  }
+};
+
+
+let imageUrl = null;
+
+if (previewImage instanceof File) {
+  // create a temporary preview URL for image file
+  imageUrl = URL.createObjectURL(previewImage);
+} else if (typeof previewImage === "string" && previewImage.startsWith("data:")) {
+  imageUrl = previewImage; // base64 preview
+} else if (profile_image) {
+  imageUrl = `https://api.bookmyfarm.net/assets/images/user_profiles/${profile_image}`;
+}
+
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -118,19 +101,20 @@ updateUser({
         <form onSubmit={handleSubmit} className="space-y-4 py-4">
           <div className="flex flex-col items-center mb-4">
             <div className="relative w-24 h-24 mb-2">
-              {previewImage ? (
-                <img 
-                  src={previewImage} 
-                  alt="Profile Preview" 
-                  className="w-24 h-24 rounded-full object-cover border-4 border-primary"
-                />
-              ) : (
-                <div className="w-24 h-24 rounded-full bg-muted flex items-center justify-center border-4 border-primary">
-                  <span className="text-2xl font-bold text-muted-foreground">
-                    {name.charAt(0).toUpperCase()}
-                  </span>
-                </div>
-              )}
+              {imageUrl ? (
+  <img
+    src={imageUrl}
+    alt="Profile Preview"
+    className="w-24 h-24 rounded-full object-cover border-4 border-primary"
+  />
+) : (
+  <div className="w-24 h-24 rounded-full bg-muted flex items-center justify-center border-4 border-primary">
+    <span className="text-2xl font-bold text-muted-foreground">
+      {name.charAt(0).toUpperCase()}
+    </span>
+  </div>
+)}
+
               <label 
                 htmlFor="profile-image" 
                 className="absolute bottom-0 right-0 bg-primary text-white p-1 rounded-full cursor-pointer"

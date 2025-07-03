@@ -1,354 +1,3 @@
-// 'use client';
-// import { useState, useEffect } from 'react';
-// import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-// import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-// import { Input } from '@/components/ui/input';
-// import { Label } from '@/components/ui/label';
-// import { Button } from '@/components/ui/button';
-// import { Form } from '@/components/ui/form';
-// import { useForm } from 'react-hook-form';
-// import { useAuth } from '@/contexts/AuthContext';
-// import { Alert, AlertDescription } from '@/components/ui/alert';
-// import { Loader2 } from 'lucide-react';
-// import { api } from '@/axiosApi';
-// import { createRecaptchaVerifier, sendOTP } from '@/lib/firebaseConfig';
-
-// export default function AuthModal({ isOpen, onClose }) {
-//   const [activeTab, setActiveTab] = useState('login');
-//   const [isOtpSent, setIsOtpSent] = useState(false);
-//   const [formattedPhone, setFormattedPhone] = useState('');
-//   const [localLoading, setLocalLoading] = useState(false);
-
-// const {
-//   confirmationResult,
-//   setConfirmationResult,
-//   // ADD THESE ↓
-//   user,
-//   loading,
-//   error,
-//   signup,
-//   verifyOtpAndLogin,
-//   clearError
-// } = useAuth();
-
-//   const loginForm = useForm({
-//     defaultValues: {
-//       mobileNumber: '',
-//       otp: ''
-//     }
-//   });
-
-//   const signupForm = useForm({
-//     defaultValues: {
-//       name: '',
-//       mobileNumber: '',
-//       otp: ''
-//     }
-//   });
-//   useEffect(() => {
-//   if (typeof window !== 'undefined') {
-//     let el = document.getElementById('recaptcha-container');
-//     if (!el) {
-//       const div = document.createElement('div');
-//       div.id = 'recaptcha-container';
-//       div.style.display = 'none';
-//       document.body.appendChild(div);
-//       console.log('✅ Mounted #recaptcha-container manually');
-//     }
-//   }
-// }, []);
-
-//   // AuthModal.jsx
-// // useEffect(() => {
-// //   return () => {
-// //     if (window.recaptchaVerifier) {
-// //       window.recaptchaVerifier.clear();
-// //       window.recaptchaVerifier = null;
-// //       console.log('🧹 Cleared reCAPTCHA verifier');
-// //     }
-// //   };
-// // }, []);
-
-//   useEffect(() => {
-//     if (isOpen && !isOtpSent) {
-//       clearError();
-//     }
-//   }, [isOpen, isOtpSent, clearError]);
-
-//   const formatPhoneNumber = (phone) => {
-//     const digits = phone.replace(/\D/g, '');
-//     if (!phone.startsWith('+')) {
-//       return `${digits}`;
-//     }
-//     return phone;
-//   };
-
-// // AuthModal.jsx
-// const handleSendOtp = async (phoneNumber) => {
-//   try {
-//     setLocalLoading(true);
-
-//     // ⏳ Give DOM time to mount
-//     await new Promise((r) => setTimeout(r, 100));
-
-//     if (!window.recaptchaVerifier) {
-//       const verifier = createRecaptchaVerifier();
-//       if (!verifier) throw new Error('Recaptcha not initialized');
-//     }
-
-//     const confirmation = await sendOTP(phoneNumber);
-//     setConfirmationResult(confirmation);
-//     setIsOtpSent(true);
-//   } catch (err) {
-//     console.error('❌ Failed to send OTP:', err);
-//     alert(err.message);
-//   } finally {
-//     setLocalLoading(false);
-//   }
-// };
-
-//   const handleVerifyOtp = async () => {
-//     try {
-//       const result = await confirmationResult.confirm(otp);
-//       console.log('✅ Logged in user:', result.user);
-//       alert('Login successful!');
-//     } catch (err) {
-//       console.error('❌ Invalid OTP:', err);
-//       alert('Invalid OTP');
-//     }
-//   };
-
-//   useEffect(() => {
-//     return () => {
-//       if (window.recaptchaVerifier) {
-//         window.recaptchaVerifier.clear();
-//         window.recaptchaVerifier = null;
-//       }
-//     };
-//   }, []);
-
-// const handleLogin = async (values) => {
-//   if (!values.otp || values.otp.length < 4) {
-//     alert('Please enter a valid OTP');
-//     return;
-//   }
-//   try {
-//     await verifyOtpAndLogin(values.otp);
-//     setIsOtpSent(false);
-//     onClose();
-//   } catch (error) {
-//     console.error('Error during login:', error);
-//   }
-// };
-
-//   const handleSignup = async (values) => {
-//     if (!values.otp || values.otp.length < 4) {
-//       alert('Please enter a valid OTP');
-//       return;
-//     }
-
-//     if (!values.name) {
-//       alert('Please enter your name');
-//       return;
-//     }
-
-//     try {
-//       await verifyOtpAndLogin(values.otp, formattedPhone);
-
-//       await signup({
-//         name: values.name,
-//         mobileNumber: formattedPhone
-//       });
-//       setIsOtpSent(false);
-//       onClose();
-//     } catch (error) {
-//       console.error('Error verifying OTP:', error);
-//     }
-//   };
-
-//   return (
-
-//     <Dialog open={isOpen} onOpenChange={onClose}>
-//       <DialogContent className="sm:max-w-[425px]">
-//         <DialogHeader>
-//           <DialogTitle className="text-center text-xl font-semibold">
-//             Log In or Sign Up
-//           </DialogTitle>
-//         </DialogHeader>
-
-//         {error && (
-//           <Alert variant="destructive" className="mb-4">
-//             <AlertDescription>{error}</AlertDescription>
-//           </Alert>
-//         )}
-
-//         <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value)}>
-//           <TabsList className="grid w-full grid-cols-2">
-//             <TabsTrigger value="login">Login</TabsTrigger>
-//             <TabsTrigger value="signup">Sign Up</TabsTrigger>
-//           </TabsList>
-
-//           <TabsContent value="login" className="space-y-4 py-4">
-//             <Form {...loginForm}>
-//               <form onSubmit={loginForm.handleSubmit(handleLogin)} className="space-y-4">
-//                 <div className="space-y-2">
-//                   <Label htmlFor="login-mobile">Enter your Mobile Number</Label>
-//                   <div className="flex">
-//                     <div className="flex items-center px-3 bg-muted border border-r-0 border-input rounded-l-md">
-//                       <span className="text-sm">+91</span>
-//                     </div>
-//                     <Input
-//                       id="login-mobile"
-//                       type="tel"
-//                       placeholder="Mobile Number"
-//                       className="rounded-l-none"
-//                       {...loginForm.register('mobileNumber')}
-//                     />
-//                   </div>
-//                 </div>
-
-//                 {isOtpSent ? (
-//                   <>
-//                     <div className="space-y-2">
-//                       <Label htmlFor="login-otp">Enter OTP</Label>
-//                       <Input
-//                         id="login-otp"
-//                         type="text"
-//                         placeholder="Enter OTP"
-//                         {...loginForm.register('otp')}
-//                       />
-//                     </div>
-//                     <Button
-//                       type="submit"
-//                       className="w-full bg-primary text-white hover:bg-primary/90"
-//                       disabled={loading}
-//                     >
-//                       {loading ? (
-//                         <>
-//                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-//                           Verifying...
-//                         </>
-//                       ) : (
-//                         'Login'
-//                       )}
-//                     </Button>
-//                   </>
-//                 ) : (
-//                   <Button
-//                     id="login-otp-button"
-//                     type="button"
-//                     className="w-full bg-primary text-white hover:bg-primary/90"
-//                     onClick={() => handleSendOtp(loginForm.getValues('mobileNumber'))}
-//                     disabled={loading}
-//                   >
-//                     {loading ? (
-//                       <>
-//                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-//                         Sending OTP...
-//                       </>
-//                     ) : (
-//                       'Get OTP'
-//                     )}
-//                   </Button>
-//                 )}
-//               </form>
-//             </Form>
-//           </TabsContent>
-
-//           <TabsContent value="signup" className="space-y-4 py-4">
-//             <Form {...signupForm}>
-//               <form onSubmit={signupForm.handleSubmit(handleSignup)} className="space-y-4">
-//                 <div className="space-y-2">
-//                   <Label htmlFor="signup-name">Full Name</Label>
-//                   <Input
-//                     id="signup-name"
-//                     type="text"
-//                     placeholder="Your Name"
-//                     {...signupForm.register('name')}
-//                   />
-//                 </div>
-
-//                 <div className="space-y-2">
-//                   <Label htmlFor="signup-mobile">Mobile Number</Label>
-//                   <div className="flex">
-//                     <div className="flex items-center px-3 bg-muted border border-r-0 border-input rounded-l-md">
-//                       <span className="text-sm">+91</span>
-//                     </div>
-//                     <Input
-//                       id="signup-mobile"
-//                       type="tel"
-//                       placeholder="Mobile Number"
-//                       className="rounded-l-none"
-//                       {...signupForm.register('mobileNumber')}
-//                     />
-//                   </div>
-//                 </div>
-
-//                 {isOtpSent ? (
-//                   <>
-//                     <div className="space-y-2">
-//                       <Label htmlFor="signup-otp">Enter OTP</Label>
-//                       <Input
-//                         id="signup-otp"
-//                         type="text"
-//                         placeholder="Enter OTP"
-//                         {...signupForm.register('otp')}
-//                       />
-//                     </div>
-//                     <Button
-//                       type="submit"
-//                       className="w-full bg-primary text-white hover:bg-primary/90"
-//                       disabled={loading}
-//                     >
-//                       {loading ? (
-//                         <>
-//                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-//                           Creating Account...
-//                         </>
-//                       ) : (
-//                         'Create Account'
-//                       )}
-//                     </Button>
-//                   </>
-//                 ) : (
-//                   <Button
-//                     id="signup-otp-button"
-//                     type="button"
-//                     className="w-full bg-primary text-white hover:bg-primary/90"
-//                     onClick={() => handleSendOtp(signupForm.getValues('mobileNumber'))}
-//                     disabled={loading}
-//                   >
-//                     {loading ? (
-//                       <>
-//                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-//                         Sending OTP...
-//                       </>
-//                     ) : (
-//                       'Get OTP'
-//                     )}
-//                   </Button>
-//                 )}
-//               </form>
-//             </Form>
-//           </TabsContent>
-//         </Tabs>
-
-//         <div className="mt-4 text-center text-sm text-muted-foreground">
-//           By clicking, I accept the{' '}
-//           <a href="#" className="text-primary hover:underline">
-//             Terms & Conditions
-//           </a>{' '}
-//           and{' '}
-//           <a href="#" className="text-primary hover:underline">
-//             Privacy Policy
-//           </a>
-//         </div>
-
-//       </DialogContent>
-//     </Dialog>
-
-//   );
-// }
 "use client";
 
 import { useState, useEffect, useRef } from "react";
@@ -481,81 +130,82 @@ export default function AuthModal({ isOpen, onClose }) {
     };
   }, [isOpen]);
 
+
   const handleSendOtp = async (phoneNumber) => {
-    try {
-      const raw = phoneNumber.replace(/\D/g, "");
-      if (!raw || raw.length !== 10) {
-        throw new Error("Enter a valid 10-digit number");
-      }
-
-      setLocalLoading(true);
-      setFormattedPhone(`+91${raw}`);
-
-      // Verify recaptcha is ready
-      if (!recaptchaRef.current || !isRecaptchaReady) {
-        throw new Error("Security verification not ready. Please try again.");
-      }
-
-      // 🔥 STEP 1: Send OTP via Firebase (for frontend verification)
-      console.log("Sending Firebase OTP...");
-      const confirmation = await sendOTP(raw, recaptchaRef.current);
-      setConfirmationResult(confirmation);
-      
-      // 🔥 STEP 2: Also call your backend API (for backend processing)
-      console.log("Calling backend API...");
-      try {
-        await authAPI.sendOTP(`+91${raw}`);
-        console.log("Backend API called successfully");
-      } catch (backendError) {
-        console.warn("Backend API failed (continuing with Firebase):", backendError);
-        // Continue with Firebase flow even if backend fails
-      }
-
-      setIsOtpSent(true);
-      
-    } catch (err) {
-      console.error("❌ Failed to send OTP:", err);
-
-      // User-friendly error messages
-      let errorMessage = err.message;
-      if (err.code === "auth/too-many-requests") {
-        errorMessage = "Too many attempts. Please try again later.";
-      } else if (err.code === "auth/invalid-phone-number") {
-        errorMessage = "Invalid phone number format.";
-      } else if (err.code === "auth/captcha-check-failed") {
-        errorMessage = "Security verification failed. Please try again.";
-      }
-
-      alert(errorMessage || "Failed to send OTP");
-    } finally {
-      setLocalLoading(false);
+  try {
+    const raw = phoneNumber.replace(/\D/g, "");
+    if (!raw || raw.length !== 10) {
+      throw new Error("Enter a valid 10-digit number");
     }
-  };
 
-  const handleLogin = async (values) => {
-    if (!values.otp || values.otp.length < 4) {
-      alert("Please enter a valid OTP");
-      return;
+    setLocalLoading(true);
+    setFormattedPhone(`+91${raw}`);
+
+    if (!recaptchaRef.current || !isRecaptchaReady) {
+      throw new Error("Security verification not ready. Please try again.");
     }
-    try {
-      // 🔥 STEP 1: Verify OTP with Firebase
-      await verifyOtpAndLogin(values.otp);
-      
-      // 🔥 STEP 2: Also verify with your backend
-      try {
-        await authAPI.verifyOTP(formattedPhone, values.otp);
-        console.log("Backend OTP verification successful");
-      } catch (backendError) {
-        console.warn("Backend OTP verification failed:", backendError);
-        // Continue with Firebase flow
-      }
-      
-      setIsOtpSent(false);
-      onClose();
-    } catch (error) {
-      console.error("Login failed:", error);
+
+    // 🔥 STEP 1: Send OTP via Firebase only
+    console.log("Sending Firebase OTP...");
+    const confirmation = await sendOTP(raw, recaptchaRef.current);
+    setConfirmationResult(confirmation);
+
+    setIsOtpSent(true);
+
+  } catch (err) {
+    console.error("❌ Failed to send OTP:", err);
+
+    let errorMessage = err.message;
+    if (err.code === "auth/too-many-requests") {
+      errorMessage = "Too many attempts. Please try again later.";
+    } else if (err.code === "auth/invalid-phone-number") {
+      errorMessage = "Invalid phone number format.";
+    } else if (err.code === "auth/captcha-check-failed") {
+      errorMessage = "Security verification failed. Please try again.";
     }
-  };
+
+    alert(errorMessage || "Failed to send OTP");
+  } finally {
+    setLocalLoading(false);
+  }
+};
+
+const handleLogin = async (values) => {
+  if (!values.otp || values.otp.length < 4) {
+    alert("Please enter a valid OTP");
+    return;
+  }
+
+  try {
+    // 🔥 Step 1: Verify OTP with Firebase
+    await verifyOtpAndLogin(values.otp);
+
+    // 🔥 Step 2: Call backend to register/login user
+    const response = await fetch("https://api.bookmyfarm.net/api/add_user", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ phone_number: formattedPhone }),
+    });
+
+    const result = await response.json();
+
+    if (result?.status === 1 && result?.data?.token) {
+      // ✅ Store token in localStorage
+      localStorage.setItem("accessToken", result.data.token);
+      console.log("✅ Token saved to localStorage");
+    } else {
+      console.warn("❌ Token not received from backend");
+    }
+
+    setIsOtpSent(false);
+    onClose();
+  } catch (error) {
+    console.error("Login failed:", error);
+    alert("Login failed. Please try again.");
+  }
+};
+
+
 
   const handleSignup = async (values) => {
     if (!values.name || !values.otp) {

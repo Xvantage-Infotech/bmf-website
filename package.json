@@ -2,11 +2,12 @@
   "name": "my-nextjs-app",
   "version": "0.1.0",
   "private": true,
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start -p 5005"
-  },
+"scripts": {
+  "dev": "next dev -p 3003",
+  "build": "next build",
+  "start": "next start -p 5005"
+}
+,
   "dependencies": {
     "@hookform/resolvers": "^5.1.1",
     "@jridgewell/trace-mapping": "^0.3.25",

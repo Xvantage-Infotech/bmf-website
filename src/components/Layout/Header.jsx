@@ -18,6 +18,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useRouter } from "next/navigation";
+import { Heart } from "lucide-react";
 
 export default function Header() {
   const pathname = usePathname();
@@ -25,15 +27,17 @@ export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const { isMobile } = useResponsive();
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated, logout, authInitialized } = useAuth();
+  const router = useRouter();
+
+  // if (!authInitialized) return null; // or a skeleton if you want
+  const isLoggedIn = !!user?.token;
 
   const navigationItems = [
-
     { href: "/", label: "Farms" },
     { href: "/customers", label: "Happy Customers" },
     { href: "/contact", label: "Contact" },
     { href: "/owner/register", label: "List Your Farm" },
-
   ];
 
   const Logo = () => (
@@ -95,7 +99,7 @@ export default function Header() {
                 className="w-full justify-start"
                 onClick={() => {
                   setIsMenuOpen(false);
-                  window.location.href = "/profile";
+                  router.push("/profile");
                 }}
               >
                 <User className="mr-2 h-4 w-4" />
@@ -106,7 +110,7 @@ export default function Header() {
                 className="w-full justify-start"
                 onClick={() => {
                   setIsMenuOpen(false);
-                  window.location.href = "/profile";
+                  router.push("/profile");
                 }}
               >
                 <Settings className="mr-2 h-4 w-4" />
@@ -121,7 +125,7 @@ export default function Header() {
                 }}
               >
                 <LogOut className="mr-2 h-4 w-4" />
-                <span>MJ Test MJ test Checking something</span>
+                <span>LogOut</span>
               </Button>
             </div>
           </div>
@@ -133,7 +137,7 @@ export default function Header() {
               setIsAuthModalOpen(true);
             }}
           >
-            MJ test Checking something
+            Login
           </Button>
         ))}
     </nav>
@@ -153,52 +157,33 @@ export default function Header() {
           {!isMobile && (
             <div className="flex items-center space-x-6">
               <Navigation className="flex items-center space-x-6" />
-              {isAuthenticated ? (
+
+              {isLoggedIn ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <div className="flex items-center space-x-2 cursor-pointer">
                       <Avatar className="h-8 w-8">
-                        {user?.profileImage ? (
-                          <AvatarImage
-                            src={user.profileImage}
-                            alt={user.name}
-                          />
-                        ) : (
-                          <AvatarFallback className="bg-primary text-white">
-                            {user?.name.charAt(0).toUpperCase()}
-                          </AvatarFallback>
-                        )}
+                        <AvatarFallback className="bg-primary text-white flex items-center justify-center">
+                          <User className="w-5 h-5" />
+                        </AvatarFallback>
                       </Avatar>
-                      <span className="text-sm font-medium">{user?.name}</span>
+                      {/* <span className="text-sm font-medium">User</span> */}
                     </div>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem
-                      className="cursor-pointer"
-                      onClick={() => {
-                        setIsMenuOpen(false);
-                        window.location.href = "/profile";
-                      }}
-                    >
+                    <DropdownMenuItem onClick={() => router.push("/profile")}>
                       <User className="mr-2 h-4 w-4" />
-                      <span>Profile</span>
+                      Profile
                     </DropdownMenuItem>
-                    <DropdownMenuItem
-                      className="cursor-pointer"
-                      onClick={() => {
-                        setIsMenuOpen(false);
-                        window.location.href = "/profile";
-                      }}
-                    >
-                      <Settings className="mr-2 h-4 w-4" />
-                      <span>Edit Profile</span>
+
+                    <DropdownMenuItem onClick={() => router.push("/saved")}>
+                      <Heart className="mr-2 h-4 w-4" />
+                      Wishlist
                     </DropdownMenuItem>
-                    <DropdownMenuItem
-                      className="cursor-pointer"
-                      onClick={logout}
-                    >
+
+                    <DropdownMenuItem onClick={logout}>
                       <LogOut className="mr-2 h-4 w-4" />
-                      <span>Logout</span>
+                      Logout
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>

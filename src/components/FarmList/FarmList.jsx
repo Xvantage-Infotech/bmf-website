@@ -102,7 +102,7 @@
 //             </Select>
 
 //             {/* Uncomment to show filters */}
-//             {/* 
+//             {/*
 //             <Button
 //               variant="outline"
 //               onClick={() => setShowFilters(!showFilters)}
@@ -110,7 +110,7 @@
 //             >
 //               <SlidersHorizontal className="w-4 h-4" />
 //               <span>Filters</span>
-//             </Button> 
+//             </Button>
 //             */}
 //           </div>
 //         </div>
@@ -151,7 +151,6 @@
 //     </section>
 //   );
 // }
-
 
 // "use client";
 
@@ -310,44 +309,46 @@
 //   );
 // }
 
+"use client";
 
-
-'use client';
-
-import { useState, useEffect } from 'react';
-import FarmCard from '@/components/FarmCard/FarmCard';
-import { Button } from '@/components/ui/button';
+import { useState, useEffect } from "react";
+import FarmCard from "@/components/FarmCard/FarmCard";
+import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { fetchFarms } from '@/services/Farm/farm.service';
+} from "@/components/ui/select";
+import { fetchFarms } from "@/services/Farm/farm.service";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function FarmList({
   selectedCity,
   selectedCategory,
   searchFilters = {},
-  title = 'Featured Farmhouses',
-  description = 'Discover premium properties for your perfect getaway',
+  title = "Featured Farmhouses",
+  description = "Discover premium properties for your perfect getaway",
+  farms: externalFarms = null,
 }) {
-  const [sortBy, setSortBy] = useState('featured');
+  const [sortBy, setSortBy] = useState("featured");
   const [farms, setFarms] = useState([]);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const isSearchMode = externalFarms !== null;
 
   const getFarms = async (append = false) => {
+    if (isSearchMode) return;
     try {
       setLoading(true);
       const payload = {
-        city: selectedCity !== 'all' ? selectedCity : undefined,
-        category: selectedCategory !== 'all' ? selectedCategory : undefined,
-        sort_by: '',
+        city: selectedCity !== "all" ? selectedCity : undefined,
+        category: selectedCategory !== "all" ? selectedCategory : undefined,
+        sort_by: "",
         page: page.toString(),
-        per_page: '10',
+        per_page: "10",
         ...searchFilters,
       };
       const data = await fetchFarms(payload);
@@ -356,11 +357,26 @@ export default function FarmList({
       setFarms((prev) => (append ? [...prev, ...newFarms] : newFarms));
       setHasMore(newFarms.length === 10); // Assume API returns 10 per page
     } catch (err) {
-      console.error('Error fetching farms:', err);
+      console.error("Error fetching farms:", err);
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (isSearchMode) {
+      setFarms(externalFarms || []);
+      setHasMore(false);
+    } else {
+      setPage(1);
+      getFarms(false);
+    }
+  }, [
+    selectedCity,
+    selectedCategory,
+    JSON.stringify(searchFilters),
+    externalFarms,
+  ]);
 
   useEffect(() => {
     setPage(1);
@@ -373,30 +389,93 @@ export default function FarmList({
 
   const sortedFarms = [...farms].sort((a, b) => {
     switch (sortBy) {
-      case 'price-low':
+      case "price-low":
         return parseFloat(a.final_price) - parseFloat(b.final_price);
-      case 'price-high':
+      case "price-high":
         return parseFloat(b.final_price) - parseFloat(a.final_price);
-      case 'rating':
-        return parseFloat(b.reviews_avg_star || 0) - parseFloat(a.reviews_avg_star || 0);
+      case "rating":
+        return (
+          parseFloat(b.reviews_avg_star || 0) -
+          parseFloat(a.reviews_avg_star || 0)
+        );
       default:
         return 0;
     }
   });
 
+  // Add this effect to restore scroll position
+  useEffect(() => {
+    const restoreScrollPosition = () => {
+      // Wait for farms to load and render
+      if (!loading && farms.length > 0) {
+        const savedPosition = sessionStorage.getItem("farmScrollPosition");
+        if (savedPosition) {
+          // Use setTimeout to ensure restoration happens after render
+          setTimeout(() => {
+            window.scrollTo({
+              top: parseInt(savedPosition),
+              behavior: "auto", // Instant scroll
+            });
+
+            // Optional: Highlight last clicked card
+            const lastCard = document.querySelector(".last-clicked-farm");
+            if (lastCard) {
+              lastCard.scrollIntoView({ block: "nearest", behavior: "auto" });
+              lastCard.classList.remove("last-clicked-farm");
+            }
+
+            sessionStorage.removeItem("farmScrollPosition");
+          }, 50); // Short delay to ensure DOM is ready
+        }
+      }
+    };
+
+    restoreScrollPosition();
+
+    // Handle browser back/forward navigation
+    window.addEventListener("popstate", restoreScrollPosition);
+    return () => window.removeEventListener("popstate", restoreScrollPosition);
+  }, [loading, farms]);
+
   const sortOptions = [
-    { value: 'featured', label: 'Featured' },
-    { value: 'price-low', label: 'Price: Low to High' },
-    { value: 'price-high', label: 'Price: High to Low' },
-    { value: 'rating', label: 'Guest Rating' },
+    { value: "featured", label: "Featured" },
+    { value: "price-low", label: "Price: Low to High" },
+    { value: "price-high", label: "Price: High to Low" },
+    { value: "rating", label: "Guest Rating" },
   ];
+
+  // Skeleton loader component that matches FarmCard structure
+  const FarmCardSkeleton = () => (
+    <div className="farm-card animate-card-hover cursor-pointer">
+      <div className="relative">
+        <Skeleton className="h-48 w-full rounded-t-lg" />
+        <Skeleton className="absolute top-3 right-3 w-8 h-8 rounded-full" />
+        <Skeleton className="absolute bottom-3 left-3 h-6 w-20 rounded" />
+      </div>
+      <div className="p-4">
+        <Skeleton className="h-6 w-3/4 mb-2" />
+        <Skeleton className="h-4 w-1/2 mb-4" />
+        <div className="flex justify-between mb-4">
+          <Skeleton className="h-4 w-1/4" />
+          <Skeleton className="h-4 w-1/4" />
+        </div>
+        <Skeleton className="h-4 w-1/3 mb-2" />
+        <div className="flex justify-between mt-4">
+          <Skeleton className="h-6 w-1/3" />
+          <Skeleton className="h-6 w-1/4" />
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <section id="farm-list" className="section-padding bg-white">
       <div className="max-w-7xl mx-auto container-padding">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h2 className="text-3xl font-bold text-neutral-900 mb-2">{title}</h2>
+            <h2 className="text-3xl font-bold text-neutral-900 mb-2">
+              {title}
+            </h2>
             <p className="text-neutral-600">{description}</p>
             {!loading && sortedFarms.length > 0 && (
               <p className="text-sm text-neutral-500 mt-1">
@@ -428,19 +507,29 @@ export default function FarmList({
             </div>
             {hasMore && (
               <div className="flex justify-center mt-10">
-                <Button onClick={() => setPage((prev) => prev + 1)}>Load More</Button>
+                <Button onClick={() => setPage((prev) => prev + 1)}>
+                  Load More
+                </Button>
               </div>
             )}
           </>
         ) : loading ? (
-          <div className="text-center py-16 text-neutral-500">Loading farms...</div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {Array.from({ length: 10 }).map((_, index) => (
+              <FarmCardSkeleton key={index} />
+            ))}
+          </div>
         ) : (
           <div className="text-center py-16">
-            <h3 className="text-xl font-semibold text-neutral-900 mb-2">No farms found</h3>
+            <h3 className="text-xl font-semibold text-neutral-900 mb-2">
+              No farms found
+            </h3>
             <p className="text-neutral-600 mb-6">
               Try changing your search filters or explore other options.
             </p>
-            <Button onClick={() => window.location.reload()}>Clear Filters</Button>
+            <Button onClick={() => window.location.reload()}>
+              Clear Filters
+            </Button>
           </div>
         )}
       </div>

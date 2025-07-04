@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -16,30 +17,32 @@ import {
 } from 'lucide-react';
 
 export default function BookingConfirmation() {
-  const bookingDetails = {
-    id: `BMF${Date.now().toString().slice(-6)}`,
-    farmName: 'Green Valley Resort',
-    location: 'Lonavala, Maharashtra',
-    checkIn: new Date('2025-06-28'),
-    checkOut: new Date('2025-06-30'),
-    guests: 4,
-    totalAmount: 15750,
-    guestName: 'John Doe',
-    guestEmail: 'john.doe@example.com',
-    guestPhone: '+91 9277778778',
-    bookingDate: new Date()
-  };
+
+   const [bookingDetails, setBookingDetails] = useState(null);
+
+
+ 
+  useEffect(() => {
+    const stored = localStorage.getItem('booking-confirmation');
+    if (stored) {
+      setBookingDetails(JSON.parse(stored));
+    }
+  }, []);
+
+  if (!bookingDetails) {
+    return <p className="text-center p-6">Loading booking details...</p>;
+  }
 
   const handleDownloadVoucher = () => {
-    const voucher = `
+const voucher = `
 BOOKING CONFIRMATION
 BookMyFarm
 
 Booking ID: ${bookingDetails.id}
 Property: ${bookingDetails.farmName}
-Location: ${bookingDetails.location}
-Check-in: ${bookingDetails.checkIn.toLocaleDateString()}
-Check-out: ${bookingDetails.checkOut.toLocaleDateString()}
+Location: ${bookingDetails.location_link}
+Check-in: ${new Date(bookingDetails.checkIn).toLocaleDateString()}
+Check-out: ${new Date(bookingDetails.checkOut).toLocaleDateString()}
 Guests: ${bookingDetails.guests}
 Total Amount: ₹${bookingDetails.totalAmount.toLocaleString()}
 
@@ -48,10 +51,11 @@ Name: ${bookingDetails.guestName}
 Email: ${bookingDetails.guestEmail}
 Phone: ${bookingDetails.guestPhone}
 
-Booking Date: ${bookingDetails.bookingDate.toLocaleDateString()}
+Booking Date: ${new Date(bookingDetails.bookingDate).toLocaleDateString()}
 
 Thank you for booking with BookMyFarm!
 `;
+
 
     const blob = new Blob([voucher], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
@@ -111,7 +115,7 @@ Thank you for booking with BookMyFarm!
                     <div>
                       <div className="text-sm text-neutral-500 mb-1">Booking Date</div>
                       <div className="font-medium">
-                        {bookingDetails.bookingDate.toLocaleDateString()}
+                        {new Date(bookingDetails.bookingDate).toLocaleDateString()}
                       </div>
                     </div>
                   </div>
@@ -122,7 +126,7 @@ Thank you for booking with BookMyFarm!
                     </h3>
                     <p className="text-neutral-600 flex items-center">
                       <MapPin className="w-4 h-4 mr-2" />
-                      {bookingDetails.location}
+                      {bookingDetails.location_link}
                     </p>
                   </div>
 
@@ -131,14 +135,14 @@ Thank you for booking with BookMyFarm!
                       <Calendar className="w-5 h-5 text-neutral-500 mx-auto mb-1" />
                       <div className="text-xs text-neutral-500">Check-in</div>
                       <div className="font-medium">
-                        {bookingDetails.checkIn.toLocaleDateString()}
+                     {new Date(bookingDetails.checkIn).toLocaleDateString()}
                       </div>
                     </div>
                     <div className="text-center">
                       <Calendar className="w-5 h-5 text-neutral-500 mx-auto mb-1" />
                       <div className="text-xs text-neutral-500">Check-out</div>
                       <div className="font-medium">
-                        {bookingDetails.checkOut.toLocaleDateString()}
+                       {new Date(bookingDetails.checkOut).toLocaleDateString()}
                       </div>
                     </div>
                     <div className="text-center">

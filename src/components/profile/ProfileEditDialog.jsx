@@ -10,6 +10,7 @@ import { format } from 'date-fns';
 import { CalendarIcon, Upload } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
+import { getUserProfile, updateUserProfile } from '@/services/Auth/auth.service';
 
 
 
@@ -18,53 +19,81 @@ export default function ProfileEditDialog({ isOpen, onClose }) {
   const { user, updateUser } = useAuth();
   
   const [name, setName] = useState(user?.name || '');
-  const [address, setAddress] = useState(user?.address || '');
-  const [location, setLocation] = useState(user?.location || '');
+  const [street, setStreet] = useState(user?.street || '');
+  const [email, setEmail] = useState(user?.email || '');
+  const [city, setCity] = useState(user?.city || '');
 const [dob, setDob] = useState(user?.dob ? new Date(user.dob) : undefined);
-  const [profileImage, setProfileImage] = useState<string | undefined>(user?.profileImage);
-  const [previewImage, setPreviewImage] = useState<string | undefined>(user?.profileImage);
+  const [profile_image, setProfile_image] = useState(user?.profile_image);
+  const [previewImage, setPreviewImage] = useState(user?.profileImage);
 
   // Reset form when dialog opens
   useEffect(() => {
     if (isOpen && user) {
       setName(user.name || '');
-      setAddress(user.address || '');
-      setLocation(user.location || '');
+      setStreet(user.street || '');
+      setEmail(user.email || '');
+      setCity(user.city || '');
       setDob(user.dob ? new Date(user.dob) : undefined);
-      setProfileImage(user.profileImage);
-      setPreviewImage(user.profileImage);
+      setProfile_image(user.profile_image);
+      setPreviewImage(user.profile_image);
     }
   }, [isOpen, user]);
 
-  const handleImageChange = (e) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      // Create a preview URL for the selected image
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const result = reader.result;
 
-        setPreviewImage(result);
-        setProfileImage(result); // In a real app, you would upload this to a server
-      };
-      reader.readAsDataURL(file);
-    }
+
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  const token = localStorage.getItem("accessToken");
+  if (!token) return alert("You must be logged in to update your profile.");
+
+  const payload = {
+    name,
+    email,
+    street,
+    city,
+    date_of_birth: dob ? dob.toISOString().split("T")[0] : "",
+    profile_image: previewImage, // will be a File if new image selected
   };
+  console.log("🚀 ~ handleSubmit ~ payload:", payload)
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  try {
+    const res = await updateUserProfile(payload, token);
+    const newToken = res?.data?.token;
+    if (newToken) localStorage.setItem("accessToken", newToken);
     
-    // Update user profile
-    updateUser({
-      name,
-      address,
-      location,
-      dob: dob ? dob.toISOString().split('T')[0] : undefined, // Format as YYYY-MM-DD
-      profileImage
-    });
-    
+    // refetch user
+    const userRes = await getUserProfile(newToken || token);
+    updateUser(userRes?.data);
     onClose();
-  };
+  } catch (err) {
+    console.error("❌ Failed to update profile", err);
+    alert("Update failed. Please try again.");
+  }
+};
+
+
+const handleImageChange = (e) => {
+  const file = e.target.files?.[0];
+  if (file) {
+    setPreviewImage(file); // for upload
+    const reader = new FileReader();
+    reader.onloadend = () => setProfile_image(reader.result); // just for preview
+    reader.readAsDataURL(file);
+  }
+};
+
+
+let imageUrl = null;
+
+if (previewImage instanceof File) {
+  // create a temporary preview URL for image file
+  imageUrl = URL.createObjectURL(previewImage);
+} else if (typeof previewImage === "string" && previewImage.startsWith("data:")) {
+  imageUrl = previewImage; // base64 preview
+} else if (profile_image) {
+  imageUrl = `https://api.bookmyfarm.net/assets/images/user_profiles/${profile_image}`;
+}
+
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -76,19 +105,20 @@ const [dob, setDob] = useState(user?.dob ? new Date(user.dob) : undefined);
         <form onSubmit={handleSubmit} className="space-y-4 py-4">
           <div className="flex flex-col items-center mb-4">
             <div className="relative w-24 h-24 mb-2">
-              {previewImage ? (
-                <img 
-                  src={previewImage} 
-                  alt="Profile Preview" 
-                  className="w-24 h-24 rounded-full object-cover border-4 border-primary"
-                />
-              ) : (
-                <div className="w-24 h-24 rounded-full bg-muted flex items-center justify-center border-4 border-primary">
-                  <span className="text-2xl font-bold text-muted-foreground">
-                    {name.charAt(0).toUpperCase()}
-                  </span>
-                </div>
-              )}
+              {imageUrl ? (
+  <img
+    src={imageUrl}
+    alt="Profile Preview"
+    className="w-24 h-24 rounded-full object-cover border-4 border-primary"
+  />
+) : (
+  <div className="w-24 h-24 rounded-full bg-muted flex items-center justify-center border-4 border-primary">
+    <span className="text-2xl font-bold text-muted-foreground">
+      {name.charAt(0).toUpperCase()}
+    </span>
+  </div>
+)}
+
               <label 
                 htmlFor="profile-image" 
                 className="absolute bottom-0 right-0 bg-primary text-white p-1 rounded-full cursor-pointer"
@@ -115,23 +145,32 @@ const [dob, setDob] = useState(user?.dob ? new Date(user.dob) : undefined);
               placeholder="Your Name"
             />
           </div>
+           <div className="space-y-2">
+            <Label htmlFor="email">Email</Label>
+            <Input 
+              id="email" 
+              value={email} 
+              onChange={(e) => setEmail(e.target.value)} 
+              placeholder="Your Name"
+            />
+          </div>
           
           <div className="space-y-2">
-            <Label htmlFor="location">Location</Label>
+            <Label htmlFor="city">Location</Label>
             <Input 
-              id="location" 
-              value={location} 
-              onChange={(e) => setLocation(e.target.value)} 
+              id="city" 
+              value={city} 
+              onChange={(e) => setCity(e.target.value)} 
               placeholder="City, State"
             />
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="address">Address</Label>
+            <Label htmlFor="street">Address</Label>
             <Input 
-              id="address" 
-              value={address} 
-              onChange={(e) => setAddress(e.target.value)} 
+              id="street" 
+              value={street} 
+              onChange={(e) => setStreet(e.target.value)} 
               placeholder="Your Address"
             />
           </div>
@@ -152,13 +191,25 @@ const [dob, setDob] = useState(user?.dob ? new Date(user.dob) : undefined);
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={dob}
-                  onSelect={setDob}
-                  initialFocus
-                  disabled={(date) => date > new Date()}
-                />
+<Calendar
+  mode="single"
+  selected={dob}
+  onSelect={setDob}
+  captionLayout="dropdown"
+  fromYear={1950}
+  toYear={new Date().getFullYear()}
+  defaultMonth={dob || new Date(2000, 0, 1)}
+  disabled={(date) => date > new Date()}
+  classNames={{
+    caption_dropdowns: "flex gap-1  pt-3 pb-2",
+    dropdown:
+      "h-8 rounded-md border border-input bg-background px-1 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-primary disabled:cursor-not-allowed disabled:opacity-50",
+    caption_label: "hidden", // hide the default caption if needed
+  }}
+/>
+
+
+
               </PopoverContent>
             </Popover>
           </div>

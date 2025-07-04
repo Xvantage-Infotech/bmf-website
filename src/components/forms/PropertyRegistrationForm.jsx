@@ -1,152 +1,440 @@
-'use client';
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Upload, X, CheckCircle, AlertCircle } from 'lucide-react';
-import { FACILITY_OPTIONS, TIME_OPTIONS } from '@/constants/categories';
+"use client";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Upload, X, CheckCircle, AlertCircle } from "lucide-react";
+import { FACILITY_OPTIONS, TIME_OPTIONS } from "@/constants/categories";
+import { submitProperty } from "@/services/Listfarm/listfarm.service";
+import { useAuth } from "@/contexts/AuthContext";
+import { useDialog } from "@/hooks/use-dialog";
 
+// ✅ Move this above the default export or in a separate file
+const InputField = ({
+  name,
+  label,
+  type = "text",
+  required = false,
+  placeholder = "",
+  note = "",
+  formData,
+  errors,
+  handleInputChange,
+  validateField,
+  setErrors,
+}) => {
+  const handleBlur = () => {
+    const error = validateField(name, formData[name]);
+    if (error) {
+      setErrors((prev) => ({ ...prev, [name]: error }));
+    }
+  };
 
+  return (
+    <div className="space-y-2">
+      <Label htmlFor={name} className="flex items-center gap-1">
+        {label}
+        {required && <span className="text-red-500">*</span>}
+        {note && (
+          <span className="text-xs text-neutral-500 ml-2">({note})</span>
+        )}
+      </Label>
+      <Input
+        id={name}
+        name={name}
+        type={type}
+        value={formData[name] ?? ""}
+        onChange={(e) => handleInputChange(name, e.target.value)}
+        onBlur={handleBlur}
+        placeholder={placeholder}
+        className={errors[name] ? "border-red-500" : ""}
+      />
+      {errors[name] && (
+        <p className="text-sm text-red-500 flex items-center gap-1">
+          <AlertCircle className="w-4 h-4" />
+          {errors[name]}
+        </p>
+      )}
+    </div>
+  );
+};
 
 export default function PropertyRegistrationForm() {
+  const { user } = useAuth();
+  const { show } = useDialog();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!validateForm()) return;
+
+    if (!user?.token) {
+      alert("Please log in to register your property.");
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const response = await submitProperty(formData, user.token);
+
+       show({
+        title: "Property Submitted!",
+        description: "We’ll review it and get back to you soon.",
+      });
+
+      setFormData({
+        // Backend-required fields
+        name: "",
+        size: "",
+        facilities: [],
+        swimming_pool_size: "",
+        care_taker_name: "",
+        care_taker_number: "",
+        person_limit: "",
+        day_capacity: "",
+        night_capacity: "",
+        extra_person_charge: "",
+        weekday_half_day_price: "",
+        weekday_full_day_price: "",
+        weekend_half_day_price: "",
+        weekend_full_day_price: "",
+        address: "",
+        city: "",
+        near_by_area: "",
+        location_link: "",
+        referral_code: "",
+        photos: [],
+
+        // Frontend-only fields (not sent to backend)
+        farmOwnerName: "",
+        farmOwnerMobile: "",
+        farmOwnerEmail: "",
+        checkInTime: "",
+        checkOutTime: "",
+        kidsSwimmingPool: false,
+        propertyRules: "",
+      });
+
+      setErrors({});
+    } catch (error) {
+      console.error("❌ Error submitting property:", error);
+      alert(
+        error?.message ||
+          "There was an error submitting your application. Please try again."
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // const [formData, setFormData] = useState({
+  //   farmOwnerName: "",
+  //   farmOwnerMobile: "",
+  //   farmOwnerEmail: "",
+  //   farmName: "",
+  //   city: "",
+  //   nearbyArea: "",
+  //   personLimit: "",
+  //   guestStayCapacityDay: "",
+  //   guestStayCapacityNight: "",
+  //   farmSizeSqYd: "",
+  //   extraPersonChargeWeekdays: "",
+  //   extraPersonChargeWeekends: "",
+  //   price12HourWeekday: "",
+  //   price24HourWeekday: "",
+  //   price12HourWeekend: "",
+  //   price24HourWeekend: "",
+  //   checkInTime: "",
+  //   checkOutTime: "",
+  //   caretakerName: "",
+  //   caretakerNumber: "",
+  //   farmAddress: "",
+  //   farmFacilities: [],
+  //   locationLink: "",
+  //   propertyRules: "",
+  //   swimmingPoolSize: "",
+  //   kidsSwimmingPool: false,
+  //   referralCode: "",
+  //   propertyPhotos: [],
+  // });
+
   const [formData, setFormData] = useState({
-    farmOwnerName: '',
-    farmOwnerMobile: '',
-    farmOwnerEmail: '',
-    farmName: '',
-    city: '',
-    nearbyArea: '',
-    personLimit: '',
-    guestStayCapacityDay: '',
-    guestStayCapacityNight: '',
-    farmSizeSqYd: '',
-    extraPersonChargeWeekdays: '',
-    extraPersonChargeWeekends: '',
-    price12HourWeekday: '',
-    price24HourWeekday: '',
-    price12HourWeekend: '',
-    price24HourWeekend: '',
-    checkInTime: '',
-    checkOutTime: '',
-    caretakerName: '',
-    caretakerNumber: '',
-    farmAddress: '',
-    farmFacilities: [],
-    locationLink: '',
-    propertyRules: '',
-    swimmingPoolSize: '',
+    // Backend-required fields
+    name: "",
+    size: "",
+    facilities: [],
+    swimming_pool_size: "",
+    care_taker_name: "",
+    care_taker_number: "",
+    person_limit: "",
+    day_capacity: "",
+    night_capacity: "",
+    extra_person_charge: "",
+    weekday_half_day_price: "",
+    weekday_full_day_price: "",
+    weekend_half_day_price: "",
+    weekend_full_day_price: "",
+    address: "",
+    city: "",
+    near_by_area: "",
+    location_link: "",
+    referral_code: "",
+    photos: [],
+
+    // Extra frontend-only fields (not sent to backend)
+    farmOwnerName: "",
+    farmOwnerMobile: "",
+    farmOwnerEmail: "",
+    checkInTime: "",
+    checkOutTime: "",
     kidsSwimmingPool: false,
-    referralCode: '',
-    propertyPhotos: []
+    propertyRules: "",
   });
 
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const validateField = (name,value)=> {
+  // const validateField = (name, value) => {
+  //   switch (name) {
+  //     case "farmOwnerMobile":
+  //     case "caretakerNumber":
+  //       if (typeof value === "string" && value && !/^\d{10}$/.test(value)) {
+  //         return "Please enter a valid 10-digit mobile number";
+  //       }
+  //       break;
+  //     case "farmOwnerEmail":
+  //       if (
+  //         typeof value === "string" &&
+  //         value &&
+  //         !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
+  //       ) {
+  //         return "Please enter a valid email address";
+  //       }
+  //       break;
+  //     case "locationLink":
+  //       if (
+  //         typeof value === "string" &&
+  //         value &&
+  //         !/^https?:\/\/.+/.test(value)
+  //       ) {
+  //         return "Please enter a valid URL (starting with http:// or https://)";
+  //       }
+  //       break;
+  //     case "propertyPhotos":
+  //       if (Array.isArray(value) && value.length === 0) {
+  //         return "Please upload at least one property photo";
+  //       }
+  //       if (Array.isArray(value) && value.length > 10) {
+  //         return "Maximum 10 photos allowed";
+  //       }
+  //       break;
+  //   }
+  //   return "";
+  // };
+
+  const validateField = (name, value) => {
     switch (name) {
-      case 'farmOwnerMobile':
-      case 'caretakerNumber':
-        if (typeof value === 'string' && value && !/^\d{10}$/.test(value)) {
-          return 'Please enter a valid 10-digit mobile number';
+      case "farmOwnerMobile":
+      case "care_taker_number":
+        if (typeof value === "string" && value && !/^\d{10}$/.test(value)) {
+          return "Please enter a valid 10-digit mobile number";
         }
         break;
-      case 'farmOwnerEmail':
-        if (typeof value === 'string' && value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-          return 'Please enter a valid email address';
+
+      case "farmOwnerEmail":
+        if (
+          typeof value === "string" &&
+          value &&
+          !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
+        ) {
+          return "Please enter a valid email address";
         }
         break;
-      case 'locationLink':
-        if (typeof value === 'string' && value && !/^https?:\/\/.+/.test(value)) {
-          return 'Please enter a valid URL (starting with http:// or https://)';
+
+      case "location_link":
+        if (
+          typeof value === "string" &&
+          value &&
+          !/^https?:\/\/.+/.test(value)
+        ) {
+          return "Please enter a valid URL (starting with http:// or https://)";
         }
         break;
-      case 'propertyPhotos':
+
+      case "photos":
         if (Array.isArray(value) && value.length === 0) {
-          return 'Please upload at least one property photo';
+          return "Please upload at least one property photo";
         }
         if (Array.isArray(value) && value.length > 10) {
-          return 'Maximum 10 photos allowed';
+          return "Maximum 10 photos allowed";
         }
         break;
     }
-    return '';
+    return "";
   };
 
-  const handleInputChange = (name,value) => {
-    setFormData(prev => ({ ...prev, [name]: value }));
-    
+  const handleInputChange = (name, value) => {
+    setFormData((prev) => ({ ...prev, [name]: value }));
+
     // Clear error when user starts typing
     if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: '' }));
+      setErrors((prev) => ({ ...prev, [name]: "" }));
     }
-    
-    // Validate field on change
-    const error = validateField(name, value);
-    if (error) {
-      setErrors(prev => ({ ...prev, [name]: error }));
-    }
+
+    // // Validate field on change
+    // const error = validateField(name, value);
+    // if (error) {
+    //   setErrors((prev) => ({ ...prev, [name]: error }));
+    // }
   };
+
+  // const handleFileUpload = (files) => {
+  //   if (!files) return;
+
+  //   const newFiles = Array.from(files);
+  //   const validFiles = newFiles.filter((file) => {
+  //     const isValidType =
+  //       file.type.startsWith("image/") || file.type.startsWith("video/");
+  //     const isValidSize = file.size <= 10 * 1024 * 1024; // 10MB
+  //     return isValidType && isValidSize;
+  //   });
+
+  //   if (validFiles.length !== newFiles.length) {
+  //     setErrors((prev) => ({
+  //       ...prev,
+  //       propertyPhotos:
+  //         "Some files were rejected. Only images/videos under 10MB are allowed.",
+  //     }));
+  //   }
+
+  //   const updatedFiles = [...formData.propertyPhotos, ...validFiles].slice(
+  //     0,
+  //     10
+  //   );
+  //   handleInputChange("propertyPhotos", updatedFiles);
+  // };
 
   const handleFileUpload = (files) => {
     if (!files) return;
-    
+
     const newFiles = Array.from(files);
-    const validFiles = newFiles.filter(file => {
-      const isValidType = file.type.startsWith('image/') || file.type.startsWith('video/');
+    const validFiles = newFiles.filter((file) => {
+      const isValidType =
+        file.type.startsWith("image/") || file.type.startsWith("video/");
       const isValidSize = file.size <= 10 * 1024 * 1024; // 10MB
       return isValidType && isValidSize;
     });
 
     if (validFiles.length !== newFiles.length) {
-      setErrors(prev => ({ 
-        ...prev, 
-        propertyPhotos: 'Some files were rejected. Only images/videos under 10MB are allowed.' 
+      setErrors((prev) => ({
+        ...prev,
+        photos:
+          "Some files were rejected. Only images/videos under 10MB are allowed.",
       }));
     }
 
-    const updatedFiles = [...formData.propertyPhotos, ...validFiles].slice(0, 10);
-    handleInputChange('propertyPhotos', updatedFiles);
+    const updatedFiles = [...formData.photos, ...validFiles].slice(0, 10);
+    handleInputChange("photos", updatedFiles);
   };
 
+  // const removeFile = (index) => {
+  //   const updatedFiles = formData.propertyPhotos.filter((_, i) => i !== index);
+  //   handleInputChange("propertyPhotos", updatedFiles);
+  // };
   const removeFile = (index) => {
-    const updatedFiles = formData.propertyPhotos.filter((_, i) => i !== index);
-    handleInputChange('propertyPhotos', updatedFiles);
+    const updatedFiles = formData.photos.filter((_, i) => i !== index);
+    handleInputChange("photos", updatedFiles);
   };
 
-  const validateForm = ()=> {
+  const validateForm = () => {
     const newErrors = {};
-    
+
     // Required field validation
+    // const requiredFields = [
+    //   "farmOwnerName",
+    //   "farmOwnerMobile",
+    //   "farmOwnerEmail",
+    //   "farmName",
+    //   "city",
+    //   "nearbyArea",
+    //   "personLimit",
+    //   "guestStayCapacityDay",
+    //   "guestStayCapacityNight",
+    //   "farmSizeSqYd",
+    //   "extraPersonChargeWeekdays",
+    //   "extraPersonChargeWeekends",
+    //   "price12HourWeekday",
+    //   "price24HourWeekday",
+    //   "price12HourWeekend",
+    //   "price24HourWeekend",
+    //   "checkInTime",
+    //   "checkOutTime",
+    //   "caretakerName",
+    //   "caretakerNumber",
+    //   "farmAddress",
+    //   "locationLink",
+    //   "propertyRules",
+    // ];
     const requiredFields = [
-      'farmOwnerName', 'farmOwnerMobile', 'farmOwnerEmail', 'farmName', 'city', 
-      'nearbyArea', 'personLimit', 'guestStayCapacityDay', 'guestStayCapacityNight',
-      'farmSizeSqYd', 'extraPersonChargeWeekdays', 'extraPersonChargeWeekends',
-      'price12HourWeekday', 'price24HourWeekday', 'price12HourWeekend', 'price24HourWeekend',
-      'checkInTime', 'checkOutTime', 'caretakerName', 'caretakerNumber', 'farmAddress',
-      'locationLink', 'propertyRules'
+      "farmOwnerName", // frontend only
+      "farmOwnerMobile", // frontend only
+      "farmOwnerEmail", // frontend only
+      "name",
+      "city",
+      "near_by_area",
+      "person_limit",
+      "day_capacity",
+      "night_capacity",
+      "size",
+      "extra_person_charge",
+      "weekday_half_day_price",
+      "weekday_full_day_price",
+      "weekend_half_day_price",
+      "weekend_full_day_price",
+      "checkInTime", // frontend only
+      "checkOutTime", // frontend only
+      "care_taker_name",
+      "care_taker_number",
+      "address",
+      "location_link",
+      "propertyRules", // frontend only
     ];
 
-    requiredFields.forEach(field => {
+    requiredFields.forEach((field) => {
       const value = formData[field];
-      if (!value || (typeof value === 'string' && !value.trim())) {
-        newErrors[field] = 'This field is required';
+      if (!value || (typeof value === "string" && !value.trim())) {
+        newErrors[field] = "This field is required";
       }
     });
 
     // Facilities validation
-    if (formData.farmFacilities.length === 0) {
-      newErrors.farmFacilities = 'Please select at least one facility';
+    // if (formData.farmFacilities.length === 0) {
+    //   newErrors.farmFacilities = "Please select at least one facility";
+    // }
+
+    // // Photos validation
+    // if (formData.propertyPhotos.length === 0) {
+    //   newErrors.propertyPhotos = "Please upload at least one property photo";
+    // }
+
+    if (formData.facilities.length === 0) {
+      newErrors.facilities = "Please select at least one facility";
     }
 
-    // Photos validation
-    if (formData.propertyPhotos.length === 0) {
-      newErrors.propertyPhotos = 'Please upload at least one property photo';
+    if (formData.photos.length === 0) {
+      newErrors.photos = "Please upload at least one property photo";
     }
 
     // Field-specific validation
@@ -161,97 +449,39 @@ export default function PropertyRegistrationForm() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    if (!validateForm()) {
-      return;
-    }
-
-    setIsSubmitting(true);
-    
-    try {
-      // TODO: Implement actual form submission
-      console.log('Form submitted:', formData);
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      alert('Property registration submitted successfully! We will review your application and contact you within 2-3 business days.');
-      
-      // Reset form
-      setFormData({
-        farmOwnerName: '',
-        farmOwnerMobile: '',
-        farmOwnerEmail: '',
-        farmName: '',
-        city: '',
-        nearbyArea: '',
-        personLimit: '',
-        guestStayCapacityDay: '',
-        guestStayCapacityNight: '',
-        farmSizeSqYd: '',
-        extraPersonChargeWeekdays: '',
-        extraPersonChargeWeekends: '',
-        price12HourWeekday: '',
-        price24HourWeekday: '',
-        price12HourWeekend: '',
-        price24HourWeekend: '',
-        checkInTime: '',
-        checkOutTime: '',
-        caretakerName: '',
-        caretakerNumber: '',
-        farmAddress: '',
-        farmFacilities: [],
-        locationLink: '',
-        propertyRules: '',
-        swimmingPoolSize: '',
-        kidsSwimmingPool: false,
-        referralCode: '',
-        propertyPhotos: []
-      });
-      setErrors({});
-      
-    } catch (error) {
-      console.error('Error submitting form:', error);
-      alert('There was an error submitting your application. Please try again.');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-const InputField = ({
-  name,
-  label,
-  type = 'text',
-  required = false,
-  placeholder = '',
-  note = ''
-}) => (
-
-    <div className="space-y-2">
-      <Label htmlFor={name} className="flex items-center gap-1">
-        {label}
-        {required && <span className="text-red-500">*</span>}
-        {note && <span className="text-xs text-neutral-500 ml-2">({note})</span>}
-      </Label>
-      <Input
-        id={name}
-        name={name}
-        type={type}
-        value={formData[name]}
-        onChange={(e) => handleInputChange(name, e.target.value)}
-        placeholder={placeholder}
-        className={errors[name] ? 'border-red-500' : ''}
-      />
-      {errors[name] && (
-        <p className="text-sm text-red-500 flex items-center gap-1">
-          <AlertCircle className="w-4 h-4" />
-          {errors[name]}
-        </p>
-      )}
-    </div>
-  );
+  // const InputField = ({
+  //   name,
+  //   label,
+  //   type = "text",
+  //   required = false,
+  //   placeholder = "",
+  //   note = "",
+  // }) => (
+  //   <div className="space-y-2">
+  //     <Label htmlFor={name} className="flex items-center gap-1">
+  //       {label}
+  //       {required && <span className="text-red-500">*</span>}
+  //       {note && (
+  //         <span className="text-xs text-neutral-500 ml-2">({note})</span>
+  //       )}
+  //     </Label>
+  //     <Input
+  //       id={name}
+  //       name={name}
+  //       type={type}
+  //       value={formData[name] ?? ""} // ✅ Safe fallback for undefined/null
+  //       onChange={(e) => handleInputChange(name, e.target.value)}
+  //       placeholder={placeholder}
+  //       className={errors[name] ? "border-red-500" : ""}
+  //     />
+  //     {errors[name] && (
+  //       <p className="text-sm text-red-500 flex items-center gap-1">
+  //         <AlertCircle className="w-4 h-4" />
+  //         {errors[name]}
+  //       </p>
+  //     )}
+  //   </div>
+  // );
 
   return (
     <form onSubmit={handleSubmit} className="max-w-4xl mx-auto space-y-8">
@@ -267,6 +497,11 @@ const InputField = ({
               label="Farm Owner Name"
               required
               placeholder="Enter full name"
+              formData={formData}
+              errors={errors}
+              handleInputChange={handleInputChange}
+              validateField={validateField}
+              setErrors={setErrors}
             />
             <InputField
               name="farmOwnerMobile"
@@ -274,6 +509,11 @@ const InputField = ({
               type="tel"
               required
               placeholder="10-digit mobile number"
+              formData={formData}
+              errors={errors}
+              handleInputChange={handleInputChange}
+              validateField={validateField}
+              setErrors={setErrors}
             />
           </div>
           <InputField
@@ -282,6 +522,11 @@ const InputField = ({
             type="email"
             required
             placeholder="owner@example.com"
+            formData={formData}
+            errors={errors}
+            handleInputChange={handleInputChange}
+            validateField={validateField}
+            setErrors={setErrors}
           />
         </CardContent>
       </Card>
@@ -293,58 +538,93 @@ const InputField = ({
         </CardHeader>
         <CardContent className="space-y-6">
           <InputField
-            name="farmName"
+            name="name"
             label="Farm Name"
             required
             placeholder="Enter property name"
+            formData={formData}
+            errors={errors}
+            handleInputChange={handleInputChange}
+            validateField={validateField}
+            setErrors={setErrors}
           />
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <InputField
               name="city"
               label="City"
               required
               placeholder="Enter city"
+              formData={formData}
+              errors={errors}
+              handleInputChange={handleInputChange}
+              validateField={validateField}
+              setErrors={setErrors}
             />
             <InputField
-              name="nearbyArea"
+              name="near_by_area"
               label="Nearby Area"
               required
               placeholder="Enter nearby area/landmark"
+              formData={formData}
+              errors={errors}
+              handleInputChange={handleInputChange}
+              validateField={validateField}
+              setErrors={setErrors}
             />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <InputField
-              name="personLimit"
+              name="person_limit"
               label="Person Limit"
               type="number"
               required
               note="extra charge applies"
               placeholder="Maximum guests"
+              formData={formData}
+              errors={errors}
+              handleInputChange={handleInputChange}
+              validateField={validateField}
+              setErrors={setErrors}
             />
             <InputField
-              name="guestStayCapacityDay"
+              name="day_capacity"
               label="Guest Stay Capacity (Day)"
               type="number"
               required
               placeholder="Day capacity"
+              formData={formData}
+              errors={errors}
+              handleInputChange={handleInputChange}
+              validateField={validateField}
+              setErrors={setErrors}
             />
             <InputField
-              name="guestStayCapacityNight"
+              name="night_capacity"
               label="Guest Stay Capacity (Night)"
               type="number"
               required
               placeholder="Night capacity"
+              formData={formData}
+              errors={errors}
+              handleInputChange={handleInputChange}
+              validateField={validateField}
+              setErrors={setErrors}
             />
           </div>
 
           <InputField
-            name="farmSizeSqYd"
+            name="size"
             label="Farm Size in Sq yd"
             type="number"
             required
             placeholder="Enter size in square yards"
+            formData={formData}
+            errors={errors}
+            handleInputChange={handleInputChange}
+            validateField={validateField}
+            setErrors={setErrors}
           />
         </CardContent>
       </Card>
@@ -357,18 +637,28 @@ const InputField = ({
         <CardContent className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <InputField
-              name="extraPersonChargeWeekdays"
+              name="extra_person_charge"
               label="Extra Person Charge on Weekdays"
               type="number"
               required
               placeholder="Amount in ₹"
+              formData={formData}
+              errors={errors}
+              handleInputChange={handleInputChange}
+              validateField={validateField}
+              setErrors={setErrors}
             />
             <InputField
-              name="extraPersonChargeWeekends"
+              name="extra_person_charge"
               label="Extra Person Charge on Weekends"
               type="number"
               required
               placeholder="Amount in ₹"
+              formData={formData}
+              errors={errors}
+              handleInputChange={handleInputChange}
+              validateField={validateField}
+              setErrors={setErrors}
             />
           </div>
 
@@ -376,35 +666,55 @@ const InputField = ({
             <div className="space-y-4">
               <h4 className="font-medium text-neutral-900">Weekday Pricing</h4>
               <InputField
-                name="price12HourWeekday"
+                name="weekday_half_day_price"
                 label="12-Hour Price Weekday"
                 type="number"
                 required
                 placeholder="Amount in ₹"
+                formData={formData}
+                errors={errors}
+                handleInputChange={handleInputChange}
+                validateField={validateField}
+                setErrors={setErrors}
               />
               <InputField
-                name="price24HourWeekday"
+                name="weekday_full_day_price"
                 label="24-Hour Price Weekday"
                 type="number"
                 required
                 placeholder="Amount in ₹"
+                formData={formData}
+                errors={errors}
+                handleInputChange={handleInputChange}
+                validateField={validateField}
+                setErrors={setErrors}
               />
             </div>
             <div className="space-y-4">
               <h4 className="font-medium text-neutral-900">Weekend Pricing</h4>
               <InputField
-                name="price12HourWeekend"
+                name="weekend_half_day_price"
                 label="12-Hour Price Weekend"
                 type="number"
                 required
                 placeholder="Amount in ₹"
+                formData={formData}
+                errors={errors}
+                handleInputChange={handleInputChange}
+                validateField={validateField}
+                setErrors={setErrors}
               />
               <InputField
-                name="price24HourWeekend"
+                name="weekend_full_day_price"
                 label="24-Hour Price Weekend"
                 type="number"
                 required
                 placeholder="Amount in ₹"
+                formData={formData}
+                errors={errors}
+                handleInputChange={handleInputChange}
+                validateField={validateField}
+                setErrors={setErrors}
               />
             </div>
           </div>
@@ -422,8 +732,15 @@ const InputField = ({
               <Label className="flex items-center gap-1">
                 Check-In Time <span className="text-red-500">*</span>
               </Label>
-              <Select value={formData.checkInTime} onValueChange={(value) => handleInputChange('checkInTime', value)}>
-                <SelectTrigger className={errors.checkInTime ? 'border-red-500' : ''}>
+              <Select
+                value={formData.checkInTime}
+                onValueChange={(value) =>
+                  handleInputChange("checkInTime", value)
+                }
+              >
+                <SelectTrigger
+                  className={errors.checkInTime ? "border-red-500" : ""}
+                >
                   <SelectValue placeholder="Select check-in time" />
                 </SelectTrigger>
                 <SelectContent>
@@ -446,8 +763,15 @@ const InputField = ({
               <Label className="flex items-center gap-1">
                 Check-Out Time <span className="text-red-500">*</span>
               </Label>
-              <Select value={formData.checkOutTime} onValueChange={(value) => handleInputChange('checkOutTime', value)}>
-                <SelectTrigger className={errors.checkOutTime ? 'border-red-500' : ''}>
+              <Select
+                value={formData.checkOutTime}
+                onValueChange={(value) =>
+                  handleInputChange("checkOutTime", value)
+                }
+              >
+                <SelectTrigger
+                  className={errors.checkOutTime ? "border-red-500" : ""}
+                >
                   <SelectValue placeholder="Select check-out time" />
                 </SelectTrigger>
                 <SelectContent>
@@ -477,17 +801,27 @@ const InputField = ({
         <CardContent className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <InputField
-              name="caretakerName"
+              name="care_taker_name"
               label="Caretaker Name"
               required
               placeholder="Enter caretaker name"
+              formData={formData}
+              errors={errors}
+              handleInputChange={handleInputChange}
+              validateField={validateField}
+              setErrors={setErrors}
             />
             <InputField
-              name="caretakerNumber"
+              name="care_taker_number"
               label="Caretaker Number"
               type="tel"
               required
               placeholder="10-digit mobile number"
+              formData={formData}
+              errors={errors}
+              handleInputChange={handleInputChange}
+              validateField={validateField}
+              setErrors={setErrors}
             />
           </div>
         </CardContent>
@@ -504,16 +838,16 @@ const InputField = ({
               Farm Address <span className="text-red-500">*</span>
             </Label>
             <Textarea
-              value={formData.farmAddress}
-              onChange={(e) => handleInputChange('farmAddress', e.target.value)}
+              value={formData.address}
+              onChange={(e) => handleInputChange("address", e.target.value)}
               placeholder="Enter complete farm address"
               rows={3}
-              className={errors.farmAddress ? 'border-red-500' : ''}
+              className={errors.address ? "border-red-500" : ""}
             />
-            {errors.farmAddress && (
+            {errors.address && (
               <p className="text-sm text-red-500 flex items-center gap-1">
                 <AlertCircle className="w-4 h-4" />
-                {errors.farmAddress}
+                {errors.address}
               </p>
             )}
           </div>
@@ -524,14 +858,23 @@ const InputField = ({
             </Label>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3 p-4 border rounded-lg">
               {FACILITY_OPTIONS.map((facility) => (
-                <label key={facility} className="flex items-center space-x-2 cursor-pointer">
+                <label
+                  key={facility}
+                  className="flex items-center space-x-2 cursor-pointer"
+                >
                   <Checkbox
-                    checked={formData.farmFacilities.includes(facility)}
+                    checked={formData.facilities.includes(facility)}
                     onCheckedChange={(checked) => {
                       if (checked) {
-                        handleInputChange('farmFacilities', [...formData.farmFacilities, facility]);
+                        handleInputChange("facilities", [
+                          ...formData.facilities,
+                          facility,
+                        ]);
                       } else {
-                        handleInputChange('farmFacilities', formData.farmFacilities.filter(f => f !== facility));
+                        handleInputChange(
+                          "facilities",
+                          formData.facilities.filter((f) => f !== facility)
+                        );
                       }
                     }}
                   />
@@ -539,20 +882,25 @@ const InputField = ({
                 </label>
               ))}
             </div>
-            {errors.farmFacilities && (
+            {errors.facilities && (
               <p className="text-sm text-red-500 flex items-center gap-1">
                 <AlertCircle className="w-4 h-4" />
-                {errors.farmFacilities}
+                {errors.facilities}
               </p>
             )}
           </div>
 
           <InputField
-            name="locationLink"
+            name="location_link"
             label="Location Link"
             type="url"
             required
             placeholder="https://maps.google.com/..."
+            formData={formData}
+            errors={errors}
+            handleInputChange={handleInputChange}
+            validateField={validateField}
+            setErrors={setErrors}
           />
 
           <div className="space-y-2">
@@ -561,10 +909,12 @@ const InputField = ({
             </Label>
             <Textarea
               value={formData.propertyRules}
-              onChange={(e) => handleInputChange('propertyRules', e.target.value)}
+              onChange={(e) =>
+                handleInputChange("propertyRules", e.target.value)
+              }
               placeholder="Enter property rules and regulations"
               rows={4}
-              className={errors.propertyRules ? 'border-red-500' : ''}
+              className={errors.propertyRules ? "border-red-500" : ""}
             />
             {errors.propertyRules && (
               <p className="text-sm text-red-500 flex items-center gap-1">
@@ -576,11 +926,16 @@ const InputField = ({
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <InputField
-              name="swimmingPoolSize"
+              name="swimming_pool_size"
               label="Swimming Pool Size"
               placeholder="e.g., 20x10 feet (optional)"
+              formData={formData}
+              errors={errors}
+              handleInputChange={handleInputChange}
+              validateField={validateField}
+              setErrors={setErrors}
             />
-            
+
             <div className="space-y-2">
               <Label>Kids Swimming Pool Available?</Label>
               <div className="flex items-center space-x-4">
@@ -589,7 +944,7 @@ const InputField = ({
                     type="radio"
                     name="kidsSwimmingPool"
                     checked={formData.kidsSwimmingPool === true}
-                    onChange={() => handleInputChange('kidsSwimmingPool', true)}
+                    onChange={() => handleInputChange("kidsSwimmingPool", true)}
                   />
                   <span>Yes</span>
                 </label>
@@ -598,7 +953,9 @@ const InputField = ({
                     type="radio"
                     name="kidsSwimmingPool"
                     checked={formData.kidsSwimmingPool === false}
-                    onChange={() => handleInputChange('kidsSwimmingPool', false)}
+                    onChange={() =>
+                      handleInputChange("kidsSwimmingPool", false)
+                    }
                   />
                   <span>No</span>
                 </label>
@@ -607,9 +964,14 @@ const InputField = ({
           </div>
 
           <InputField
-            name="referralCode"
+            name="referral_code"
             label="Referral Code"
             placeholder="Enter referral code (optional)"
+            formData={formData}
+            errors={errors}
+            handleInputChange={handleInputChange}
+            validateField={validateField}
+            setErrors={setErrors}
           />
         </CardContent>
       </Card>
@@ -623,31 +985,37 @@ const InputField = ({
           <div className="space-y-2">
             <Label className="flex items-center gap-1">
               Upload Property Photos <span className="text-red-500">*</span>
-              <span className="text-xs text-neutral-500 ml-2">(up to 10 images/videos, max 10 MB each)</span>
+              <span className="text-xs text-neutral-500 ml-2">
+                (up to 10 images/videos, max 10 MB each)
+              </span>
             </Label>
-            
+
             <div className="border-2 border-dashed border-neutral-300 rounded-lg p-6 text-center">
               <input
                 type="file"
-                id="propertyPhotos"
+                id="photos"
                 multiple
                 accept="image/*,video/*"
                 onChange={(e) => handleFileUpload(e.target.files)}
                 className="hidden"
               />
-              <label htmlFor="propertyPhotos" className="cursor-pointer">
+              <label htmlFor="photos" className="cursor-pointer">
                 <Upload className="w-8 h-8 text-neutral-400 mx-auto mb-2" />
-                <p className="text-neutral-600">Click to upload photos and videos</p>
-                <p className="text-xs text-neutral-500 mt-1">PNG, JPG, MP4 up to 10MB each</p>
+                <p className="text-neutral-600">
+                  Click to upload photos and videos
+                </p>
+                <p className="text-xs text-neutral-500 mt-1">
+                  PNG, JPG, MP4 up to 10MB each
+                </p>
               </label>
             </div>
 
-            {formData.propertyPhotos.length > 0 && (
+            {formData.photos.length > 0 && (
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
-                {formData.propertyPhotos.map((file, index) => (
+                {formData.photos.map((file, index) => (
                   <div key={index} className="relative">
                     <div className="aspect-square bg-neutral-100 rounded-lg flex items-center justify-center relative overflow-hidden">
-                      {file.type.startsWith('image/') ? (
+                      {file.type.startsWith("image/") ? (
                         <img
                           src={URL.createObjectURL(file)}
                           alt={`Property ${index + 1}`}
@@ -656,7 +1024,9 @@ const InputField = ({
                       ) : (
                         <div className="flex flex-col items-center">
                           <Upload className="w-8 h-8 text-neutral-400" />
-                          <span className="text-xs text-neutral-500 mt-1">Video</span>
+                          <span className="text-xs text-neutral-500 mt-1">
+                            Video
+                          </span>
                         </div>
                       )}
                       <button
@@ -667,16 +1037,18 @@ const InputField = ({
                         <X className="w-4 h-4" />
                       </button>
                     </div>
-                    <p className="text-xs text-neutral-500 mt-1 truncate">{file.name}</p>
+                    <p className="text-xs text-neutral-500 mt-1 truncate">
+                      {file.name}
+                    </p>
                   </div>
                 ))}
               </div>
             )}
 
-            {errors.propertyPhotos && (
+            {errors.photos && (
               <p className="text-sm text-red-500 flex items-center gap-1">
                 <AlertCircle className="w-4 h-4" />
-                {errors.propertyPhotos}
+                {errors.photos}
               </p>
             )}
           </div>

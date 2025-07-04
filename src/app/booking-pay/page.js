@@ -1,7 +1,12 @@
 'use client';
 
-import BookingPay from "@/pages/BookingPay";
+import dynamic from 'next/dynamic';
 
-export default function BookingconfirmPage() {
+// Import from new path (not pages/)
+const BookingPay = dynamic(() => import('@/components/booking/BookingPay'), {
+  ssr: false,
+});
+
+export default function BookingPayPage() {
   return <BookingPay />;
 }

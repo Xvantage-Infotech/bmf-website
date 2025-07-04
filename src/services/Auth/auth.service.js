@@ -11,6 +11,7 @@ export const updateUserProfile = async (userData, token) => {
   const formData = new FormData();
 
   formData.append("name", userData.name);
+    formData.append("email", userData.email);
   formData.append("street", userData.street);
   formData.append("city", userData.city);
   formData.append("date_of_birth", userData.date_of_birth || "");

@@ -52,6 +52,7 @@ export default function Profiles() {
       <p className="text-neutral-600 mb-2">{user?.city || 'No location set'}</p>
 
         <div className="w-full text-left space-y-2 mt-4">
+        <div><span className="font-medium">Email:</span> {user?.email || 'Not provided'}</div>
         <div><span className="font-medium">Phone:</span> {user?.phone_number || 'Not provided'}</div>
 <div><span className="font-medium">DOB:</span> {user?.date_of_birth ? format(new Date(user.date_of_birth), "PPP") : 'Not provided'}</div>
 

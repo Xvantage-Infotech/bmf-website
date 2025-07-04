@@ -17,7 +17,7 @@
 
 //   const rating = parseFloat(farm.rating);
 // const mainImage = farm?.farm_images?.[0]?.image
-//   ? `https://api.bookmyfarm.net/assets/images/farm_images/${farm.farm_images[0].image}`
+//   ? `https://api-stagging.bookmyfarm.net/assets/images/farm_images/${farm.farm_images[0].image}`
 //   : '/placeholder.jpg';
 
 //   return (
@@ -199,7 +199,7 @@ export default function FarmCard({ farm, className = "" }) {
                       <div className="absolute inset-0 bg-neutral-200 animate-pulse" />
                     )}
                     <img
-                      src={`https://api.bookmyfarm.net/assets/images/farm_images/${img.image}`}
+                      src={`https://api-stagging.bookmyfarm.net/assets/images/farm_images/${img.image}`}
                       alt={`${farm.name} - Image ${idx + 1}`}
                       className={`w-full h-full object-cover transition-opacity duration-300 ${
                         loadedImages[idx] ? "opacity-100" : "opacity-0"

@@ -20,6 +20,7 @@ export default function ProfileEditDialog({ isOpen, onClose }) {
   
   const [name, setName] = useState(user?.name || '');
   const [street, setStreet] = useState(user?.street || '');
+  const [email, setEmail] = useState(user?.email || '');
   const [city, setCity] = useState(user?.city || '');
 const [dob, setDob] = useState(user?.dob ? new Date(user.dob) : undefined);
   const [profile_image, setProfile_image] = useState(user?.profile_image);
@@ -30,6 +31,7 @@ const [dob, setDob] = useState(user?.dob ? new Date(user.dob) : undefined);
     if (isOpen && user) {
       setName(user.name || '');
       setStreet(user.street || '');
+      setEmail(user.email || '');
       setCity(user.city || '');
       setDob(user.dob ? new Date(user.dob) : undefined);
       setProfile_image(user.profile_image);
@@ -46,11 +48,13 @@ const handleSubmit = async (e) => {
 
   const payload = {
     name,
+    email,
     street,
     city,
     date_of_birth: dob ? dob.toISOString().split("T")[0] : "",
     profile_image: previewImage, // will be a File if new image selected
   };
+  console.log("🚀 ~ handleSubmit ~ payload:", payload)
 
   try {
     const res = await updateUserProfile(payload, token);
@@ -138,6 +142,15 @@ if (previewImage instanceof File) {
               id="name" 
               value={name} 
               onChange={(e) => setName(e.target.value)} 
+              placeholder="Your Name"
+            />
+          </div>
+           <div className="space-y-2">
+            <Label htmlFor="email">Email</Label>
+            <Input 
+              id="email" 
+              value={email} 
+              onChange={(e) => setEmail(e.target.value)} 
               placeholder="Your Name"
             />
           </div>

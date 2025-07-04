@@ -440,7 +440,7 @@ export default function FarmDetail() {
                             className="flex items-center gap-2 p-2 bg-neutral-50 rounded"
                           >
                             <img
-                              src={`https://api.bookmyfarm.net/assets/images/amenity-icons/${ra.amenities.icon}`}
+                              src={`https://api-stagging.bookmyfarm.net/assets/images/amenity-icons/${ra.amenities.icon}`}
                               alt={ra.amenities.name}
                               className="w-5 h-5 object-contain"
                             />

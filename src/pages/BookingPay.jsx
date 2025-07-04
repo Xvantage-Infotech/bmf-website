@@ -5,13 +5,17 @@ import { useSearchParams } from 'next/navigation';
 import { MapPin } from 'lucide-react';
 import Script from 'next/script';
 import { createRazorpayOrder } from '@/services/Payment/payment.service';
+import { useAuth } from '@/contexts/AuthContext';
+
+
+
 
 export default function BookingPay() {
   const [showPolicy, setShowPolicy] = useState(false);
   const [agreedToPolicy, setAgreedToPolicy] = useState(false);
 
   const searchParams = useSearchParams();
-
+const { user } = useAuth(); // Access logged-in user
 
 const farmId = searchParams.get('farmId');
   const bookingName = searchParams.get('name');
@@ -32,6 +36,9 @@ const farmId = searchParams.get('farmId');
   const originalPrice = increasePercentage > 0
     ? discountedPrice / (1 - increasePercentage / 100)
     : discountedPrice;
+
+  
+
 
   const handlePayNow = async () => {
     if (!agreedToPolicy) {
@@ -64,9 +71,12 @@ const razorpayKey =
     : process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID_PRODUCTION;
 
 
+        if (typeof window.Razorpay === 'undefined') {
+  alert('Razorpay SDK not loaded. Please refresh.');
+  return;
+}
 
-
-      const options = {
+const options = {
   key: razorpayKey,
   amount: Math.round(discountedPrice * 100),
   currency: 'INR',
@@ -77,26 +87,39 @@ const razorpayKey =
     console.log('Payment success:', response);
     alert('Payment successful!');
   },
- prefill: {
-  name: bookingName || 'Guest',
-  email: 'testuser@example.com', // ✅ required, even if mocked
-  contact: '9999999999',         // ✅ required, even if mocked
-}
-,
+  prefill: {
+    name: bookingName || user?.name || 'Guest',
+    email: user?.email || 'fallback@example.com',
+    contact: user?.phone_number?.replace('+91', '') || '9999999999',
+  },
   theme: {
     color: '#17AE7D',
   },
+  config: {
+    display: {
+      hide: {
+        truecaller: true,
+      },
+      preferences: {
+        show_default_blocks: false,
+      },
+    },
+  },
 };
+
+console.log("🚀 ~ handlePayNow ~ options.prefill:", options.prefill)
 console.log("Using Razorpay key:", razorpayKey);
       console.log("🚀 ~ handlePayNow ~ options.order_id:", options.order_id)
 
       const rzp = new window.Razorpay(options);
       rzp.open();
 
+
+
     } catch (error) {
-      console.error('Payment error:', error);
-      alert('Something went wrong. Try again.');
-    }
+  console.error('Payment error:', error.response?.data || error);
+  alert('Something went wrong. Try again.');
+}
   };
 
   const image = searchParams.get('image');

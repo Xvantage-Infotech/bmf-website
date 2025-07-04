@@ -182,7 +182,7 @@ const handleLogin = async (values) => {
     await verifyOtpAndLogin(values.otp);
 
     // ✅ Step 2: Call backend to login and get custom JWT
-    const response = await fetch("https://api.bookmyfarm.net/api/add_user", {
+    const response = await fetch("https://api-stagging.bookmyfarm.net/api/add_user", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ phone_number: formattedPhone }),

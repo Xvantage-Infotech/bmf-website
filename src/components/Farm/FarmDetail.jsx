@@ -34,12 +34,14 @@ export default function FarmDetail() {
   const [loading, setLoading] = useState(true);
 
   const [selectedImageIndex, setSelectedImageIndex] = useState(1);
+  const [autoScrollEnabled, setAutoScrollEnabled] = useState(true);
 
   // Move this declaration above the useEffect
   const farmImages = farm?.farm_images || [];
 
   const scrollRef = useRef(null);
   const autoScrollRef = useRef(null);
+  const autoScrollTimeoutRef = useRef(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -69,27 +71,29 @@ export default function FarmDetail() {
         behavior: "smooth",
       });
     }
-    setSelectedImageIndex(index);
   };
 
   const stopAutoScroll = () => {
-    if (autoScrollRef.current) {
-      clearInterval(autoScrollRef.current);
-      autoScrollRef.current = null;
-    }
+    setAutoScrollEnabled(false); // 🆕 disable future auto scroll
+    clearInterval(autoScrollRef.current);
+    clearTimeout(autoScrollTimeoutRef.current); // 🆕 also cancel any pending timeout
+    autoScrollRef.current = null;
+    autoScrollTimeoutRef.current = null;
   };
 
   const handleNext = () => {
     stopAutoScroll();
-    const nextIndex = (selectedImageIndex + 1) % farmImages.length;
+    const nextIndex = (selectedImageIndex + 1) % extendedImages.length;
     scrollToIndex(nextIndex);
+    setSelectedImageIndex(nextIndex);
   };
 
   const handlePrev = () => {
     stopAutoScroll();
     const prevIndex =
-      (selectedImageIndex - 1 + farmImages.length) % farmImages.length;
+      (selectedImageIndex - 1 + extendedImages.length) % extendedImages.length;
     scrollToIndex(prevIndex);
+    setSelectedImageIndex(prevIndex);
   };
 
   const loopCount = 10; // or any large number
@@ -97,7 +101,6 @@ export default function FarmDetail() {
     { length: loopCount },
     () => farmImages
   ).flat();
-  
 
   useEffect(() => {
     // Scroll to top when detail page loads
@@ -118,24 +121,23 @@ export default function FarmDetail() {
 
   // Auto-scroll carousel every 3s
   useEffect(() => {
-    if (!farm || farmImages.length <= 1) return;
+    if (!farm || extendedImages.length <= 1 || !autoScrollEnabled) return;
 
-    // Add delay before starting auto-scroll
-    const timer = setTimeout(() => {
+    let index = selectedImageIndex;
+
+    autoScrollTimeoutRef.current = setTimeout(() => {
       autoScrollRef.current = setInterval(() => {
-        setSelectedImageIndex((prevIndex) => {
-          const nextIndex = (prevIndex + 1) % farmImages.length;
-          scrollToIndex(nextIndex);
-          return nextIndex;
-        });
+        index = (index + 1) % extendedImages.length;
+        scrollToIndex(index);
+        setSelectedImageIndex(index);
       }, 3000);
-    }, 1000); // 1 second delay
+    }, 1000);
 
     return () => {
-      clearTimeout(timer);
+      clearTimeout(autoScrollTimeoutRef.current);
       clearInterval(autoScrollRef.current);
     };
-  }, [farm, farmImages.length]);
+  }, [farm, extendedImages.length, autoScrollEnabled]);
 
   useEffect(() => {
     if (scrollRef.current && farmImages.length > 1) {
@@ -156,27 +158,18 @@ export default function FarmDetail() {
     if (!container) return;
 
     const handleScrollEnd = () => {
-      const total = extendedImages.length;
-      const resetIndex = farmImages.length;
+      const threshold = extendedImages.length - farmImages.length;
 
-      if (selectedImageIndex >= total - 2) {
-        const resetTo = resetIndex;
-        const child = container.children[resetTo];
-        if (child) {
-          child.scrollIntoView({
-            behavior: "auto",
-            inline: "center",
-            block: "nearest",
-          });
-          setSelectedImageIndex(resetTo);
-        }
+      if (selectedImageIndex >= threshold) {
+        const resetTo = farmImages.length; // reset after a few loops
+        scrollToIndex(resetTo);
+        setSelectedImageIndex(resetTo);
       }
     };
 
     container.addEventListener("scrollend", handleScrollEnd);
     return () => {
       container.removeEventListener("scrollend", handleScrollEnd);
-      clearInterval(autoScrollRef.current); // Additional cleanup
     };
   }, [selectedImageIndex, extendedImages.length]);
 
@@ -215,22 +208,19 @@ export default function FarmDetail() {
     loadFarm();
   }, [farmId]);
 
-  
+  if (loading)
+    return (
+      <div className="min-h-screen flex flex-col justify-center items-center bg-white">
+        <img
+          src="/bmflogofoot.svg"
+          alt="Book My Farm Logo"
+          style={{ width: "350px", height: "350px" }}
+          className="mb-4"
+        />
 
-  
-    if (loading)
-      return (
-        <div className="min-h-screen flex flex-col justify-center items-center bg-white">
-          <img
-            src="/bmflogofoot.svg"
-            alt="Book My Farm Logo"
-            style={{ width: "350px", height: "350px" }}
-            className="mb-4"
-          />
-
-          {/* <p className="text-neutral-500 text-sm animate-pulse">Loading farm details...</p> */}
-        </div>
-      );
+        {/* <p className="text-neutral-500 text-sm animate-pulse">Loading farm details...</p> */}
+      </div>
+    );
 
   if (!farm)
     return <div className="p-8 text-center text-red-500">Farm not found.</div>;

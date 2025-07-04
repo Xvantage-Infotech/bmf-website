@@ -114,8 +114,11 @@ import { useRouter } from "next/navigation";
 import { Heart, Bed, Users, Star, MapPin } from "lucide-react";
 import { formatPrice, generateStars } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function FarmCard({ farm, className = "" }) {
+
+  
   const [isFavorited, setIsFavorited] = useState(false);
   const [imageIndex, setImageIndex] = useState(0);
   const [loadedImages, setLoadedImages] = useState({});
@@ -123,6 +126,7 @@ export default function FarmCard({ farm, className = "" }) {
 
   const intervalRef = useRef(null);
   const router = useRouter();
+  const { isAuthenticated } = useAuth();
 
   const images = farm.farm_images || [];
   const mainImage =
@@ -131,14 +135,13 @@ export default function FarmCard({ farm, className = "" }) {
       : "/placeholder.jpg";
 
   const handleClick = (e) => {
-  const scrollPosition = window.scrollY || document.documentElement.scrollTop;
-  const scrollHeight = document.documentElement.scrollHeight;
-  sessionStorage.setItem("farmScrollPosition", scrollPosition.toString());
-  sessionStorage.setItem("farmScrollHeight", scrollHeight.toString());
+    const scrollPosition = window.scrollY || document.documentElement.scrollTop;
+    const scrollHeight = document.documentElement.scrollHeight;
+    sessionStorage.setItem("farmScrollPosition", scrollPosition.toString());
+    sessionStorage.setItem("farmScrollHeight", scrollHeight.toString());
 
-  e.currentTarget.classList.add("last-clicked-farm");
-};
-
+    e.currentTarget.classList.add("last-clicked-farm");
+  };
 
   useEffect(() => {
     if (!isHovered || images.length <= 1) return;
@@ -161,7 +164,7 @@ export default function FarmCard({ farm, className = "" }) {
   const rating = parseFloat(farm.rating);
 
   return (
-    <Link 
+    <Link
       href={`/farm/${farm.id}`}
       scroll={false} // Disable Next.js automatic scroll
       onClick={handleClick}
@@ -242,18 +245,22 @@ export default function FarmCard({ farm, className = "" }) {
             )}
 
             {/* Heart icon */}
-            <Button
-              size="icon"
-              variant="secondary"
-              className="absolute top-3 right-3 w-8 h-8 bg-white/80 backdrop-blur-sm hover:bg-white z-20"
-              onClick={toggleFavorite}
-            >
-              <Heart
-                className={`w-4 h-4 ${
-                  isFavorited ? "fill-red-500 text-red-500" : "text-neutral-600"
-                }`}
-              />
-            </Button>
+            {isAuthenticated && (
+              <Button
+                size="icon"
+                variant="secondary"
+                className="absolute top-3 right-3 w-8 h-8 bg-white/80 backdrop-blur-sm hover:bg-white z-20"
+                onClick={toggleFavorite}
+              >
+                <Heart
+                  className={`w-4 h-4 ${
+                    isFavorited
+                      ? "fill-red-500 text-red-500"
+                      : "text-neutral-600"
+                  }`}
+                />
+              </Button>
+            )}
 
             {/* Category badge */}
             <div className="absolute bottom-3 left-3 z-20">

@@ -330,15 +330,17 @@ export default function FarmList({
   searchFilters = {},
   title = "Featured Farmhouses",
   description = "Discover premium properties for your perfect getaway",
+  farms: externalFarms = null,
 }) {
   const [sortBy, setSortBy] = useState("featured");
   const [farms, setFarms] = useState([]);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(false);
-  
+  const isSearchMode = externalFarms !== null;
 
   const getFarms = async (append = false) => {
+    if (isSearchMode) return;
     try {
       setLoading(true);
       const payload = {
@@ -360,6 +362,21 @@ export default function FarmList({
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (isSearchMode) {
+      setFarms(externalFarms || []);
+      setHasMore(false);
+    } else {
+      setPage(1);
+      getFarms(false);
+    }
+  }, [
+    selectedCity,
+    selectedCategory,
+    JSON.stringify(searchFilters),
+    externalFarms,
+  ]);
 
   useEffect(() => {
     setPage(1);

@@ -35,7 +35,7 @@ export default function Homes() {
   const [isSearchMode, setIsSearchMode] = useState(false);
   const [farms, setFarms] = useState([]);
   const [searchResults, setSearchResults] = useState([]);
-const [showSearchResults, setShowSearchResults] = useState(false);
+  const [showSearchResults, setShowSearchResults] = useState(false);
   const [featuredFarms, setFeaturedFarms] = useState([]);
   const [open, setOpen] = useState(false);
 
@@ -48,6 +48,12 @@ const [showSearchResults, setShowSearchResults] = useState(false);
     } else {
       params.set("city", city);
     }
+
+    // ✅ Reset search mode when user manually changes city
+    setIsSearchMode(false);
+    setSearchFilters(null);
+    setFarms([]); // optional: forces fresh fetch if needed
+
     router.push(`?${params.toString()}`, { scroll: false });
   };
 
@@ -339,6 +345,7 @@ const [showSearchResults, setShowSearchResults] = useState(false);
           city_id:
             selectedCity !== "all" ? CITY_IDS[selectedCity.toLowerCase()] : "",
         }}
+        farms={isSearchMode ? farms : null}
       />
 
       <VideoGallery />

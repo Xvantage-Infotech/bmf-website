@@ -18,25 +18,26 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useRouter } from "next/navigation";
+import { Heart } from "lucide-react";
 
 export default function Header() {
   const pathname = usePathname();
 
-    const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-    const { isMobile } = useResponsive();
-const { user, isAuthenticated, logout, authInitialized } = useAuth();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const { isMobile } = useResponsive();
+  const { user, isAuthenticated, logout, authInitialized } = useAuth();
+  const router = useRouter();
 
-// if (!authInitialized) return null; // or a skeleton if you want
-const isLoggedIn = !!user?.token;
+  // if (!authInitialized) return null; // or a skeleton if you want
+  const isLoggedIn = !!user?.token;
 
   const navigationItems = [
-
     { href: "/", label: "Farms" },
     { href: "/customers", label: "Happy Customers" },
     { href: "/contact", label: "Contact" },
     { href: "/owner/register", label: "List Your Farm" },
-
   ];
 
   const Logo = () => (
@@ -98,7 +99,7 @@ const isLoggedIn = !!user?.token;
                 className="w-full justify-start"
                 onClick={() => {
                   setIsMenuOpen(false);
-                  window.location.href = "/profile";
+                  router.push("/profile");
                 }}
               >
                 <User className="mr-2 h-4 w-4" />
@@ -109,7 +110,7 @@ const isLoggedIn = !!user?.token;
                 className="w-full justify-start"
                 onClick={() => {
                   setIsMenuOpen(false);
-                  window.location.href = "/profile";
+                  router.push("/profile");
                 }}
               >
                 <Settings className="mr-2 h-4 w-4" />
@@ -156,53 +157,33 @@ const isLoggedIn = !!user?.token;
           {!isMobile && (
             <div className="flex items-center space-x-6">
               <Navigation className="flex items-center space-x-6" />
-              {/* {isAuthenticated ? (
+
+              {isLoggedIn ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <div className="flex items-center space-x-2 cursor-pointer">
                       <Avatar className="h-8 w-8">
-                        {user?.profileImage ? (
-                          <AvatarImage
-                            src={user.profileImage}
-                            alt={user.name}
-                          />
-                        ) : (
-                          <AvatarFallback className="bg-primary text-white">
-                            {(user?.name || "U").charAt(0).toUpperCase()}
-
-                          </AvatarFallback>
-                        )}
+                        <AvatarFallback className="bg-primary text-white flex items-center justify-center">
+                          <User className="w-5 h-5" />
+                        </AvatarFallback>
                       </Avatar>
-                      <span className="text-sm font-medium">{user?.name}</span>
+                      {/* <span className="text-sm font-medium">User</span> */}
                     </div>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem
-                      className="cursor-pointer"
-                      onClick={() => {
-                        setIsMenuOpen(false);
-                        window.location.href = "/profile";
-                      }}
-                    >
+                    <DropdownMenuItem onClick={() => router.push("/profile")}>
                       <User className="mr-2 h-4 w-4" />
-                      <span>Profile</span>
+                      Profile
                     </DropdownMenuItem>
-                    <DropdownMenuItem
-                      className="cursor-pointer"
-                      onClick={() => {
-                        setIsMenuOpen(false);
-                        window.location.href = "/profile";
-                      }}
-                    >
-                      <Settings className="mr-2 h-4 w-4" />
-                      <span>Edit Profile</span>
+
+                    <DropdownMenuItem onClick={() => router.push("/saved")}>
+                      <Heart className="mr-2 h-4 w-4" />
+                      Wishlist
                     </DropdownMenuItem>
-                    <DropdownMenuItem
-                      className="cursor-pointer"
-                      onClick={logout}
-                    >
+
+                    <DropdownMenuItem onClick={logout}>
                       <LogOut className="mr-2 h-4 w-4" />
-                      <span>Logout</span>
+                      Logout
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -213,44 +194,7 @@ const isLoggedIn = !!user?.token;
                 >
                   Login/Sign Up
                 </Button>
-              )} */}
-{isLoggedIn ? (
-  <DropdownMenu>
-    <DropdownMenuTrigger asChild>
-      <div className="flex items-center space-x-2 cursor-pointer">
-        <Avatar className="h-8 w-8">
-       
-
-<AvatarFallback className="bg-primary text-white flex items-center justify-center">
-  <User className="w-5 h-5" />
-</AvatarFallback>
-
-        </Avatar>
-        {/* <span className="text-sm font-medium">User</span> */}
-      </div>
-    </DropdownMenuTrigger>
-    <DropdownMenuContent align="end">
-      <DropdownMenuItem onClick={() => (window.location.href = "/profile")}>
-        <User className="mr-2 h-4 w-4" />
-        Profile
-      </DropdownMenuItem>
-      <DropdownMenuItem onClick={logout}>
-        <LogOut className="mr-2 h-4 w-4" />
-        Logout
-      </DropdownMenuItem>
-    </DropdownMenuContent>
-  </DropdownMenu>
-) : (
-  <Button
-    className="bg-primary text-white hover:bg-primary/90 transition-colors"
-    onClick={() => setIsAuthModalOpen(true)}
-  >
-    Login/Sign Up
-  </Button>
-)}
-
-
-
+              )}
             </div>
           )}
 

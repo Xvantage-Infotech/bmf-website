@@ -312,6 +312,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { fetchWishlist } from "@/services/Wishlist/wishlist.service";
+
 import FarmCard from "@/components/FarmCard/FarmCard";
 import { Button } from "@/components/ui/button";
 import {
@@ -323,6 +325,7 @@ import {
 } from "@/components/ui/select";
 import { fetchFarms } from "@/services/Farm/farm.service";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function FarmList({
   selectedCity,
@@ -338,6 +341,26 @@ export default function FarmList({
   const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(false);
   const isSearchMode = externalFarms !== null;
+  const { user } = useAuth();
+const [wishlistIds, setWishlistIds] = useState([]);
+
+useEffect(() => {
+  const loadWishlist = async () => {
+    if (!user?.token) return;
+
+    try {
+      const wishlist = await fetchWishlist(1, 50, user.token); // adjust page size as needed
+      const ids = wishlist.map((f) => f.id);
+      setWishlistIds(ids);
+    } catch (err) {
+      console.error("Error fetching wishlist:", err);
+    }
+  };
+
+  loadWishlist();
+}, [user]);
+
+
 
   const getFarms = async (append = false) => {
     if (isSearchMode) return;
@@ -502,7 +525,15 @@ export default function FarmList({
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {sortedFarms.map((farm) => (
-                <FarmCard key={farm.id} farm={farm} />
+  <FarmCard
+  key={farm.id}
+  farm={farm}
+  isFavorited={wishlistIds.includes(farm.id)}
+  onToggleFavorite={() => {
+    setWishlistIds((prev) => prev.filter((id) => id !== farm.id));
+  }}
+/>
+
               ))}
             </div>
             {hasMore && (

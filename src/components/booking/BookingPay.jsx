@@ -33,9 +33,10 @@ const farmId = searchParams.get('farmId');
   const increasePercentage = parseFloat(searchParams.get('increase_percentage') || '0');
   const discountedPrice = parseFloat(price || '0');
 
-  const originalPrice = increasePercentage > 0
-    ? discountedPrice / (1 - increasePercentage / 100)
-    : discountedPrice;
+const originalPrice = increasePercentage > 0
+  ? discountedPrice * (1 + increasePercentage / 100)
+  : discountedPrice;
+
 
   
 

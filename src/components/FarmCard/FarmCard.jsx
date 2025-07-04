@@ -12,8 +12,14 @@ export default function FarmCard({
   farm,
   className = "",
   isFavorited: isFavoriteProp = false,
+   onToggleFavorite,
 }) {
-  const [isFavorited, setIsFavorited] = useState(isFavoriteProp);
+  const [isFavorited, setIsFavorited] = useState(false);
+
+useEffect(() => {
+  setIsFavorited(isFavoriteProp);
+}, [isFavoriteProp]);
+
   const [imageIndex, setImageIndex] = useState(0);
   const [loadedImages, setLoadedImages] = useState({});
   const [isHovered, setIsHovered] = useState(false);
@@ -50,22 +56,28 @@ export default function FarmCard({
     return () => clearInterval(intervalRef.current);
   }, [isHovered, images.length]);
 
-  const toggleFavorite = async (e) => {
-    e.preventDefault();
-    e.stopPropagation();
 
-    if (!user?.token) {
-      return alert("Please login to add to wishlist");
-    }
+const toggleFavorite = async (e) => {
+  e.preventDefault();
+  e.stopPropagation();
 
-    try {
-      await addToWishlist(farm.id, user.token);
-      setIsFavorited(true);
-    } catch (err) {
-      console.error(err);
-      alert("Something went wrong");
+  if (!user?.token) {
+    return alert("Please login to add to wishlist");
+  }
+
+  try {
+    await addToWishlist(farm.id, user.token); // server toggles
+    const nextState = !isFavorited;
+    setIsFavorited(nextState);
+
+    if (onToggleFavorite) {
+      onToggleFavorite(nextState); // ✅ pass new state to parent
     }
-  };
+  } catch (err) {
+    console.error(err);
+    alert("Something went wrong");
+  }
+};
 
   const rating = parseFloat(farm.rating);
 

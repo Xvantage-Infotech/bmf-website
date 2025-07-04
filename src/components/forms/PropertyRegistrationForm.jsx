@@ -18,7 +18,6 @@ import { Upload, X, CheckCircle, AlertCircle } from "lucide-react";
 import { FACILITY_OPTIONS, TIME_OPTIONS } from "@/constants/categories";
 import { submitProperty } from "@/services/Listfarm/listfarm.service";
 import { useAuth } from "@/contexts/AuthContext";
-import { useDialog } from "@/hooks/use-dialog";
 
 // ✅ Move this above the default export or in a separate file
 const InputField = ({

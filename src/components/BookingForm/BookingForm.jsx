@@ -12,19 +12,26 @@ import ImprovedDatePicker from './ImprovedDatePicker';
 import { useAuth } from '@/contexts/AuthContext';
 import AuthModal from '../auth/AuthModal';
 import { checkBookingAvailability } from '@/services/Farm/farm.service';
+import { useRouter } from 'next/navigation';
+import { formatDate } from 'date-fns';
+import { format } from 'date-fns';
+
 
 
 export default function BookingForm({ farm, className = '' }) {
   const [checkIn, setCheckIn] = useState();
   const [checkOut, setCheckOut] = useState();
-  const [checkInTime, setCheckInTime] = useState("10:00 AM");
-  const [checkOutTime, setCheckOutTime] = useState("9:00 AM");
+ const [checkInTime, setCheckInTime] = useState("7:00 AM");
+const [checkOutTime, setCheckOutTime] = useState("6:00 AM");
+
   const [adults, setAdults] = useState(2);
   const [children, setChildren] = useState(0);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [hasCheckedAvailability, setHasCheckedAvailability] = useState(false);
   const [finalPrice, setFinalPrice] = useState(null);
-
+  
+  const [isBooked, setIsBooked] = useState(false);
+  const [bookingError, setBookingError] = useState('');
 
 const { user } = useAuth();
 const isLoggedIn = !!user?.token;
@@ -97,15 +104,60 @@ const dynamicTotal = checkIn && checkOut
 
 const nights = checkIn && checkOut ? calculateNights(checkIn, checkOut) : 0;
 const pricePerNight = nights > 0 ? dynamicTotal / nights : 0;
-
-
-
   const totalGuests = adults + children;
   const isGuestLimitExceeded = totalGuests > farm.maxGuests;
   const isBookingValid = checkIn && checkOut && nights > 0 && !isGuestLimitExceeded;
 
-const [isBooked, setIsBooked] = useState(false);
-const [bookingError, setBookingError] = useState('');
+
+const router = useRouter();
+
+// const handleBooking = async () => {
+//   if (!isLoggedIn) {
+//     setIsAuthModalOpen(true);
+//     return;
+//   }
+
+//   if (!checkIn || !checkOut || isGuestLimitExceeded) return;
+
+//   const token = localStorage.getItem('accessToken');
+//   if (!token) return;
+
+//  const formatDate = (date) => {
+//   return date.toLocaleDateString('en-CA'); // returns 'YYYY-MM-DD' in local timezone
+// };
+
+
+// const payload = {
+//   farm_id: String(farm.id),
+//   start_date: formatDate(checkIn),
+//   start_time: convertTo24HourFormat(checkInTime),
+//   end_date: formatDate(checkOut),
+//   end_time: convertTo24HourFormat(checkOutTime),
+//   no_of_guest: String(adults + children),
+// };
+
+
+// try {
+//   const res = await checkBookingAvailability(payload, token);
+//   setHasCheckedAvailability(true);
+
+// if (res?.status === 0) {
+//   setIsBooked(false);
+//   setBookingError('');
+//   setFinalPrice(res.final_price); // 👈 this
+// } else {
+//   setIsBooked(true);
+//   setBookingError('This farm is already booked for the selected dates.');
+//   setFinalPrice(null);
+// }
+
+// } catch (err) {
+//   setIsBooked(false);
+//   setBookingError(err.message || 'Error checking availability.');
+// }
+
+
+// };
 
 const handleBooking = async () => {
   if (!isLoggedIn) {
@@ -118,43 +170,71 @@ const handleBooking = async () => {
   const token = localStorage.getItem('accessToken');
   if (!token) return;
 
- const formatDate = (date) => {
-  return date.toLocaleDateString('en-CA'); // returns 'YYYY-MM-DD' in local timezone
+  const formatDate = (date) => {
+    return date.toLocaleDateString('en-CA'); // YYYY-MM-DD
+  };
+
+  const payload = {
+    farm_id: String(farm.id),
+    start_date: formatDate(checkIn),
+    start_time: convertTo24HourFormat(checkInTime),
+    end_date: formatDate(checkOut),
+    end_time: convertTo24HourFormat(checkOutTime),
+    no_of_guest: String(adults + children),
+  };
+
+  try {
+    const res = await checkBookingAvailability(payload, token);
+    setHasCheckedAvailability(true);
+
+    if (res?.status === 0) {
+      setIsBooked(false);
+      setBookingError('');
+      setFinalPrice(res.final_price);
+    } else {
+      setIsBooked(true);
+      setBookingError('This farm is already booked for the selected dates.');
+      setFinalPrice(null);
+    }
+
+    
+  } catch (err) {
+    setIsBooked(false);
+    setBookingError(err.message || 'Error checking availability.');
+  }
+};
+const increasePercentage = farm.increase_percentage || 0; // 👈 if 20%
+const discountedPrice = finalPrice; // already comes from availability check
+
+
+const handleConfirmBooking = () => {
+  if (!checkIn || !checkOut || !finalPrice) {
+    console.warn('Missing booking data');
+    return;
+  }
+
+router.push('/booking-pay?' + new URLSearchParams({
+    farmId: String(farm.id),
+  name: user?.name || 'Guest',
+  guest: totalGuests,
+  checkIn: format(new Date(checkIn), 'yyyy-MM-dd'),
+  checkOut: format(new Date(checkOut), 'yyyy-MM-dd'),
+  checkInTime,
+  checkOutTime,
+  price: discountedPrice.toString(), // 👈 finalPrice is already discounted
+  increase_percentage: increasePercentage.toString(), // 👈 pass this too
+  farmName: farm.farm_alias_name,
+  farmLocation: farm.location_link,
+  rating: farm.rating || '0',
+  areaCity: `${farm.area?.name || ''}, ${farm.city?.name || ''}`,
+  image: farm.farm_images?.[0]?.image || '',
+  houseCancellationPolicy: farm.house_cancellation_policy || '',
+}).toString());
+   
+
+
 };
 
-
-const payload = {
-  farm_id: String(farm.id),
-  start_date: formatDate(checkIn),
-  start_time: convertTo24HourFormat(checkInTime),
-  end_date: formatDate(checkOut),
-  end_time: convertTo24HourFormat(checkOutTime),
-  no_of_guest: String(adults + children),
-};
-
-
-try {
-  const res = await checkBookingAvailability(payload, token);
-
-  setHasCheckedAvailability(true);
-
-if (res?.status === 0) {
-  setIsBooked(false);
-  setBookingError('');
-  setFinalPrice(res.final_price); // 👈 this
-} else {
-  setIsBooked(true);
-  setBookingError('This farm is already booked for the selected dates.');
-  setFinalPrice(null);
-}
-
-} catch (err) {
-  setIsBooked(false);
-  setBookingError(err.message || 'Error checking availability.');
-}
-
-
-};
 
 
 const extraGuests = totalGuests > farm.person_limit
@@ -192,7 +272,7 @@ const extraGuestCharge = extraGuests * (farm.person_price_weekday || 0);
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {Array.from({ length: 10 }, (_, i) => i + 1).map((num) => (
+                  {Array.from({ length: 100 }, (_, i) => i + 1).map((num) => (
                     <SelectItem key={num} value={num.toString()}>
                       {num} Adult{num !== 1 ? 's' : ''}
                     </SelectItem>
@@ -208,7 +288,7 @@ const extraGuestCharge = extraGuests * (farm.person_price_weekday || 0);
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {Array.from({ length: 6 }, (_, i) => i).map((num) => (
+                  {Array.from({ length: 25 }, (_, i) => i).map((num) => (
                     <SelectItem key={num} value={num.toString()}>
                       {num} {num === 1 ? 'Child' : 'Children'}
                     </SelectItem>
@@ -247,7 +327,7 @@ const extraGuestCharge = extraGuests * (farm.person_price_weekday || 0);
 
           {/* Booking Button */}
 <Button
-  onClick={handleBooking}
+  onClick={hasCheckedAvailability ? handleConfirmBooking : handleBooking}
   disabled={!isBookingValid || isBooked}
   className="w-full bg-primary text-white hover:bg-primary/90 disabled:opacity-50"
   size="lg"
@@ -262,6 +342,7 @@ const extraGuestCharge = extraGuests * (farm.person_price_weekday || 0);
     ? 'Book Now'
     : 'Check Availability'}
 </Button>
+
 
 {bookingError && (
   <p className="text-sm text-red-600 text-center mt-2">{bookingError}</p>

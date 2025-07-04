@@ -1,18 +1,41 @@
-// /app/saved/page.jsx
 "use client";
 
-import ClientOnly from '@/components/Clientonly/ClientOnly';
-import { staticFarms } from '@/data/staticFarms';
-import FarmCard from '@/components/FarmCard/FarmCard';
+import { useEffect, useState } from "react";
+import ClientOnly from "@/components/Clientonly/ClientOnly";
+import FarmCard from "@/components/FarmCard/FarmCard";
+import { useAuth } from "@/contexts/AuthContext";
+import { fetchWishlist } from "@/services/Wishlist/wishlist.service";
 
 export default function SavedFarms() {
-  const savedFarms = staticFarms.slice(0, 3);
+  const { user } = useAuth();
+  const [wishlist, setWishlist] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadWishlist = async () => {
+      if (!user?.token) return;
+
+      try {
+        const farms = await fetchWishlist(1, 20, user.token);
+        setWishlist(farms);
+      } catch (err) {
+        console.error("❌ Error loading wishlist:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadWishlist();
+  }, [user]);
 
   return (
     <ClientOnly>
       <div className="max-w-4xl mx-auto py-10 px-4">
         <h1 className="text-2xl font-bold mb-6 text-center">Saved Farms</h1>
-        {savedFarms.length === 0 ? (
+
+        {loading ? (
+          <p className="text-center text-neutral-500">Loading wishlist...</p>
+        ) : wishlist.length === 0 ? (
           <div className="text-center text-neutral-600 mt-20">
             <p className="mb-2">You haven't saved any farms yet.</p>
             <p>
@@ -32,8 +55,8 @@ export default function SavedFarms() {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            {savedFarms.map((farm) => (
-              <FarmCard key={farm.id} farm={farm} />
+            {wishlist.map((farm) => (
+              <FarmCard key={farm.id} farm={farm} isFavorited={true} />
             ))}
           </div>
         )}

@@ -8,11 +8,16 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { addToWishlist } from "@/services/Wishlist/wishlist.service";
 
-export default function FarmCard({ farm, className = "" }) {
-  const [isFavorited, setIsFavorited] = useState(false);
+export default function FarmCard({
+  farm,
+  className = "",
+  isFavorited: isFavoriteProp = false,
+}) {
+  const [isFavorited, setIsFavorited] = useState(isFavoriteProp);
   const [imageIndex, setImageIndex] = useState(0);
   const [loadedImages, setLoadedImages] = useState({});
   const [isHovered, setIsHovered] = useState(false);
+  
 
   const intervalRef = useRef(null);
   const router = useRouter();
@@ -36,13 +41,13 @@ export default function FarmCard({ farm, className = "" }) {
   useEffect(() => {
     if (!isHovered || images.length <= 1) return;
 
-    if (intervalRef.current) clearInterval(intervalRef.current); // ✅ Prevent overlapping intervals
+    if (intervalRef.current) clearInterval(intervalRef.current);
 
     intervalRef.current = setInterval(() => {
       setImageIndex((prevIndex) => (prevIndex + 1) % images.length);
     }, 2000);
 
-    return () => clearInterval(intervalRef.current); // ✅ Clean up properly
+    return () => clearInterval(intervalRef.current);
   }, [isHovered, images.length]);
 
   const toggleFavorite = async (e) => {
@@ -67,9 +72,9 @@ export default function FarmCard({ farm, className = "" }) {
   return (
     <Link
       href={`/farm/${farm.id}`}
-      scroll={false} // Disable Next.js automatic scroll
+      scroll={false}
       onClick={handleClick}
-      className="block" // Ensure Link doesn't affect layout
+      className="block"
     >
       <div
         className={`farm-card animate-card-hover cursor-pointer ${className}`}
@@ -80,7 +85,7 @@ export default function FarmCard({ farm, className = "" }) {
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => {
               setIsHovered(false);
-              setImageIndex(0); // reset to first image
+              setImageIndex(0);
             }}
           >
             {images.length > 0 ? (

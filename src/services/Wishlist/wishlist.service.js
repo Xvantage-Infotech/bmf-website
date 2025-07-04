@@ -20,3 +20,27 @@ export const addToWishlist = async (farmId, token) => {
     throw error?.response?.data || error;
   }
 };
+
+// Fetch user's wishlist (paginated)
+export const fetchWishlist = async (page = 1, perPage = 50, token) => {
+  try {
+    const response = await api.post(
+      "/api/wishlist",
+      {
+        page: page.toString(),
+        per_page: perPage.toString(),
+      },
+      {
+        headers: {
+          Accept: "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    return response.data?.data || []; 
+  } catch (error) {
+    console.error("❌ [fetchWishlist] Error:", error);
+    throw error?.response?.data || error;
+  }
+};

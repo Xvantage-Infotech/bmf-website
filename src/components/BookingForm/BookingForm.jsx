@@ -21,8 +21,8 @@ import { format } from 'date-fns';
 export default function BookingForm({ farm, className = '' }) {
   const [checkIn, setCheckIn] = useState();
   const [checkOut, setCheckOut] = useState();
- const [checkInTime, setCheckInTime] = useState("7:00 AM");
-const [checkOutTime, setCheckOutTime] = useState("6:00 AM");
+ const [checkInTime, setCheckInTime] = useState();
+const [checkOutTime, setCheckOutTime] = useState();
 
   const [adults, setAdults] = useState(2);
   const [children, setChildren] = useState(0);
@@ -246,7 +246,9 @@ const extraGuestCharge = extraGuests * (farm.person_price_weekday || 0);
 
 
   return (
-    <div className={`sticky top-8 ${className}`}>
+    // <div className={`sticky top-8 ${className}`}>
+    <div className={`sticky top-8 w-full max-w-md ${className}`}>
+
       <div className="bg-neutral-50 rounded-2xl p-6 border border-neutral-200">
         <h3 className="text-xl font-bold text-neutral-900 mb-6">Book Your Stay</h3>
 
@@ -281,7 +283,7 @@ const extraGuestCharge = extraGuests * (farm.person_price_weekday || 0);
               </Select>
             </div>
 
-            <div>
+            {/* <div>
               <Label className="block text-sm font-medium text-neutral-700 mb-2">Children</Label>
               <Select value={children.toString()} onValueChange={(value) => setChildren(parseInt(value))}>
                 <SelectTrigger>
@@ -295,7 +297,7 @@ const extraGuestCharge = extraGuests * (farm.person_price_weekday || 0);
                   ))}
                 </SelectContent>
               </Select>
-            </div>
+            </div> */}
           </div>
 
           {/* Guest Limit Warning */}

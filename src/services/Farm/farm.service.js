@@ -65,3 +65,15 @@ export const checkBookingAvailability = async (payload, token) => {
 
   return response.data; // expected to return { available: true/false }
 };
+
+
+
+export const fetchPropertyCategories = async () => {
+  try {
+    const response = await api.get('/api/category');
+    return response?.data?.data || [];
+  } catch (error) {
+    console.error('Error fetching property categories:', error);
+    throw error;
+  }
+};

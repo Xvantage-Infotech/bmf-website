@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,6 +19,7 @@ import { FACILITY_OPTIONS, TIME_OPTIONS } from "@/constants/categories";
 import { submitProperty } from "@/services/Listfarm/listfarm.service";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDialog } from "@/hooks/use-dialog";
+import { fetchPropertyCategories } from "@/services/Farm/farm.service";
 
 // ✅ Move this above the default export or in a separate file
 const InputField = ({
@@ -176,6 +177,7 @@ export default function PropertyRegistrationForm() {
     size: "",
     facilities: [],
     swimming_pool_size: "",
+    category_id: "",
     care_taker_name: "",
     care_taker_number: "",
     person_limit: "",
@@ -197,14 +199,29 @@ export default function PropertyRegistrationForm() {
     farmOwnerName: "",
     farmOwnerMobile: "",
     farmOwnerEmail: "",
-    checkInTime: "",
-    checkOutTime: "",
+    // checkInTime: "",
+    // checkOutTime: "",
+    checkInTime: [],
+checkOutTime: [],
+
     kidsSwimmingPool: false,
     propertyRules: "",
   });
 
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [checkInOpen, setCheckInOpen] = useState(false);
+const [checkOutOpen, setCheckOutOpen] = useState(false);
+const [categories, setCategories] = useState([]);
+
+useEffect(() => {
+  fetchPropertyCategories()
+    .then(setCategories)
+    .catch((err) => {
+      console.error("Failed to load categories", err);
+    });
+}, []);
+
 
   // const validateField = (name, value) => {
   //   switch (name) {
@@ -243,6 +260,21 @@ export default function PropertyRegistrationForm() {
   //   }
   //   return "";
   // };
+
+const handleMultiSelect = (key, value) => {
+  setFormData((prev) => {
+    const selected = prev[key];
+    if (selected.includes(value)) {
+      return { ...prev, [key]: selected.filter((item) => item !== value) };
+    } else if (selected.length < 2) {
+      return { ...prev, [key]: [...selected, value] };
+    }
+    return prev; // max limit reached
+  });
+};
+
+
+
 
   const validateField = (name, value) => {
     switch (name) {
@@ -285,20 +317,21 @@ export default function PropertyRegistrationForm() {
     return "";
   };
 
-  const handleInputChange = (name, value) => {
-    setFormData((prev) => ({ ...prev, [name]: value }));
+ const handleInputChange = (name, value) => {
+  setFormData((prev) => ({ ...prev, [name]: value }));
 
-    // Clear error when user starts typing
-    if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: "" }));
-    }
+  // Clear error when user starts typing
+  if (errors[name]) {
+    setErrors((prev) => ({ ...prev, [name]: "" }));
+  }
 
-    // // Validate field on change
-    // const error = validateField(name, value);
-    // if (error) {
-    //   setErrors((prev) => ({ ...prev, [name]: error }));
-    // }
-  };
+  // ✅ Validate field on change
+  const error = validateField(name, value);
+  if (error) {
+    setErrors((prev) => ({ ...prev, [name]: error }));
+  }
+};
+
 
   // const handleFileUpload = (files) => {
   //   if (!files) return;
@@ -436,6 +469,13 @@ export default function PropertyRegistrationForm() {
     if (formData.photos.length === 0) {
       newErrors.photos = "Please upload at least one property photo";
     }
+if (formData.checkInTime.length === 0) {
+  errors.checkInTime = "Please select at least one check-in time.";
+}
+
+if (formData.checkOutTime.length === 0) {
+  errors.checkOutTime = "Please select at least one check-out time.";
+}
 
     // Field-specific validation
     Object.entries(formData).forEach(([key, value]) => {
@@ -486,7 +526,7 @@ export default function PropertyRegistrationForm() {
   return (
     <form onSubmit={handleSubmit} className="max-w-4xl mx-auto space-y-8">
       {/* Owner Information */}
-      <Card>
+      {/* <Card>
         <CardHeader>
           <CardTitle>Farm Owner Information</CardTitle>
         </CardHeader>
@@ -529,7 +569,7 @@ export default function PropertyRegistrationForm() {
             setErrors={setErrors}
           />
         </CardContent>
-      </Card>
+      </Card> */}
 
       {/* Property Information */}
       <Card>
@@ -539,7 +579,7 @@ export default function PropertyRegistrationForm() {
         <CardContent className="space-y-6">
           <InputField
             name="name"
-            label="Farm Name"
+            label="Property Name"
             required
             placeholder="Enter property name"
             formData={formData}
@@ -574,49 +614,37 @@ export default function PropertyRegistrationForm() {
             />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <InputField
-              name="person_limit"
-              label="Person Limit"
-              type="number"
-              required
-              note="extra charge applies"
-              placeholder="Maximum guests"
-              formData={formData}
-              errors={errors}
-              handleInputChange={handleInputChange}
-              validateField={validateField}
-              setErrors={setErrors}
-            />
-            <InputField
-              name="day_capacity"
-              label="Guest Stay Capacity (Day)"
-              type="number"
-              required
-              placeholder="Day capacity"
-              formData={formData}
-              errors={errors}
-              handleInputChange={handleInputChange}
-              validateField={validateField}
-              setErrors={setErrors}
-            />
-            <InputField
-              name="night_capacity"
-              label="Guest Stay Capacity (Night)"
-              type="number"
-              required
-              placeholder="Night capacity"
-              formData={formData}
-              errors={errors}
-              handleInputChange={handleInputChange}
-              validateField={validateField}
-              setErrors={setErrors}
-            />
-          </div>
+          <div className="space-y-2">
+  <Label className="flex items-center gap-1">
+    Property Category <span className="text-red-500">*</span>
+  </Label>
+  <Select
+    value={formData.category_id}
+    onValueChange={(value) => handleInputChange("category_id", value)}
+  >
+    <SelectTrigger className={errors.category_id ? "border-red-500" : ""}>
+      <SelectValue placeholder="Select category" />
+    </SelectTrigger>
+    <SelectContent>
+      {categories.map((category) => (
+        <SelectItem key={category.id} value={String(category.id)}>
+          {category.name}
+        </SelectItem>
+      ))}
+    </SelectContent>
+  </Select>
+  {errors.category_id && (
+    <p className="text-sm text-red-500 flex items-center gap-1">
+      <AlertCircle className="w-4 h-4" />
+      {errors.category_id}
+    </p>
+  )}
+</div>
+
 
           <InputField
             name="size"
-            label="Farm Size in Sq yd"
+            label="Property Size in Sqyd"
             type="number"
             required
             placeholder="Enter size in square yards"
@@ -626,216 +654,9 @@ export default function PropertyRegistrationForm() {
             validateField={validateField}
             setErrors={setErrors}
           />
-        </CardContent>
-      </Card>
-
-      {/* Pricing Information */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Pricing Information</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <InputField
-              name="extra_person_charge"
-              label="Extra Person Charge on Weekdays"
-              type="number"
-              required
-              placeholder="Amount in ₹"
-              formData={formData}
-              errors={errors}
-              handleInputChange={handleInputChange}
-              validateField={validateField}
-              setErrors={setErrors}
-            />
-            <InputField
-              name="extra_person_charge"
-              label="Extra Person Charge on Weekends"
-              type="number"
-              required
-              placeholder="Amount in ₹"
-              formData={formData}
-              errors={errors}
-              handleInputChange={handleInputChange}
-              validateField={validateField}
-              setErrors={setErrors}
-            />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-4">
-              <h4 className="font-medium text-neutral-900">Weekday Pricing</h4>
-              <InputField
-                name="weekday_half_day_price"
-                label="12-Hour Price Weekday"
-                type="number"
-                required
-                placeholder="Amount in ₹"
-                formData={formData}
-                errors={errors}
-                handleInputChange={handleInputChange}
-                validateField={validateField}
-                setErrors={setErrors}
-              />
-              <InputField
-                name="weekday_full_day_price"
-                label="24-Hour Price Weekday"
-                type="number"
-                required
-                placeholder="Amount in ₹"
-                formData={formData}
-                errors={errors}
-                handleInputChange={handleInputChange}
-                validateField={validateField}
-                setErrors={setErrors}
-              />
-            </div>
-            <div className="space-y-4">
-              <h4 className="font-medium text-neutral-900">Weekend Pricing</h4>
-              <InputField
-                name="weekend_half_day_price"
-                label="12-Hour Price Weekend"
-                type="number"
-                required
-                placeholder="Amount in ₹"
-                formData={formData}
-                errors={errors}
-                handleInputChange={handleInputChange}
-                validateField={validateField}
-                setErrors={setErrors}
-              />
-              <InputField
-                name="weekend_full_day_price"
-                label="24-Hour Price Weekend"
-                type="number"
-                required
-                placeholder="Amount in ₹"
-                formData={formData}
-                errors={errors}
-                handleInputChange={handleInputChange}
-                validateField={validateField}
-                setErrors={setErrors}
-              />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Check-in/Check-out Times */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Check-in & Check-out Times</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <Label className="flex items-center gap-1">
-                Check-In Time <span className="text-red-500">*</span>
-              </Label>
-              <Select
-                value={formData.checkInTime}
-                onValueChange={(value) =>
-                  handleInputChange("checkInTime", value)
-                }
-              >
-                <SelectTrigger
-                  className={errors.checkInTime ? "border-red-500" : ""}
-                >
-                  <SelectValue placeholder="Select check-in time" />
-                </SelectTrigger>
-                <SelectContent>
-                  {TIME_OPTIONS.map((time) => (
-                    <SelectItem key={time} value={time}>
-                      {time}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {errors.checkInTime && (
-                <p className="text-sm text-red-500 flex items-center gap-1">
-                  <AlertCircle className="w-4 h-4" />
-                  {errors.checkInTime}
-                </p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label className="flex items-center gap-1">
-                Check-Out Time <span className="text-red-500">*</span>
-              </Label>
-              <Select
-                value={formData.checkOutTime}
-                onValueChange={(value) =>
-                  handleInputChange("checkOutTime", value)
-                }
-              >
-                <SelectTrigger
-                  className={errors.checkOutTime ? "border-red-500" : ""}
-                >
-                  <SelectValue placeholder="Select check-out time" />
-                </SelectTrigger>
-                <SelectContent>
-                  {TIME_OPTIONS.map((time) => (
-                    <SelectItem key={time} value={time}>
-                      {time}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {errors.checkOutTime && (
-                <p className="text-sm text-red-500 flex items-center gap-1">
-                  <AlertCircle className="w-4 h-4" />
-                  {errors.checkOutTime}
-                </p>
-              )}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Caretaker Information */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Caretaker Information</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <InputField
-              name="care_taker_name"
-              label="Caretaker Name"
-              required
-              placeholder="Enter caretaker name"
-              formData={formData}
-              errors={errors}
-              handleInputChange={handleInputChange}
-              validateField={validateField}
-              setErrors={setErrors}
-            />
-            <InputField
-              name="care_taker_number"
-              label="Caretaker Number"
-              type="tel"
-              required
-              placeholder="10-digit mobile number"
-              formData={formData}
-              errors={errors}
-              handleInputChange={handleInputChange}
-              validateField={validateField}
-              setErrors={setErrors}
-            />
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Property Details */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Property Details</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="space-y-2">
+         <div className="space-y-2">
             <Label className="flex items-center gap-1">
-              Farm Address <span className="text-red-500">*</span>
+              Property Address <span className="text-red-500">*</span>
             </Label>
             <Textarea
               value={formData.address}
@@ -852,9 +673,33 @@ export default function PropertyRegistrationForm() {
             )}
           </div>
 
+             <InputField
+            name="location_link"
+            label="Location Link"
+            type="url"
+            required
+            placeholder="https://maps.google.com/..."
+            formData={formData}
+            errors={errors}
+            handleInputChange={handleInputChange}
+            validateField={validateField}
+            setErrors={setErrors}
+          />
+
+        </CardContent>
+      </Card>
+
+        {/* Property Details */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Property Details</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+         
+
           <div className="space-y-2">
             <Label className="flex items-center gap-1">
-              Farm Facilities <span className="text-red-500">*</span>
+              Property Facilities <span className="text-red-500">*</span>
             </Label>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3 p-4 border rounded-lg">
               {FACILITY_OPTIONS.map((facility) => (
@@ -890,22 +735,31 @@ export default function PropertyRegistrationForm() {
             )}
           </div>
 
-          <InputField
-            name="location_link"
-            label="Location Link"
-            type="url"
-            required
-            placeholder="https://maps.google.com/..."
-            formData={formData}
-            errors={errors}
-            handleInputChange={handleInputChange}
-            validateField={validateField}
-            setErrors={setErrors}
-          />
-
+       
           <div className="space-y-2">
             <Label className="flex items-center gap-1">
               Property Rules <span className="text-red-500">*</span>
+            </Label>
+            <Textarea
+              value={formData.propertyRules}
+              onChange={(e) =>
+                handleInputChange("propertyRules", e.target.value)
+              }
+              placeholder="Enter property rules and regulations"
+              rows={4}
+              className={errors.propertyRules ? "border-red-500" : ""}
+            />
+            {errors.propertyRules && (
+              <p className="text-sm text-red-500 flex items-center gap-1">
+                <AlertCircle className="w-4 h-4" />
+                {errors.propertyRules}
+              </p>
+            )}
+          </div>
+
+           <div className="space-y-2">
+            <Label className="flex items-center gap-1">
+              Property Description <span className="text-red-500">*</span>
             </Label>
             <Textarea
               value={formData.propertyRules}
@@ -975,6 +829,348 @@ export default function PropertyRegistrationForm() {
           />
         </CardContent>
       </Card>
+
+      {/* Pricing Information */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Pricing Information</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <InputField
+              name="extra_person_charge"
+              label="Extra Person Charge"
+              type="number"
+              required
+              placeholder="Amount in ₹"
+              formData={formData}
+              errors={errors}
+              handleInputChange={handleInputChange}
+              validateField={validateField}
+              setErrors={setErrors}
+            />
+            {/* <InputField
+              name="extra_person_charge"
+              label="Extra Person Charge on Weekends"
+              type="number"
+              required
+              placeholder="Amount in ₹"
+              formData={formData}
+              errors={errors}
+              handleInputChange={handleInputChange}
+              validateField={validateField}
+              setErrors={setErrors}
+            /> */}
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <InputField
+              name="person_limit"
+              label="Person Limit"
+              type="number"
+              required
+              note="After extra charge applicable"
+              placeholder="Maximum guests"
+              formData={formData}
+              errors={errors}
+              handleInputChange={handleInputChange}
+              validateField={validateField}
+              setErrors={setErrors}
+            />
+            <InputField
+              name="day_capacity"
+              label="Guest Stay Capacity (Day)"
+              type="number"
+              required
+              placeholder="Day capacity"
+              formData={formData}
+              errors={errors}
+              handleInputChange={handleInputChange}
+              validateField={validateField}
+              setErrors={setErrors}
+            />
+            <InputField
+              name="night_capacity"
+              label="Guest Stay Capacity (Night)"
+              type="number"
+              required
+              placeholder="Night capacity"
+              formData={formData}
+              errors={errors}
+              handleInputChange={handleInputChange}
+              validateField={validateField}
+              setErrors={setErrors}
+            />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-4">
+              <h4 className="font-medium text-neutral-900">Weekday Pricing</h4>
+              <InputField
+                name="weekday_half_day_price"
+                label="12-Hour Price Weekday"
+                type="number"
+                required
+                placeholder="Amount in ₹"
+                formData={formData}
+                errors={errors}
+                handleInputChange={handleInputChange}
+                validateField={validateField}
+                setErrors={setErrors}
+              />
+              <InputField
+                name="weekday_full_day_price"
+                label="24-Hour Price Weekday"
+                type="number"
+                required
+                placeholder="Amount in ₹"
+                formData={formData}
+                errors={errors}
+                handleInputChange={handleInputChange}
+                validateField={validateField}
+                setErrors={setErrors}
+              />
+            </div>
+            <div className="space-y-4">
+              <h4 className="font-medium text-neutral-900">Weekend Pricing</h4>
+              <InputField
+                name="weekend_half_day_price"
+                label="12-Hour Price Weekend"
+                type="number"
+                required
+                placeholder="Amount in ₹"
+                formData={formData}
+                errors={errors}
+                handleInputChange={handleInputChange}
+                validateField={validateField}
+                setErrors={setErrors}
+              />
+              <InputField
+                name="weekend_full_day_price"
+                label="24-Hour Price Weekend"
+                type="number"
+                required
+                placeholder="Amount in ₹"
+                formData={formData}
+                errors={errors}
+                handleInputChange={handleInputChange}
+                validateField={validateField}
+                setErrors={setErrors}
+              />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Check-in/Check-out Times */}
+      {/* <Card>
+        <CardHeader>
+          <CardTitle>Check-in & Check-out Times</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <Label className="flex items-center gap-1">
+                Check-In Time <span className="text-red-500">*</span>
+              </Label>
+              <Select
+                value={formData.checkInTime}
+                onValueChange={(value) =>
+                  handleInputChange("checkInTime", value)
+                }
+              >
+                <SelectTrigger
+                  className={errors.checkInTime ? "border-red-500" : ""}
+                >
+                  <SelectValue placeholder="Select check-in time" />
+                </SelectTrigger>
+                <SelectContent>
+                  {TIME_OPTIONS.map((time) => (
+                    <SelectItem key={time} value={time}>
+                      {time}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.checkInTime && (
+                <p className="text-sm text-red-500 flex items-center gap-1">
+                  <AlertCircle className="w-4 h-4" />
+                  {errors.checkInTime}
+                </p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label className="flex items-center gap-1">
+                Check-Out Time <span className="text-red-500">*</span>
+              </Label>
+              <Select
+                value={formData.checkOutTime}
+                onValueChange={(value) =>
+                  handleInputChange("checkOutTime", value)
+                }
+              >
+                <SelectTrigger
+                  className={errors.checkOutTime ? "border-red-500" : ""}
+                >
+                  <SelectValue placeholder="Select check-out time" />
+                </SelectTrigger>
+                <SelectContent>
+                  {TIME_OPTIONS.map((time) => (
+                    <SelectItem key={time} value={time}>
+                      {time}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.checkOutTime && (
+                <p className="text-sm text-red-500 flex items-center gap-1">
+                  <AlertCircle className="w-4 h-4" />
+                  {errors.checkOutTime}
+                </p>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card> */}
+
+
+<Card>
+        <CardHeader>
+          <CardTitle>Check-in & Check-out Times</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+  <Label className="flex items-center gap-1">
+    Check-In Time <span className="text-red-500">*</span>
+  </Label>
+<Select open={checkInOpen} onOpenChange={setCheckInOpen}>
+  <SelectTrigger className={errors.checkInTime ? "border-red-500" : ""}>
+    <SelectValue placeholder="Select check-in time">
+      {formData.checkInTime.length > 0
+        ? formData.checkInTime.join(", ")
+        : "Select check-in time"}
+    </SelectValue>
+  </SelectTrigger>
+  <SelectContent>
+    {TIME_OPTIONS.map((time) => (
+      <div
+        key={time}
+        className="flex items-center gap-2 px-2 py-1 hover:bg-gray-100 cursor-pointer"
+        onClick={(e) => {
+          e.stopPropagation();
+          handleMultiSelect("checkInTime", time);
+        }}
+      >
+        <input
+          type="checkbox"
+          checked={formData.checkInTime.includes(time)}
+          readOnly
+          disabled={
+            !formData.checkInTime.includes(time) &&
+            formData.checkInTime.length >= 2
+          }
+        />
+        <label className="text-sm">{time}</label>
+      </div>
+    ))}
+  </SelectContent>
+</Select>
+
+  {errors.checkInTime && (
+    <p className="text-sm text-red-500 flex items-center gap-1">
+      <AlertCircle className="w-4 h-4" />
+      {errors.checkInTime}
+    </p>
+  )}
+</div>
+
+
+           <div className="space-y-2">
+  <Label className="flex items-center gap-1">
+    Check-Out Time <span className="text-red-500">*</span>
+  </Label>
+ <Select open={checkOutOpen} onOpenChange={setCheckOutOpen}>
+  <SelectTrigger className={errors.checkOutTime ? "border-red-500" : ""}>
+    <SelectValue placeholder="Select check-out time">
+      {formData.checkOutTime.length > 0
+        ? formData.checkOutTime.join(", ")
+        : "Select check-out time"}
+    </SelectValue>
+  </SelectTrigger>
+  <SelectContent>
+    {TIME_OPTIONS.map((time) => (
+      <div
+        key={time}
+        className="flex items-center gap-2 px-2 py-1 hover:bg-gray-100 cursor-pointer"
+        onClick={(e) => {
+          e.stopPropagation();
+          handleMultiSelect("checkOutTime", time);
+        }}
+      >
+        <input
+          type="checkbox"
+          checked={formData.checkOutTime.includes(time)}
+          readOnly
+          disabled={
+            !formData.checkOutTime.includes(time) &&
+            formData.checkOutTime.length >= 2
+          }
+        />
+        <label className="text-sm">{time}</label>
+      </div>
+    ))}
+  </SelectContent>
+</Select>
+
+  {errors.checkOutTime && (
+    <p className="text-sm text-red-500 flex items-center gap-1">
+      <AlertCircle className="w-4 h-4" />
+      {errors.checkOutTime}
+    </p>
+  )}
+</div>
+
+          </div>
+        </CardContent>
+      </Card>
+
+
+      {/* Caretaker Information */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Caretaker Information</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <InputField
+              name="care_taker_name"
+              label="Caretaker Name"
+              required
+              placeholder="Enter caretaker name"
+              formData={formData}
+              errors={errors}
+              handleInputChange={handleInputChange}
+              validateField={validateField}
+              setErrors={setErrors}
+            />
+            <InputField
+              name="care_taker_number"
+              label="Caretaker Number"
+              type="tel"
+              required
+              placeholder="10-digit mobile number"
+              formData={formData}
+              errors={errors}
+              handleInputChange={handleInputChange}
+              validateField={validateField}
+              setErrors={setErrors}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+    
 
       {/* Photo Upload */}
       <Card>

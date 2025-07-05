@@ -96,17 +96,8 @@ const options = {
   theme: {
     color: '#17AE7D',
   },
-  config: {
-    display: {
-      hide: {
-        truecaller: true,
-      },
-      preferences: {
-        show_default_blocks: false,
-      },
-    },
-  },
 };
+
 
 console.log("🚀 ~ handlePayNow ~ options.prefill:", options.prefill)
 console.log("Using Razorpay key:", razorpayKey);

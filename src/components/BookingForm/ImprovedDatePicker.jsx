@@ -179,6 +179,33 @@ export default function ImprovedDatePicker({
 }) {
   const [isCheckInOpen, setIsCheckInOpen] = useState(false);
   const [isCheckOutOpen, setIsCheckOutOpen] = useState(false);
+  const TIME_OPTIONS = [
+  "12:00 AM",
+  "1:00 AM",
+  "2:00 AM",
+  "3:00 AM",
+  "4:00 AM",
+  "5:00 AM",
+  "6:00 AM",
+  "7:00 AM",
+  "8:00 AM", 
+  "9:00 AM",
+  "10:00 AM",
+  "11:00 AM",
+  "12:00 PM",
+  "1:00 PM",
+  "2:00 PM", 
+  "3:00 PM", 
+  "4:00 PM",
+  "5:00 PM",
+  "6:00 PM",
+  "7:00 PM",
+  "8:00 PM",
+  "9:00 PM",
+  "10:00 PM",
+  "11:00 PM",
+];
+
 
   const today = new Date();
   const tomorrow = new Date(today);
@@ -255,18 +282,20 @@ export default function ImprovedDatePicker({
                 </PopoverContent>
               </Popover>
               {checkIn && (
-                <div className="mt-2">
-                  <Label className="text-xs text-neutral-500">Check-in Time</Label>
-                  <select
-                    className="w-full mt-1 p-2 border rounded text-sm"
-                    value={checkInTime}
-                    onChange={(e) => onCheckInTimeChange?.(e.target.value)}
-                  >
-                    {[ "7:00 AM", "7:00 PM"].map((time) => (
-                      <option key={time} value={time}>{time}</option>
-                    ))}
-                  </select>
-                </div>
+               <div className="mt-2">
+  <Label className="text-xs text-neutral-500">Check-in Time</Label>
+  <select
+    className="w-full mt-1 p-2 border rounded text-sm"
+    value={checkInTime}
+    onChange={(e) => onCheckInTimeChange?.(e.target.value)}
+  >
+    {TIME_OPTIONS.map((time) => (
+      <option key={time} value={time}>
+        {time}
+      </option>
+    ))}
+  </select>
+</div>
               )}
             </div>
 
@@ -316,9 +345,11 @@ export default function ImprovedDatePicker({
                     value={checkOutTime}
                     onChange={(e) => onCheckOutTimeChange?.(e.target.value)}
                   >
-                    {["6:00 AM","6:00 PM"].map((time) => (
-                      <option key={time} value={time}>{time}</option>
-                    ))}
+                   {TIME_OPTIONS.map((time) => (
+      <option key={time} value={time}>
+        {time}
+      </option>
+    ))}
                   </select>
                 </div>
               )}
@@ -328,24 +359,25 @@ export default function ImprovedDatePicker({
           {checkIn && checkOut && nights > 0 && (
             <div className="mt-4 p-3 bg-gradient-to-r from-primary/10 to-primary/5 rounded-lg border border-primary/20">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1">
                   <ArrowRight className="w-4 h-4 text-primary" />
                   <span className="text-sm font-medium text-neutral-700">
                     Duration: {nights} night{nights !== 1 ? 's' : ''}
                   </span>
                 </div>
-                <div className="text-right">
-                  <span className="text-xs text-neutral-500">
-                    {formatDate(checkIn)} → {formatDate(checkOut)}
-                  </span>
-                </div>
+                <div className="text-right whitespace-nowrap">
+  <span className="text-xs text-neutral-500">
+    {formatDate(checkIn)} → {formatDate(checkOut)}
+  </span>
+</div>
+
               </div>
             </div>
           )}
         </CardContent>
       </Card>
 
-      <div className="space-y-3">
+      {/* <div className="space-y-3">
         <Label className="text-sm font-medium text-neutral-700">Quick Select</Label>
         <div className="grid grid-cols-2 gap-2">
           {[
@@ -417,7 +449,7 @@ export default function ImprovedDatePicker({
             );
           })}
         </div>
-      </div>
+      </div> */}
     </div>
   );
 }

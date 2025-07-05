@@ -77,3 +77,24 @@ export const fetchPropertyCategories = async () => {
     throw error;
   }
 };
+
+export const fetchRulesAndPolicies = async (token) => {
+  try {
+    const response = await api.get("/api/rules-policies", {
+      headers: {
+        Accept: "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const data = response?.data;
+    return {
+      rules: data?.rules_and_policies || [],
+      cancellation: data?.cancellation_policy || [],
+      commission: data?.commission_policy || [],
+    };
+  } catch (error) {
+    console.error("Error fetching rules and policies:", error);
+    throw error;
+  }
+};

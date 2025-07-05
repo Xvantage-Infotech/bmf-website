@@ -479,7 +479,7 @@ export default function Homes() {
           </a>
 
           {/* Download App */}
-          <a
+          {/* <a
             href="https://play.google.com/store/apps/details?id=com.app.bookmyfarm&hl=en_IN"
             target="_blank"
             rel="noopener noreferrer"
@@ -493,7 +493,7 @@ export default function Homes() {
             aria-label="Download App"
           >
             <Download className="w-6 h-6 sm:w-7 sm:h-7 text-white/70" />
-          </a>
+          </a> */}
         </div>
 
         {/* Toggle Button */}

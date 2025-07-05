@@ -37,7 +37,7 @@ export default function Profiles() {
         
     {user?.profile_image ? (
   <img
-    src={`https://api-stagging.bookmyfarm.net/assets/images/user_profiles/${user.profile_image}`}
+    src={`https://api.bookmyfarm.net/assets/images/user_profiles/${user.profile_image}`}
     alt="Profile"
     className="w-24 h-24 rounded-full object-cover mb-4 border-4 border-primary"
   />

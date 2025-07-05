@@ -205,6 +205,64 @@ export default function FarmDetail() {
       }
     };
 
+    // const loadFarm = async () => {
+    //   try {
+    //     const data = await fetchFarmById(farmId);
+
+    //     let latitude = null;
+    //     let longitude = null;
+
+    //     const extractLatLng = (url) => {
+    //       // Match `?q=lat,lng` OR `@lat,lng` patterns
+    //       const match = url.match(
+    //         /[@?]([-+]?[0-9]*\.?[0-9]+),\s*([-+]?[0-9]*\.?[0-9]+)/
+    //       );
+    //       if (match && match.length >= 3) {
+    //         return { lat: match[1], lng: match[2] };
+    //       }
+    //       return { lat: null, lng: null };
+    //     };
+
+    //     if (data?.location_link) {
+    //       // Try extracting from original URL
+    //       const directMatch = extractLatLng(data.location_link);
+    //       latitude = directMatch.lat;
+    //       longitude = directMatch.lng;
+
+    //       // If not found and it's a short URL, try resolving
+    //       if (
+    //         (!latitude || !longitude) &&
+    //         data.location_link.includes("maps.app.goo.gl")
+    //       ) {
+    //         try {
+    //           const response = await fetch(data.location_link, {
+    //             method: "GET",
+    //             redirect: "follow",
+    //           });
+
+    //           const finalURL = response.url;
+    //           const resolvedMatch = extractLatLng(finalURL);
+
+    //           latitude = resolvedMatch.lat;
+    //           longitude = resolvedMatch.lng;
+    //         } catch (err) {
+    //           console.error("Failed to resolve short maps URL:", err);
+    //         }
+    //       }
+    //     }
+
+    //     setFarm({
+    //       ...data,
+    //       latitude,
+    //       longitude,
+    //     });
+    //   } catch (e) {
+    //     console.error(e);
+    //   } finally {
+    //     setLoading(false);
+    //   }
+    // };
+
     loadFarm();
   }, [farmId]);
 
@@ -229,6 +287,20 @@ export default function FarmDetail() {
   const mainImage = farmImages[selectedImageIndex]
     ? `https://api.bookmyfarm.net/assets/images/farm_images/${farmImages[selectedImageIndex].image}`
     : "/placeholder.jpg";
+
+  const handleWhatsAppClick = () => {
+    if (!farm) return;
+
+    const name = farm.farm_alias_name || farm.name;
+    const message = `Hello, I am interested to book this Property: ${name} - https://bookmyfarm.in/farm/${farm.id}`;
+
+    const encodedMessage = encodeURIComponent(message).replace(/\+/g, "%20");
+
+    const url = `https://wa.me/919277778778?text=${encodedMessage}`;
+
+    // Some mobile browsers block new tab if not directly triggered by user event
+    window.open(url, "_blank");
+  };
 
   return (
     <div className="min-h-screen bg-white">
@@ -473,6 +545,41 @@ export default function FarmDetail() {
                     </p>
                   )}
                 </TabsContent>
+
+                {/* <TabsContent value="location">
+                  {farm.latitude && farm.longitude ? (
+                    <div className="w-full h-64 md:h-96 rounded-lg overflow-hidden">
+                      <iframe
+                        src={`https://www.google.com/maps?q=${farm.latitude},${farm.longitude}&hl=es;z=14&output=embed`}
+                        width="100%"
+                        height="100%"
+                        style={{ border: 0 }}
+                        allowFullScreen=""
+                        loading="lazy"
+                        referrerPolicy="no-referrer-when-downgrade"
+                      ></iframe>
+                    </div>
+                  ) : farm?.location_link ? (
+                    <div className="text-center space-y-2">
+                      <p className="text-neutral-500">
+                        Location cannot be embedded, but you can open it in
+                        Google Maps:
+                      </p>
+                      <a
+                        href={farm.location_link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-block px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition"
+                      >
+                        Open in Google Maps
+                      </a>
+                    </div>
+                  ) : (
+                    <p className="text-neutral-500">
+                      Location map not available.
+                    </p>
+                  )}
+                </TabsContent> */}
               </Tabs>
             </div>
 
@@ -488,6 +595,27 @@ export default function FarmDetail() {
           <CustomerReviews />
         </div>
       </div>
+      {/* Floating WhatsApp Button */}
+      {farm && (
+        <button
+          onClick={handleWhatsAppClick}
+          className="fixed bottom-20 sm:bottom-6 right-6 z-50
+  w-12 h-12 sm:w-14 sm:h-14
+  bg-green-500 hover:bg-green-600
+  text-white rounded-full shadow-lg
+  flex items-center justify-center
+  transition-all duration-300"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 32 32"
+            fill="currentColor"
+            className="w-6 h-6 sm:w-7 sm:h-7"
+          >
+            <path d="M16.004 2.986C8.82 2.986 3 8.735 3 15.884c0 2.55.753 5.017 2.157 7.151L3 29l6.14-2.09a13.71 13.71 0 006.865 1.75h.002c7.183 0 13.003-5.748 13.003-12.898.001-7.149-5.82-12.876-13.006-12.876zm0 23.564a11.26 11.26 0 01-5.765-1.595l-.414-.246-3.648 1.24 1.208-3.555-.269-.406a10.235 10.235 0 01-1.632-5.62c0-5.715 4.675-10.367 10.373-10.367 5.697 0 10.335 4.652 10.335 10.367.002 5.715-4.637 10.182-10.188 10.182zm5.632-7.653c-.308-.155-1.82-.896-2.1-.997-.281-.1-.485-.155-.688.156-.203.309-.79.996-.968 1.201-.178.204-.357.229-.664.077-.308-.155-1.297-.479-2.47-1.528-.912-.812-1.528-1.816-1.707-2.125-.178-.308-.019-.475.135-.63.139-.138.308-.357.46-.536.154-.179.203-.309.308-.513.102-.204.051-.383-.025-.537-.077-.155-.688-1.66-.942-2.273-.248-.597-.502-.514-.688-.523l-.587-.01c-.204 0-.536.077-.817.383-.281.308-1.072 1.045-1.072 2.547s1.097 2.951 1.249 3.156c.154.204 2.157 3.293 5.227 4.62.731.316 1.3.504 1.744.644.733.234 1.4.2 1.927.122.588-.087 1.82-.743 2.077-1.46.256-.716.256-1.33.179-1.46-.077-.128-.281-.204-.587-.357z" />
+          </svg>
+        </button>
+      )}
     </div>
   );
 }

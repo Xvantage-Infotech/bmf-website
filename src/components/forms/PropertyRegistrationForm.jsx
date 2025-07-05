@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,7 +19,10 @@ import { FACILITY_OPTIONS, TIME_OPTIONS } from "@/constants/categories";
 import { submitProperty } from "@/services/Listfarm/listfarm.service";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDialog } from "@/hooks/use-dialog";
-import { fetchPropertyCategories } from "@/services/Farm/farm.service";
+import {
+  fetchPropertyCategories,
+  fetchRulesAndPolicies,
+} from "@/services/Farm/farm.service";
 
 // ✅ Move this above the default export or in a separate file
 const InputField = ({
@@ -34,6 +37,7 @@ const InputField = ({
   handleInputChange,
   validateField,
   setErrors,
+  refs,
 }) => {
   const handleBlur = () => {
     const error = validateField(name, formData[name]);
@@ -54,6 +58,7 @@ const InputField = ({
       <Input
         id={name}
         name={name}
+        ref={(el) => (refs.current[name] = el)}
         type={type}
         value={formData[name] ?? ""}
         onChange={(e) => handleInputChange(name, e.target.value)}
@@ -74,29 +79,45 @@ const InputField = ({
 export default function PropertyRegistrationForm() {
   const { user } = useAuth();
   const { show } = useDialog();
+  const refs = useRef({});
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!validateForm()) return;
+    const isValid = validateForm();
+
+    if (!isValid) {
+      console.warn("⚠️ Form validation failed");
+      return;
+    }
 
     if (!user?.token) {
       alert("Please log in to register your property.");
+      console.error("❌ No token found for user");
       return;
     }
+
+    if (!user) {
+      console.error("User is not available");
+      return;
+    }
+
+
+    // Directly set user_id in formData
+    const formDataWithUserId = { ...formData, user_id: user.id };
 
     setIsSubmitting(true);
 
     try {
-      const response = await submitProperty(formData, user.token);
+      const response = await submitProperty(formDataWithUserId, user.token);
 
-       show({
+      show({
         title: "Property Submitted!",
         description: "We’ll review it and get back to you soon.",
       });
 
       setFormData({
-        // Backend-required fields
+        user_id: user.id, // Ensure user_id is correctly set here
         name: "",
         size: "",
         facilities: [],
@@ -115,17 +136,24 @@ export default function PropertyRegistrationForm() {
         city: "",
         near_by_area: "",
         location_link: "",
+        kids_swimming: false,
         referral_code: "",
         photos: [],
+        house_rule_policy: "",
+        category_id: "",
+        description: "",
+        check_in_time: [],
+        check_out_time: [],
 
-        // Frontend-only fields (not sent to backend)
+        // Document upload fields
+        government_photo_id: null,
+        bank_details_check_photo: null,
+        property_agreement: null,
+
+        // Not sent to backend
         farmOwnerName: "",
         farmOwnerMobile: "",
         farmOwnerEmail: "",
-        checkInTime: "",
-        checkOutTime: "",
-        kidsSwimmingPool: false,
-        propertyRules: "",
       });
 
       setErrors({});
@@ -171,13 +199,50 @@ export default function PropertyRegistrationForm() {
   //   propertyPhotos: [],
   // });
 
+  const governmentIdRef = useRef(null);
+  const bankDetailsRef = useRef(null);
+  const propertyAgreementRef = useRef(null);
+
+  const [rulesData, setRulesData] = useState({
+    rules_and_policies: [],
+    cancellation_policy: [],
+    commission_policy: [],
+  });
+  const [agreed, setAgreed] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+
+  useEffect(() => {
+    const fetchRules = async () => {
+      try {
+        const token = localStorage.getItem("accessToken");
+        const res = await fetchRulesAndPolicies(token);
+
+        setRulesData({
+          rules_and_policies: res.rules || [],
+          cancellation_policy: res.cancellation || [],
+          commission_policy: res.commission || [],
+        });
+      } catch (err) {
+        console.error("Failed to fetch rules:", err);
+      }
+    };
+
+    fetchRules();
+  }, []);
+
+  // if (!agreed) {
+  //   setExpanded(true);
+  //   document.getElementById("agree")?.scrollIntoView({ behavior: "smooth" });
+  //   return;
+  // }
+
   const [formData, setFormData] = useState({
     // Backend-required fields
+    user_id: "",
     name: "",
     size: "",
     facilities: [],
     swimming_pool_size: "",
-    category_id: "",
     care_taker_name: "",
     care_taker_number: "",
     person_limit: "",
@@ -193,35 +258,38 @@ export default function PropertyRegistrationForm() {
     near_by_area: "",
     location_link: "",
     referral_code: "",
+    house_rule_policy: "",
+    description: "",
+    category_id: "",
+    kids_swimming: false,
     photos: [],
+
+    // New document upload fields
+    government_photo_id: null,
+    bank_details_check_photo: null,
+    property_agreement: null,
 
     // Extra frontend-only fields (not sent to backend)
     farmOwnerName: "",
     farmOwnerMobile: "",
     farmOwnerEmail: "",
-    // checkInTime: "",
-    // checkOutTime: "",
-    checkInTime: [],
-checkOutTime: [],
-
-    kidsSwimmingPool: false,
-    propertyRules: "",
+    check_in_time: [],
+    check_out_time: [],
   });
 
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [checkInOpen, setCheckInOpen] = useState(false);
-const [checkOutOpen, setCheckOutOpen] = useState(false);
-const [categories, setCategories] = useState([]);
+  const [checkOutOpen, setCheckOutOpen] = useState(false);
+  const [categories, setCategories] = useState([]);
 
-useEffect(() => {
-  fetchPropertyCategories()
-    .then(setCategories)
-    .catch((err) => {
-      console.error("Failed to load categories", err);
-    });
-}, []);
-
+  useEffect(() => {
+    fetchPropertyCategories()
+      .then(setCategories)
+      .catch((err) => {
+        console.error("Failed to load categories", err);
+      });
+  }, []);
 
   // const validateField = (name, value) => {
   //   switch (name) {
@@ -261,20 +329,17 @@ useEffect(() => {
   //   return "";
   // };
 
-const handleMultiSelect = (key, value) => {
-  setFormData((prev) => {
-    const selected = prev[key];
-    if (selected.includes(value)) {
-      return { ...prev, [key]: selected.filter((item) => item !== value) };
-    } else if (selected.length < 2) {
-      return { ...prev, [key]: [...selected, value] };
-    }
-    return prev; // max limit reached
-  });
-};
-
-
-
+  const handleMultiSelect = (key, value) => {
+    setFormData((prev) => {
+      const selected = prev[key];
+      if (selected.includes(value)) {
+        return { ...prev, [key]: selected.filter((item) => item !== value) };
+      } else if (selected.length < 2) {
+        return { ...prev, [key]: [...selected, value] };
+      }
+      return prev; // max limit reached
+    });
+  };
 
   const validateField = (name, value) => {
     switch (name) {
@@ -317,21 +382,20 @@ const handleMultiSelect = (key, value) => {
     return "";
   };
 
- const handleInputChange = (name, value) => {
-  setFormData((prev) => ({ ...prev, [name]: value }));
+  const handleInputChange = (name, value) => {
+    setFormData((prev) => ({ ...prev, [name]: value }));
 
-  // Clear error when user starts typing
-  if (errors[name]) {
-    setErrors((prev) => ({ ...prev, [name]: "" }));
-  }
+    // Clear error when user starts typing
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: "" }));
+    }
 
-  // ✅ Validate field on change
-  const error = validateField(name, value);
-  if (error) {
-    setErrors((prev) => ({ ...prev, [name]: error }));
-  }
-};
-
+    // ✅ Validate field on change
+    const error = validateField(name, value);
+    if (error) {
+      setErrors((prev) => ({ ...prev, [name]: error }));
+    }
+  };
 
   // const handleFileUpload = (files) => {
   //   if (!files) return;
@@ -391,39 +455,90 @@ const handleMultiSelect = (key, value) => {
     handleInputChange("photos", updatedFiles);
   };
 
+  // const validateForm = () => {
+  //   const newErrors = {};
+
+  //   const requiredFields = [
+  //     "name",
+  //     "city",
+  //     "near_by_area",
+  //     "person_limit",
+  //     "day_capacity",
+  //     "night_capacity",
+  //     "size",
+  //     "extra_person_charge",
+  //     "weekday_half_day_price",
+  //     "weekday_full_day_price",
+  //     "weekend_half_day_price",
+  //     "weekend_full_day_price",
+  //     "check_in_time", // frontend only
+  //     "check_out_time", // frontend only
+  //     "care_taker_name",
+  //     "care_taker_number",
+  //     "address",
+  //     "location_link",
+  //     "house_rule_policy",
+  //     "description",
+  //     "category_id",
+  //     // New document upload fields
+  //     "government_photo_id",
+  //     "bank_details_check_photo",
+  //     "property_agreement",
+  //   ];
+
+  //   requiredFields.forEach((field) => {
+  //     const value = formData[field];
+  //     if (!value || (typeof value === "string" && !value.trim())) {
+  //       newErrors[field] = "This field is required";
+  //     }
+  //   });
+
+  //   if (formData.facilities.length === 0) {
+  //     newErrors.facilities = "Please select at least one facility";
+  //   }
+  //   if (formData.photos.length === 0) {
+  //     newErrors.photos = "Please upload at least one property photo";
+  //   }
+
+  //   if (formData.check_in_time.length === 0) {
+  //     newErrors.check_in_time = "Please select at least one check-in time.";
+  //   }
+
+  //   if (formData.check_out_time.length === 0) {
+  //     newErrors.check_out_time = "Please select at least one check-out time.";
+  //   }
+
+  //   // Field-specific validation
+  //   Object.entries(formData).forEach(([key, value]) => {
+  //     const error = validateField(key, value);
+  //     if (error) {
+  //       newErrors[key] = error;
+  //     }
+  //   });
+  //   console.log(newErrors);
+  //   setErrors(newErrors);
+
+  //   // ⬇️ Scroll to first error field
+  //   const firstErrorField = Object.keys(newErrors)[0];
+  //   if (firstErrorField) {
+  //     const ref = refs.current[firstErrorField];
+  //     if (ref) {
+  //       ref.scrollIntoView({ behavior: "smooth", block: "center" });
+  //     } else {
+  //       // Fallback for 'Select' components if focusing doesn't work
+  //       const selectElement = document.querySelector(`#${firstErrorField}`);
+  //       if (selectElement) {
+  //         selectElement.scrollIntoView({ behavior: "smooth", block: "center" });
+  //       }
+  //     }
+  //   }
+
+  //   return Object.keys(newErrors).length === 0;
+  // };
   const validateForm = () => {
     const newErrors = {};
 
-    // Required field validation
-    // const requiredFields = [
-    //   "farmOwnerName",
-    //   "farmOwnerMobile",
-    //   "farmOwnerEmail",
-    //   "farmName",
-    //   "city",
-    //   "nearbyArea",
-    //   "personLimit",
-    //   "guestStayCapacityDay",
-    //   "guestStayCapacityNight",
-    //   "farmSizeSqYd",
-    //   "extraPersonChargeWeekdays",
-    //   "extraPersonChargeWeekends",
-    //   "price12HourWeekday",
-    //   "price24HourWeekday",
-    //   "price12HourWeekend",
-    //   "price24HourWeekend",
-    //   "checkInTime",
-    //   "checkOutTime",
-    //   "caretakerName",
-    //   "caretakerNumber",
-    //   "farmAddress",
-    //   "locationLink",
-    //   "propertyRules",
-    // ];
     const requiredFields = [
-      "farmOwnerName", // frontend only
-      "farmOwnerMobile", // frontend only
-      "farmOwnerEmail", // frontend only
       "name",
       "city",
       "near_by_area",
@@ -436,15 +551,20 @@ const handleMultiSelect = (key, value) => {
       "weekday_full_day_price",
       "weekend_half_day_price",
       "weekend_full_day_price",
-      "checkInTime", // frontend only
-      "checkOutTime", // frontend only
+      "check_in_time",
+      "check_out_time",
       "care_taker_name",
       "care_taker_number",
       "address",
       "location_link",
-      "propertyRules", // frontend only
+      "house_rule_policy",
+      "description",
+      "category_id",
+      "government_photo_id",
+      "bank_details_check_photo",
     ];
 
+    // Validate required fields
     requiredFields.forEach((field) => {
       const value = formData[field];
       if (!value || (typeof value === "string" && !value.trim())) {
@@ -452,16 +572,7 @@ const handleMultiSelect = (key, value) => {
       }
     });
 
-    // Facilities validation
-    // if (formData.farmFacilities.length === 0) {
-    //   newErrors.farmFacilities = "Please select at least one facility";
-    // }
-
-    // // Photos validation
-    // if (formData.propertyPhotos.length === 0) {
-    //   newErrors.propertyPhotos = "Please upload at least one property photo";
-    // }
-
+    // Additional validation for specific fields
     if (formData.facilities.length === 0) {
       newErrors.facilities = "Please select at least one facility";
     }
@@ -469,15 +580,16 @@ const handleMultiSelect = (key, value) => {
     if (formData.photos.length === 0) {
       newErrors.photos = "Please upload at least one property photo";
     }
-if (formData.checkInTime.length === 0) {
-  errors.checkInTime = "Please select at least one check-in time.";
-}
 
-if (formData.checkOutTime.length === 0) {
-  errors.checkOutTime = "Please select at least one check-out time.";
-}
+    if (formData.check_in_time.length === 0) {
+      newErrors.check_in_time = "Please select at least one check-in time.";
+    }
 
-    // Field-specific validation
+    if (formData.check_out_time.length === 0) {
+      newErrors.check_out_time = "Please select at least one check-out time.";
+    }
+
+    // Validate custom fields
     Object.entries(formData).forEach(([key, value]) => {
       const error = validateField(key, value);
       if (error) {
@@ -486,91 +598,45 @@ if (formData.checkOutTime.length === 0) {
     });
 
     setErrors(newErrors);
+
+    // Scroll to the first error field
+    const firstErrorField = Object.keys(newErrors)[0];
+
+    if (firstErrorField) {
+      const ref = refs.current[firstErrorField];
+
+      if (ref) {
+        // Scroll the field into view
+        ref.scrollIntoView({ behavior: "smooth", block: "center" });
+
+        // Handle special case for file inputs or selects
+        if (
+          firstErrorField === "bank_details_check_photo" ||
+          firstErrorField === "government_photo_id" ||
+          firstErrorField === "photos"
+        ) {
+          const fileInput = ref.querySelector("input[type='file']");
+          if (fileInput) {
+            fileInput.focus();
+          }
+        } else if (ref.classList.contains("select-trigger")) {
+          ref.focus(); // For Select dropdown triggers
+        } else {
+          // For textareas or input fields
+          const inputElement = ref.querySelector("input, textarea, select");
+          if (inputElement) {
+            inputElement.focus();
+          }
+        }
+      }
+    }
+
+    // Return true if the form is valid (no errors)
     return Object.keys(newErrors).length === 0;
   };
 
-  // const InputField = ({
-  //   name,
-  //   label,
-  //   type = "text",
-  //   required = false,
-  //   placeholder = "",
-  //   note = "",
-  // }) => (
-  //   <div className="space-y-2">
-  //     <Label htmlFor={name} className="flex items-center gap-1">
-  //       {label}
-  //       {required && <span className="text-red-500">*</span>}
-  //       {note && (
-  //         <span className="text-xs text-neutral-500 ml-2">({note})</span>
-  //       )}
-  //     </Label>
-  //     <Input
-  //       id={name}
-  //       name={name}
-  //       type={type}
-  //       value={formData[name] ?? ""} // ✅ Safe fallback for undefined/null
-  //       onChange={(e) => handleInputChange(name, e.target.value)}
-  //       placeholder={placeholder}
-  //       className={errors[name] ? "border-red-500" : ""}
-  //     />
-  //     {errors[name] && (
-  //       <p className="text-sm text-red-500 flex items-center gap-1">
-  //         <AlertCircle className="w-4 h-4" />
-  //         {errors[name]}
-  //       </p>
-  //     )}
-  //   </div>
-  // );
-
   return (
     <form onSubmit={handleSubmit} className="max-w-4xl mx-auto space-y-8">
-      {/* Owner Information */}
-      {/* <Card>
-        <CardHeader>
-          <CardTitle>Farm Owner Information</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <InputField
-              name="farmOwnerName"
-              label="Farm Owner Name"
-              required
-              placeholder="Enter full name"
-              formData={formData}
-              errors={errors}
-              handleInputChange={handleInputChange}
-              validateField={validateField}
-              setErrors={setErrors}
-            />
-            <InputField
-              name="farmOwnerMobile"
-              label="Farm Owner Mobile Number"
-              type="tel"
-              required
-              placeholder="10-digit mobile number"
-              formData={formData}
-              errors={errors}
-              handleInputChange={handleInputChange}
-              validateField={validateField}
-              setErrors={setErrors}
-            />
-          </div>
-          <InputField
-            name="farmOwnerEmail"
-            label="Farm Owner Email"
-            type="email"
-            required
-            placeholder="owner@example.com"
-            formData={formData}
-            errors={errors}
-            handleInputChange={handleInputChange}
-            validateField={validateField}
-            setErrors={setErrors}
-          />
-        </CardContent>
-      </Card> */}
-
       {/* Property Information */}
       <Card>
         <CardHeader>
@@ -580,6 +646,7 @@ if (formData.checkOutTime.length === 0) {
           <InputField
             name="name"
             label="Property Name"
+            refs={refs}
             required
             placeholder="Enter property name"
             formData={formData}
@@ -593,6 +660,7 @@ if (formData.checkOutTime.length === 0) {
             <InputField
               name="city"
               label="City"
+              refs={refs}
               required
               placeholder="Enter city"
               formData={formData}
@@ -604,6 +672,7 @@ if (formData.checkOutTime.length === 0) {
             <InputField
               name="near_by_area"
               label="Nearby Area"
+              refs={refs}
               required
               placeholder="Enter nearby area/landmark"
               formData={formData}
@@ -614,38 +683,45 @@ if (formData.checkOutTime.length === 0) {
             />
           </div>
 
-          <div className="space-y-2">
-  <Label className="flex items-center gap-1">
-    Property Category <span className="text-red-500">*</span>
-  </Label>
-  <Select
-    value={formData.category_id}
-    onValueChange={(value) => handleInputChange("category_id", value)}
-  >
-    <SelectTrigger className={errors.category_id ? "border-red-500" : ""}>
-      <SelectValue placeholder="Select category" />
-    </SelectTrigger>
-    <SelectContent>
-      {categories.map((category) => (
-        <SelectItem key={category.id} value={String(category.id)}>
-          {category.name}
-        </SelectItem>
-      ))}
-    </SelectContent>
-  </Select>
-  {errors.category_id && (
-    <p className="text-sm text-red-500 flex items-center gap-1">
-      <AlertCircle className="w-4 h-4" />
-      {errors.category_id}
-    </p>
-  )}
-</div>
+          <div
+            className="space-y-2"
+            ref={(el) => (refs.current["category_id"] = el)} // Correctly attaching the ref
+          >
+            <Label className="flex items-center gap-1">
+              Property Category <span className="text-red-500">*</span>
+            </Label>
 
+            <Select
+              value={formData.category_id}
+              onValueChange={(value) => handleInputChange("category_id", value)}
+            >
+              <SelectTrigger
+                className={errors.category_id ? "border-red-500" : ""}
+              >
+                <SelectValue placeholder="Select category" />
+              </SelectTrigger>
+              <SelectContent>
+                {categories.map((category) => (
+                  <SelectItem key={category.id} value={String(category.id)}>
+                    {category.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {errors.category_id && (
+              <p className="text-sm text-red-500 flex items-center gap-1">
+                <AlertCircle className="w-4 h-4" />
+                {errors.category_id}
+              </p>
+            )}
+          </div>
 
           <InputField
             name="size"
             label="Property Size in Sqyd"
             type="number"
+            refs={refs}
             required
             placeholder="Enter size in square yards"
             formData={formData}
@@ -654,7 +730,10 @@ if (formData.checkOutTime.length === 0) {
             validateField={validateField}
             setErrors={setErrors}
           />
-         <div className="space-y-2">
+          <div
+            className="space-y-2"
+            ref={(el) => (refs.current["address"] = el)} // ✅ Added ref for scroll
+          >
             <Label className="flex items-center gap-1">
               Property Address <span className="text-red-500">*</span>
             </Label>
@@ -673,10 +752,11 @@ if (formData.checkOutTime.length === 0) {
             )}
           </div>
 
-             <InputField
+          <InputField
             name="location_link"
             label="Location Link"
             type="url"
+            refs={refs}
             required
             placeholder="https://maps.google.com/..."
             formData={formData}
@@ -685,19 +765,226 @@ if (formData.checkOutTime.length === 0) {
             validateField={validateField}
             setErrors={setErrors}
           />
+          {/* Government Photo ID */}
+          <div
+            className="space-y-2"
+            ref={(el) => (refs.current["government_photo_id"] = el)}
+          >
+            <Label className="flex items-center gap-1">
+              Upload Government Photo ID <span className="text-red-500">*</span>
+              <span className="text-xs text-neutral-500 ml-2">
+                (PDF, PNG, JPG – max 10 MB)
+              </span>
+            </Label>
 
+            <div className="border-2 border-dashed border-neutral-300 rounded-lg p-6 text-center">
+              <input
+                type="file"
+                id="government_photo_id"
+                accept="image/*,.pdf"
+                className="hidden"
+                ref={governmentIdRef} // ✅ Add ref here
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    government_photo_id: e.target.files[0],
+                  }))
+                }
+              />
+
+              <label htmlFor="government_photo_id" className="cursor-pointer">
+                <Upload className="w-8 h-8 text-neutral-400 mx-auto mb-2" />
+                <p className="text-neutral-600">Click to upload document</p>
+                <p className="text-xs text-neutral-500 mt-1">
+                  Supported formats: PDF, PNG, JPG
+                </p>
+              </label>
+            </div>
+
+            {formData.government_photo_id && (
+              <div className="mt-2">
+                <div className="relative w-32 aspect-square rounded-lg overflow-hidden border">
+                  {formData.government_photo_id.type?.startsWith("image/") ? (
+                    <img
+                      src={URL.createObjectURL(formData.government_photo_id)}
+                      alt="Government ID"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex items-center justify-center h-full bg-gray-100 text-sm text-gray-500">
+                      PDF File
+                    </div>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setFormData((prev) => ({
+                        ...prev,
+                        government_photo_id: null,
+                      }));
+                      if (governmentIdRef.current) {
+                        governmentIdRef.current.value = ""; // ✅ Reset input
+                      }
+                    }}
+                    className="absolute top-1 right-1 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+                <p className="text-xs mt-1 text-neutral-700 truncate">
+                  {formData.government_photo_id.name}
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Bank Details Check Photo */}
+          <div
+            className="space-y-2"
+            ref={(el) => (refs.current["bank_details_check_photo"] = el)}
+          >
+            <Label className="flex items-center gap-1">
+              Upload Bank Details / Cancelled Cheque{" "}
+              <span className="text-red-500">*</span>
+              <span className="text-xs text-neutral-500 ml-2">
+                (PNG, JPG – max 10 MB)
+              </span>
+            </Label>
+
+            <div className="border-2 border-dashed border-neutral-300 rounded-lg p-6 text-center">
+              <input
+                type="file"
+                id="bank_details_check_photo"
+                accept="image/*"
+                ref={bankDetailsRef} // ✅ Add ref here
+                className="hidden"
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    bank_details_check_photo: e.target.files[0],
+                  }))
+                }
+              />
+              <label
+                htmlFor="bank_details_check_photo"
+                className="cursor-pointer"
+              >
+                <Upload className="w-8 h-8 text-neutral-400 mx-auto mb-2" />
+                <p className="text-neutral-600">Click to upload image</p>
+                <p className="text-xs text-neutral-500 mt-1">JPG, PNG only</p>
+              </label>
+            </div>
+
+            {formData.bank_details_check_photo && (
+              <div className="mt-2">
+                <div className="relative w-32 aspect-square rounded-lg overflow-hidden border">
+                  <img
+                    src={URL.createObjectURL(formData.bank_details_check_photo)}
+                    alt="Bank Cheque"
+                    className="w-full h-full object-cover"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setFormData((prev) => ({
+                        ...prev,
+                        bank_details_check_photo: null,
+                      }));
+                      if (bankDetailsRef.current) {
+                        bankDetailsRef.current.value = ""; // ✅ Reset input
+                      }
+                    }}
+                    className="absolute top-1 right-1 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+                <p className="text-xs mt-1 text-neutral-700 truncate">
+                  {formData.bank_details_check_photo.name}
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Property Agreement */}
+          <div className="space-y-2">
+            <Label className="flex items-center gap-1">
+              Upload Property Agreement <span className="text-red-500">*</span>
+              <span className="text-xs text-neutral-500 ml-2">
+                (PDF, PNG, JPG – max 10 MB)
+              </span>
+            </Label>
+
+            <div className="border-2 border-dashed border-neutral-300 rounded-lg p-6 text-center">
+              <input
+                type="file"
+                id="property_agreement"
+                accept="image/*,.pdf"
+                className="hidden"
+                ref={propertyAgreementRef} // ✅ added ref
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    property_agreement: e.target.files[0],
+                  }))
+                }
+              />
+              <label htmlFor="property_agreement" className="cursor-pointer">
+                <Upload className="w-8 h-8 text-neutral-400 mx-auto mb-2" />
+                <p className="text-neutral-600">Click to upload agreement</p>
+                <p className="text-xs text-neutral-500 mt-1">PDF, PNG, JPG</p>
+              </label>
+            </div>
+
+            {formData.property_agreement && (
+              <div className="mt-2">
+                <div className="relative w-32 aspect-square rounded-lg overflow-hidden border">
+                  {formData.property_agreement.type?.startsWith("image/") ? (
+                    <img
+                      src={URL.createObjectURL(formData.property_agreement)}
+                      alt="Agreement"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex items-center justify-center h-full bg-gray-100 text-sm text-gray-500">
+                      PDF File
+                    </div>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setFormData((prev) => ({
+                        ...prev,
+                        property_agreement: null,
+                      }));
+                      if (propertyAgreementRef.current) {
+                        propertyAgreementRef.current.value = ""; // ✅ reset input
+                      }
+                    }}
+                    className="absolute top-1 right-1 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+                <p className="text-xs mt-1 text-neutral-700 truncate">
+                  {formData.property_agreement.name}
+                </p>
+              </div>
+            )}
+          </div>
         </CardContent>
       </Card>
 
-        {/* Property Details */}
+      {/* Property Details */}
       <Card>
         <CardHeader>
           <CardTitle>Property Details</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-         
-
-          <div className="space-y-2">
+          <div
+            className="space-y-2"
+            ref={(el) => (refs.current["facilities"] = el)}
+          >
             <Label className="flex items-center gap-1">
               Property Facilities <span className="text-red-500">*</span>
             </Label>
@@ -735,45 +1022,48 @@ if (formData.checkOutTime.length === 0) {
             )}
           </div>
 
-       
-          <div className="space-y-2">
+          <div
+            className="space-y-2"
+            ref={(el) => (refs.current["house_rule_policy"] = el)}
+          >
             <Label className="flex items-center gap-1">
               Property Rules <span className="text-red-500">*</span>
             </Label>
             <Textarea
-              value={formData.propertyRules}
+              value={formData.house_rule_policy}
               onChange={(e) =>
-                handleInputChange("propertyRules", e.target.value)
+                handleInputChange("house_rule_policy", e.target.value)
               }
               placeholder="Enter property rules and regulations"
               rows={4}
-              className={errors.propertyRules ? "border-red-500" : ""}
+              className={errors.house_rule_policy ? "border-red-500" : ""}
             />
-            {errors.propertyRules && (
+            {errors.house_rule_policy && (
               <p className="text-sm text-red-500 flex items-center gap-1">
                 <AlertCircle className="w-4 h-4" />
-                {errors.propertyRules}
+                {errors.house_rule_policy}
               </p>
             )}
           </div>
 
-           <div className="space-y-2">
+          <div
+            className="space-y-2"
+            ref={(el) => (refs.current["description"] = el)}
+          >
             <Label className="flex items-center gap-1">
               Property Description <span className="text-red-500">*</span>
             </Label>
             <Textarea
-              value={formData.propertyRules}
-              onChange={(e) =>
-                handleInputChange("propertyRules", e.target.value)
-              }
+              value={formData.description}
+              onChange={(e) => handleInputChange("description", e.target.value)}
               placeholder="Enter property rules and regulations"
               rows={4}
-              className={errors.propertyRules ? "border-red-500" : ""}
+              className={errors.description ? "border-red-500" : ""}
             />
-            {errors.propertyRules && (
+            {errors.description && (
               <p className="text-sm text-red-500 flex items-center gap-1">
                 <AlertCircle className="w-4 h-4" />
-                {errors.propertyRules}
+                {errors.description}
               </p>
             )}
           </div>
@@ -782,6 +1072,7 @@ if (formData.checkOutTime.length === 0) {
             <InputField
               name="swimming_pool_size"
               label="Swimming Pool Size"
+              refs={refs}
               placeholder="e.g., 20x10 feet (optional)"
               formData={formData}
               errors={errors}
@@ -796,20 +1087,18 @@ if (formData.checkOutTime.length === 0) {
                 <label className="flex items-center space-x-2 cursor-pointer">
                   <input
                     type="radio"
-                    name="kidsSwimmingPool"
-                    checked={formData.kidsSwimmingPool === true}
-                    onChange={() => handleInputChange("kidsSwimmingPool", true)}
+                    name="kids_swimming"
+                    checked={formData.kids_swimming === true}
+                    onChange={() => handleInputChange("kids_swimming", true)}
                   />
                   <span>Yes</span>
                 </label>
                 <label className="flex items-center space-x-2 cursor-pointer">
                   <input
                     type="radio"
-                    name="kidsSwimmingPool"
-                    checked={formData.kidsSwimmingPool === false}
-                    onChange={() =>
-                      handleInputChange("kidsSwimmingPool", false)
-                    }
+                    name="kids_swimming"
+                    checked={formData.kids_swimming === false}
+                    onChange={() => handleInputChange("kids_swimming", false)}
                   />
                   <span>No</span>
                 </label>
@@ -821,6 +1110,7 @@ if (formData.checkOutTime.length === 0) {
             name="referral_code"
             label="Referral Code"
             placeholder="Enter referral code (optional)"
+            refs={refs}
             formData={formData}
             errors={errors}
             handleInputChange={handleInputChange}
@@ -841,6 +1131,7 @@ if (formData.checkOutTime.length === 0) {
               name="extra_person_charge"
               label="Extra Person Charge"
               type="number"
+              refs={refs}
               required
               placeholder="Amount in ₹"
               formData={formData}
@@ -867,6 +1158,7 @@ if (formData.checkOutTime.length === 0) {
               name="person_limit"
               label="Person Limit"
               type="number"
+              refs={refs}
               required
               note="After extra charge applicable"
               placeholder="Maximum guests"
@@ -880,6 +1172,7 @@ if (formData.checkOutTime.length === 0) {
               name="day_capacity"
               label="Guest Stay Capacity (Day)"
               type="number"
+              refs={refs}
               required
               placeholder="Day capacity"
               formData={formData}
@@ -892,6 +1185,7 @@ if (formData.checkOutTime.length === 0) {
               name="night_capacity"
               label="Guest Stay Capacity (Night)"
               type="number"
+              refs={refs}
               required
               placeholder="Night capacity"
               formData={formData}
@@ -909,6 +1203,7 @@ if (formData.checkOutTime.length === 0) {
                 name="weekday_half_day_price"
                 label="12-Hour Price Weekday"
                 type="number"
+                refs={refs}
                 required
                 placeholder="Amount in ₹"
                 formData={formData}
@@ -921,6 +1216,7 @@ if (formData.checkOutTime.length === 0) {
                 name="weekday_full_day_price"
                 label="24-Hour Price Weekday"
                 type="number"
+                refs={refs}
                 required
                 placeholder="Amount in ₹"
                 formData={formData}
@@ -936,6 +1232,7 @@ if (formData.checkOutTime.length === 0) {
                 name="weekend_half_day_price"
                 label="12-Hour Price Weekend"
                 type="number"
+                refs={refs}
                 required
                 placeholder="Amount in ₹"
                 formData={formData}
@@ -948,6 +1245,7 @@ if (formData.checkOutTime.length === 0) {
                 name="weekend_full_day_price"
                 label="24-Hour Price Weekend"
                 type="number"
+                refs={refs}
                 required
                 placeholder="Amount in ₹"
                 formData={formData}
@@ -961,8 +1259,7 @@ if (formData.checkOutTime.length === 0) {
         </CardContent>
       </Card>
 
-      {/* Check-in/Check-out Times */}
-      {/* <Card>
+      <Card>
         <CardHeader>
           <CardTitle>Check-in & Check-out Times</CardTitle>
         </CardHeader>
@@ -972,29 +1269,48 @@ if (formData.checkOutTime.length === 0) {
               <Label className="flex items-center gap-1">
                 Check-In Time <span className="text-red-500">*</span>
               </Label>
-              <Select
-                value={formData.checkInTime}
-                onValueChange={(value) =>
-                  handleInputChange("checkInTime", value)
-                }
-              >
+              <Select open={checkInOpen} onOpenChange={setCheckInOpen}>
                 <SelectTrigger
-                  className={errors.checkInTime ? "border-red-500" : ""}
+                  className={errors.check_in_time ? "border-red-500" : ""}
                 >
-                  <SelectValue placeholder="Select check-in time" />
+                  <SelectValue
+                    placeholder={
+                      formData.check_in_time.length > 0
+                        ? formData.check_in_time.join(", ")
+                        : "Select check-in time"
+                    }
+                  />
                 </SelectTrigger>
+
                 <SelectContent>
                   {TIME_OPTIONS.map((time) => (
-                    <SelectItem key={time} value={time}>
-                      {time}
-                    </SelectItem>
+                    <div
+                      key={time}
+                      className="flex items-center gap-2 px-2 py-1 hover:bg-gray-100 cursor-pointer"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleMultiSelect("check_in_time", time);
+                      }}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={formData.check_in_time.includes(time)}
+                        readOnly
+                        disabled={
+                          !formData.check_in_time.includes(time) &&
+                          formData.check_in_time.length >= 2
+                        }
+                      />
+                      <label className="text-sm">{time}</label>
+                    </div>
                   ))}
                 </SelectContent>
               </Select>
-              {errors.checkInTime && (
+
+              {errors.check_in_time && (
                 <p className="text-sm text-red-500 flex items-center gap-1">
                   <AlertCircle className="w-4 h-4" />
-                  {errors.checkInTime}
+                  {errors.check_in_time}
                 </p>
               )}
             </div>
@@ -1003,138 +1319,54 @@ if (formData.checkOutTime.length === 0) {
               <Label className="flex items-center gap-1">
                 Check-Out Time <span className="text-red-500">*</span>
               </Label>
-              <Select
-                value={formData.checkOutTime}
-                onValueChange={(value) =>
-                  handleInputChange("checkOutTime", value)
-                }
-              >
+              <Select open={checkOutOpen} onOpenChange={setCheckOutOpen}>
                 <SelectTrigger
-                  className={errors.checkOutTime ? "border-red-500" : ""}
+                  className={errors.check_out_time ? "border-red-500" : ""}
                 >
-                  <SelectValue placeholder="Select check-out time" />
+                  <SelectValue
+                    placeholder={
+                      formData.check_out_time.length > 0
+                        ? formData.check_out_time.join(", ")
+                        : "Select check-out time"
+                    }
+                  />
                 </SelectTrigger>
+
                 <SelectContent>
                   {TIME_OPTIONS.map((time) => (
-                    <SelectItem key={time} value={time}>
-                      {time}
-                    </SelectItem>
+                    <div
+                      key={time}
+                      className="flex items-center gap-2 px-2 py-1 hover:bg-gray-100 cursor-pointer"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleMultiSelect("check_out_time", time);
+                      }}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={formData.check_out_time.includes(time)}
+                        readOnly
+                        disabled={
+                          !formData.check_out_time.includes(time) &&
+                          formData.check_out_time.length >= 2
+                        }
+                      />
+                      <label className="text-sm">{time}</label>
+                    </div>
                   ))}
                 </SelectContent>
               </Select>
-              {errors.checkOutTime && (
+
+              {errors.check_out_time && (
                 <p className="text-sm text-red-500 flex items-center gap-1">
                   <AlertCircle className="w-4 h-4" />
-                  {errors.checkOutTime}
+                  {errors.check_out_time}
                 </p>
               )}
             </div>
           </div>
         </CardContent>
-      </Card> */}
-
-
-<Card>
-        <CardHeader>
-          <CardTitle>Check-in & Check-out Times</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-  <Label className="flex items-center gap-1">
-    Check-In Time <span className="text-red-500">*</span>
-  </Label>
-<Select open={checkInOpen} onOpenChange={setCheckInOpen}>
-  <SelectTrigger className={errors.checkInTime ? "border-red-500" : ""}>
-    <SelectValue placeholder="Select check-in time">
-      {formData.checkInTime.length > 0
-        ? formData.checkInTime.join(", ")
-        : "Select check-in time"}
-    </SelectValue>
-  </SelectTrigger>
-  <SelectContent>
-    {TIME_OPTIONS.map((time) => (
-      <div
-        key={time}
-        className="flex items-center gap-2 px-2 py-1 hover:bg-gray-100 cursor-pointer"
-        onClick={(e) => {
-          e.stopPropagation();
-          handleMultiSelect("checkInTime", time);
-        }}
-      >
-        <input
-          type="checkbox"
-          checked={formData.checkInTime.includes(time)}
-          readOnly
-          disabled={
-            !formData.checkInTime.includes(time) &&
-            formData.checkInTime.length >= 2
-          }
-        />
-        <label className="text-sm">{time}</label>
-      </div>
-    ))}
-  </SelectContent>
-</Select>
-
-  {errors.checkInTime && (
-    <p className="text-sm text-red-500 flex items-center gap-1">
-      <AlertCircle className="w-4 h-4" />
-      {errors.checkInTime}
-    </p>
-  )}
-</div>
-
-
-           <div className="space-y-2">
-  <Label className="flex items-center gap-1">
-    Check-Out Time <span className="text-red-500">*</span>
-  </Label>
- <Select open={checkOutOpen} onOpenChange={setCheckOutOpen}>
-  <SelectTrigger className={errors.checkOutTime ? "border-red-500" : ""}>
-    <SelectValue placeholder="Select check-out time">
-      {formData.checkOutTime.length > 0
-        ? formData.checkOutTime.join(", ")
-        : "Select check-out time"}
-    </SelectValue>
-  </SelectTrigger>
-  <SelectContent>
-    {TIME_OPTIONS.map((time) => (
-      <div
-        key={time}
-        className="flex items-center gap-2 px-2 py-1 hover:bg-gray-100 cursor-pointer"
-        onClick={(e) => {
-          e.stopPropagation();
-          handleMultiSelect("checkOutTime", time);
-        }}
-      >
-        <input
-          type="checkbox"
-          checked={formData.checkOutTime.includes(time)}
-          readOnly
-          disabled={
-            !formData.checkOutTime.includes(time) &&
-            formData.checkOutTime.length >= 2
-          }
-        />
-        <label className="text-sm">{time}</label>
-      </div>
-    ))}
-  </SelectContent>
-</Select>
-
-  {errors.checkOutTime && (
-    <p className="text-sm text-red-500 flex items-center gap-1">
-      <AlertCircle className="w-4 h-4" />
-      {errors.checkOutTime}
-    </p>
-  )}
-</div>
-
-          </div>
-        </CardContent>
       </Card>
-
 
       {/* Caretaker Information */}
       <Card>
@@ -1147,6 +1379,7 @@ if (formData.checkOutTime.length === 0) {
               name="care_taker_name"
               label="Caretaker Name"
               required
+              refs={refs}
               placeholder="Enter caretaker name"
               formData={formData}
               errors={errors}
@@ -1158,6 +1391,7 @@ if (formData.checkOutTime.length === 0) {
               name="care_taker_number"
               label="Caretaker Number"
               type="tel"
+              refs={refs}
               required
               placeholder="10-digit mobile number"
               formData={formData}
@@ -1170,15 +1404,16 @@ if (formData.checkOutTime.length === 0) {
         </CardContent>
       </Card>
 
-    
-
       {/* Photo Upload */}
       <Card>
         <CardHeader>
           <CardTitle>Property Photos & Videos</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="space-y-2">
+          <div
+            className="space-y-2"
+            ref={(el) => (refs.current["photos"] = el)}
+          >
             <Label className="flex items-center gap-1">
               Upload Property Photos <span className="text-red-500">*</span>
               <span className="text-xs text-neutral-500 ml-2">
@@ -1251,12 +1486,70 @@ if (formData.checkOutTime.length === 0) {
         </CardContent>
       </Card>
 
+      <div className="mb-4">
+        <div className="flex items-start space-x-2">
+          <input
+            type="checkbox"
+            checked={agreed}
+            onChange={(e) => setAgreed(e.target.checked)}
+            className="form-checkbox mt-1 text-green-600"
+          />
+          <span className="text-sm">
+            Agree to the{" "}
+            <button
+              className="underline text-green-600 hover:text-green-700"
+              onClick={() => setExpanded(!expanded)}
+              type="button"
+            >
+              House & Cancellation Policy
+            </button>
+          </span>
+        </div>
+
+        {expanded && (
+          <div className="mt-2 p-3 border rounded-lg bg-gray-50 text-sm text-gray-700 space-y-4 max-h-[300px] overflow-auto">
+            <div>
+              <h4 className="font-semibold mb-2 text-gray-800">
+                Rules & Policies
+              </h4>
+              <ul className="list-none space-y-1">
+                {rulesData.rules_and_policies.map((item, i) => (
+                  <li key={`rule-${i}`}>{item}</li>
+                ))}
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="font-semibold mt-4 mb-2 text-gray-800">
+                Cancellation Policy
+              </h4>
+              <ul className="list-none space-y-1">
+                {rulesData.cancellation_policy.map((item, i) => (
+                  <li key={`cancel-${i}`}>{item}</li>
+                ))}
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="font-semibold mt-4 mb-2 text-gray-800">
+                Commission Policy
+              </h4>
+              <ul className="list-none space-y-1">
+                {rulesData.commission_policy.map((item, i) => (
+                  <li key={`commission-${i}`}>{item}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        )}
+      </div>
+
       {/* Submit Button */}
       <div className="flex justify-center">
         <Button
           type="submit"
           size="lg"
-          disabled={isSubmitting}
+          disabled={isSubmitting || !agreed}
           className="bg-primary text-white hover:bg-primary/90 px-12"
         >
           {isSubmitting ? (

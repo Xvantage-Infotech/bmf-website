@@ -1,11 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { MapPin } from 'lucide-react';
 import Script from 'next/script';
-import { createRazorpayOrder } from '@/services/Payment/payment.service';
+import { createRazorpayOrder, updatePaymentStatus, verifyPaymentSignature } from '@/services/Payment/payment.service';
 import { useAuth } from '@/contexts/AuthContext';
+import { addBooking } from '@/services/Booking/booking.service';
 
 
 
@@ -16,6 +17,30 @@ export default function BookingPay() {
 
   const searchParams = useSearchParams();
 const { user } = useAuth(); // Access logged-in user
+
+function convertTo24Hour(timeStr) {
+  if (!timeStr || timeStr.toLowerCase() === 'undefined') return null;
+
+  const [time, modifier] = timeStr.split(' '); // e.g. ["7:00", "AM"]
+  if (!time || !modifier) return null;
+
+  let [hours, minutes] = time.split(':');
+  if (!hours || !minutes) return null;
+
+  hours = parseInt(hours, 10);
+  minutes = parseInt(minutes, 10);
+
+  if (modifier.toUpperCase() === 'PM' && hours < 12) {
+    hours += 12;
+  }
+
+  if (modifier.toUpperCase() === 'AM' && hours === 12) {
+    hours = 0;
+  }
+
+  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:00`;
+}
+
 
 const farmId = searchParams.get('farmId');
   const bookingName = searchParams.get('name');
@@ -38,7 +63,8 @@ const originalPrice = increasePercentage > 0
   : discountedPrice;
 
 
-  
+  const router = useRouter();
+
 
 
   const handlePayNow = async () => {
@@ -71,6 +97,9 @@ const razorpayKey =
     ? process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID_LOCAL
     : process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID_PRODUCTION;
 
+// const razorpayKey = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID_PRODUCTION;
+
+
 
         if (typeof window.Razorpay === 'undefined') {
   alert('Razorpay SDK not loaded. Please refresh.');
@@ -84,27 +113,108 @@ const options = {
   name: farmName,
   description: 'Farm Booking',
   order_id: data.order_id,
-  handler: (response) => {
-    console.log('Payment success:', response);
-    alert('Payment successful!');
-  },
+
+  // ✅ On Payment Success
+handler: async (response) => {
+  try {
+    const result = await verifyPaymentSignature({
+      payment_id: response.razorpay_payment_id,
+      order_id: response.razorpay_order_id,
+      signature: response.razorpay_signature,
+    });
+
+    if (result.status === 1) {
+      const transactionId = result.data?.id;
+
+const formattedCheckInTime = convertTo24Hour(checkInTime);
+const formattedCheckOutTime = convertTo24Hour(checkOutTime);
+
+const bookingResponse = await addBooking({
+  farm_id: farmId,
+  transaction_id: String(transactionId),
+  check_in_date: checkIn,
+  check_in_time: formattedCheckInTime,
+  check_out_date: checkOut,
+  check_out_time: formattedCheckOutTime,
+  no_of_guest: guest,
+  total_price: String(discountedPrice),
+});
+
+   console.log("🚀 ~ handler: ~ bookingResponse:", bookingResponse)
+
+
+      if (bookingResponse.status === 1) {
+  const bookingId = bookingResponse.data?.id;
+
+  if (bookingId) {
+    router.push(`/booking-confirmation?bookingId=${bookingId}`);
+  } else {
+    console.warn("Booking response missing ID:", bookingResponse);
+    router.push(`/booking-confirmation`);
+  }
+} else {
+  alert('Payment succeeded, but booking failed.');
+}
+
+    } else {
+      alert('Payment verification failed.');
+    }
+  } catch (error) {
+    console.error('Error in payment handler:', error);
+    alert('Something went wrong during verification.');
+  }
+},
+
+
   prefill: {
     name: bookingName || user?.name || 'Guest',
     email: user?.email || 'fallback@example.com',
     contact: user?.phone_number?.replace('+91', '') || '9999999999',
   },
+
   theme: {
     color: '#17AE7D',
   },
+
+  // ❌ On Cancel
+  modal: {
+    ondismiss: async () => {
+      try {
+        await updatePaymentStatus({
+          order_id: data.order_id,
+          status: 'Cancel',
+        });
+        console.log('Payment cancelled');
+      } catch (err) {
+        console.error('Cancel status error:', err);
+      }
+    },
+  },
 };
+
+// ❌ On Failure (attach listener after rzp object is created)
+const rzp = new window.Razorpay(options);
+rzp.on('payment.failed', async () => {
+  try {
+    await updatePaymentStatus({
+      order_id: data.order_id,
+      status: 'Fail',
+    });
+    alert('Payment failed.');
+  } catch (err) {
+    console.error('Fail status error:', err);
+  }
+});
+
+rzp.open();
+
 
 
 console.log("🚀 ~ handlePayNow ~ options.prefill:", options.prefill)
 console.log("Using Razorpay key:", razorpayKey);
       console.log("🚀 ~ handlePayNow ~ options.order_id:", options.order_id)
 
-      const rzp = new window.Razorpay(options);
-      rzp.open();
+     
 
 
 

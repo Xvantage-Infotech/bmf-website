@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Heart, Bed, Users, Star, MapPin } from "lucide-react";
-import { API_BASE_URL, formatPrice, generateStars } from "@/lib/utils";
+import {  FARM_IMAGE_BASE_URL, formatPrice, generateStars } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { addToWishlist } from "@/services/Wishlist/wishlist.service";
@@ -32,7 +32,7 @@ useEffect(() => {
   const images = farm.farm_images || [];
   const mainImage =
     images.length > 0
-      ? `${API_BASE_URL}assets/images/farm_images/${images[0].image}`
+      ? `${FARM_IMAGE_BASE_URL}/${images[0].image}`
       : "/placeholder.jpg";
 
   const handleClick = (e) => {
@@ -104,7 +104,7 @@ const toggleFavorite = async (e) => {
               images.map((img, idx) => (
                 <img
                   key={idx}
-                  src={`${API_BASE_URL}assets/images/farm_images/${img.image}`}
+                  src={`${FARM_IMAGE_BASE_URL}/${img.image}`}
                   alt={`${farm.name} - Image ${idx + 1}`}
                   className={`absolute top-0 left-0 w-full h-full object-cover transition-opacity duration-700 ${
                     idx === imageIndex ? "opacity-100 z-10" : "opacity-0 z-0"

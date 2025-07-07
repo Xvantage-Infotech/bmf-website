@@ -7,7 +7,7 @@ import Script from 'next/script';
 import { createRazorpayOrder, updatePaymentStatus, verifyPaymentSignature } from '@/services/Payment/payment.service';
 import { useAuth } from '@/contexts/AuthContext';
 import { addBooking } from '@/services/Booking/booking.service';
-import { API_BASE_URL } from '@/lib/utils';
+import {  FARM_IMAGE_BASE_URL } from '@/lib/utils';
 
 
 
@@ -226,7 +226,7 @@ console.log("Using Razorpay key:", razorpayKey);
   };
 
   const image = searchParams.get('image');
-  const imageUrl = `${API_BASE_URL}assets/images/farm_images/${image}`;
+  const imageUrl = `${FARM_IMAGE_BASE_URL}/${image}`;
 
   return (
     <>
@@ -247,7 +247,7 @@ console.log("Using Razorpay key:", razorpayKey);
               </a>
             </div>
             <div className="flex items-center text-xs text-yellow-600">
-              ⭐ <span className="ml-1">{rating}(0)</span>
+              Reviews <span className="ml-1">{rating}(0)</span>
             </div>
           </div>
         </div>
@@ -261,6 +261,7 @@ console.log("Using Razorpay key:", razorpayKey);
             <p><strong>Check out:</strong> {checkOut} – {checkOutTime}</p>
           </div>
         </div>
+
 
         <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg shadow-inner mb-4">
           <span className="text-gray-500 line-through text-sm">

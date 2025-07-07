@@ -3,7 +3,7 @@ const { add } = require("date-fns");
 
 import { useParams } from "next/navigation";
 import { useState, useEffect } from "react";
-import { API_BASE_URL, formatPrice, generateStars } from "@/lib/utils";
+import { AMENITY_ICON_BASE_URL, FARM_IMAGE_BASE_URL, formatPrice, generateStars } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -285,7 +285,7 @@ export default function FarmDetail() {
 
   const rating = parseFloat(farm.reviews_avg_star || 0);
   const mainImage = farmImages[selectedImageIndex]
-    ? `${API_BASE_URL}assets/images/farm_images/${farmImages[selectedImageIndex].image}`
+    ? `${FARM_IMAGE_BASE_URL}/${farmImages[selectedImageIndex].image}`
     : "/placeholder.jpg";
 
   const handleWhatsAppClick = () => {
@@ -418,7 +418,7 @@ export default function FarmDetail() {
                         className="flex-shrink-0 w-[100%] md:w-[80%] lg:w-[80%] snap-center transition-transform duration-300"
                       >
                         <img
-                          src={`${API_BASE_URL}assets/images/farm_images/${img.image}`}
+                          src={`${FARM_IMAGE_BASE_URL}/${img.image}`}
                           alt={`Farm image ${index + 1}`}
                           className="w-full h-full object-cover rounded-2xl shadow"
                         />
@@ -512,7 +512,7 @@ export default function FarmDetail() {
                             className="flex items-center gap-2 p-2 bg-neutral-50 rounded"
                           >
                             <img
-                              src={`${API_BASE_URL}assets/images/amenity-icons/${ra.amenities.icon}`}
+                              src={`${AMENITY_ICON_BASE_URL}/${ra.amenities.icon}`}
                               alt={ra.amenities.name}
                               className="w-5 h-5 object-contain"
                             />

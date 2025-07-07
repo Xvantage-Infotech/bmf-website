@@ -281,9 +281,9 @@ const handleLogin = async (values) => {
         )}
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-1">
             <TabsTrigger value="login">Login</TabsTrigger>
-            <TabsTrigger value="signup">Sign Up</TabsTrigger>
+            {/* <TabsTrigger value="signup">Sign Up</TabsTrigger> */}
           </TabsList>
 
           {/* Login Tab */}
@@ -356,7 +356,7 @@ const handleLogin = async (values) => {
           </TabsContent>
 
           {/* Signup Tab */}
-          <TabsContent value="signup" className="space-y-4 py-4">
+          {/* <TabsContent value="signup" className="space-y-4 py-4">
             <Form {...signupForm}>
               <form
                 onSubmit={signupForm.handleSubmit(handleSignup)}
@@ -432,7 +432,7 @@ const handleLogin = async (values) => {
                 )}
               </form>
             </Form>
-          </TabsContent>
+          </TabsContent> */}
         </Tabs>
 
         <div className="mt-4 text-center text-sm text-muted-foreground">

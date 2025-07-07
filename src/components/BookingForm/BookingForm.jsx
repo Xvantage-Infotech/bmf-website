@@ -216,33 +216,46 @@ const extraGuestCharge = extraGuests * (farm.person_price_weekday || 0);
 
         <div className="space-y-6">
           {/* Date Selection */}
-          <ImprovedDatePicker
-            checkIn={checkIn}
-            checkOut={checkOut}
-            checkInTime={checkInTime}
-            checkOutTime={checkOutTime}
-            onCheckInChange={setCheckIn}
-            onCheckOutChange={setCheckOut}
-            onCheckInTimeChange={setCheckInTime}
-            onCheckOutTimeChange={setCheckOutTime}
-          />
+         <ImprovedDatePicker
+  checkIn={checkIn}
+  checkOut={checkOut}
+  checkInTime={checkInTime}
+  checkOutTime={checkOutTime}
+  onCheckInChange={setCheckIn}
+  onCheckOutChange={setCheckOut}
+  onCheckInTimeChange={setCheckInTime}
+  onCheckOutTimeChange={setCheckOutTime}
+  checkInOptions={farm.check_in_time}
+  checkOutOptions={farm.check_out_time}
+/>
+
 
           {/* Guest Selection */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3">
             <div>
-              <Label className="block text-sm font-medium text-neutral-700 mb-2">Adults</Label>
-              <Select value={adults.toString()} onValueChange={(value) => setAdults(parseInt(value))}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {Array.from({ length: 100 }, (_, i) => i + 1).map((num) => (
-                    <SelectItem key={num} value={num.toString()}>
-                      {num} Adult{num !== 1 ? 's' : ''}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Label className="block text-sm font-medium text-neutral-700 mb-2">Total Booking Person</Label>
+        <input
+  type="number"
+  min={1}
+  value={adults}
+  onChange={(e) => {
+    const val = parseInt(e.target.value);
+    if (!isNaN(val) && val >= 1) {
+      setAdults(val);
+    } else if (e.target.value === '') {
+      setAdults(''); // Allow temporary empty state for manual typing
+    } else {
+      setAdults(1); // Prevent negative or 0
+    }
+  }}
+  onBlur={() => {
+    // Ensure value is reset to 1 if user leaves input empty or invalid
+    if (!adults || adults < 1) setAdults(1);
+  }}
+  className="w-full px-3 py-2 border rounded-md text-sm"
+/>
+
+
             </div>
 
             {/* <div>

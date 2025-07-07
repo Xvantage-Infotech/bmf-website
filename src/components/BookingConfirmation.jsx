@@ -107,7 +107,9 @@ export default function BookingConfirmation() {
   return (
     <div className="min-h-screen bg-neutral-50">
       <section className="section-padding">
-        <div className="max-w-4xl mx-auto container-padding">
+        {/* <div className="max-w-4xl mx-auto container-padding"> */}
+        <div className="w-full max-w-7xl mx-auto container-padding">
+
           <CardTitle className="mb-5">Booking Summary</CardTitle>
 
           <div className="flex gap-4 mb-6">
@@ -126,162 +128,114 @@ export default function BookingConfirmation() {
             ))}
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2 space-y-6">
-              {loading ? (
-                <p className="text-center p-6">Loading booking details...</p>
-              ) : bookings.length === 0 ? (
-                <p className="text-center p-6">
-                  {statusFilter === 2
-                    ? 'No cancelled bookings found.'
-                    : 'No bookings available for the selected status.'}
-                </p>
-              ) : (
-                bookings.map((booking) => (
-                <Card
-  key={booking.id}
-  className="mb-6"
-  onClick={() => {
-    // Prevent navigation when the booking is cancelled and the Cancelled tab is selected
-    if (statusFilter === 2) {
-      return; // Do nothing
-    }
-    router.push(`/booking-details/${booking.id}`);
-  }}
->
-  <CardHeader>
-    <div className="flex items-center justify-between">
-      <Badge
-        className={ 
-          statusFilter === 2 // When the Cancelled tab is selected, force the Cancelled badge
-            ? 'bg-red-100 text-red-800' // Red badge for Cancelled
-            : booking.status === 'Cancelled' // Otherwise, use the booking status to determine badge color
-            ? 'bg-red-100 text-red-800'
-            : booking.status === 'Completed'
-            ? 'bg-blue-100 text-blue-800'
-            : 'bg-green-100 text-green-800'
-        }
+    
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+  {loading ? (
+    <p className="text-center col-span-full p-6">Loading booking details...</p>
+  ) : bookings.length === 0 ? (
+    <p className="text-center col-span-full p-6">
+      {statusFilter === 2
+        ? 'No cancelled bookings found.'
+        : 'No bookings available for the selected status.'}
+    </p>
+  ) : (
+    bookings.map((booking) => (
+      <Card
+        key={booking.id}
+        className="cursor-pointer hover:shadow-md transition-shadow"
+        onClick={() => {
+          if (statusFilter !== 2) {
+            router.push(`/booking-details/${booking.id}`);
+          }
+        }}
       >
-        {statusFilter === 2 // When the Cancelled tab is selected, show "Cancelled"
-          ? 'Cancelled' // Static "Cancelled" label for all bookings when Cancelled tab is clicked
-          : booking.status === 'Cancelled' // Otherwise, use the booking status to determine the label
-          ? 'Cancelled'
-          : booking.status === 'Completed'
-          ? 'Completed'
-          : 'Confirmed'}
-      </Badge>
-    </div>
-  </CardHeader>
-  <CardContent className="space-y-6">
-    <div className="flex items-center gap-4">
-      <img
-        src={booking.farmImage}
-        alt={`${booking.farmName} image`}
-        className="w-32 h-32 object-cover rounded-lg"
-      />
-      <div className="flex-1 space-y-2">
-        <div className="text-xl font-semibold text-neutral-900">
-          {booking.farmName}
-        </div>
-        <a
-          href={booking.location_link}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-neutral-600 flex items-center hover:underline text-sm"
-        >
-          <MapPin className="w-4 h-4 mr-2 text-primary" />
-          {booking.areaCity}
-        </a>
-        <div className="grid grid-cols-2 gap-4 pt-2">
-          <div>
-            <div className="text-sm text-neutral-500">Booking ID</div>
-            <div className="font-mono font-semibold text-lg">{booking.id}</div>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <Badge
+              className={
+                statusFilter === 2
+                  ? 'bg-red-100 text-red-800'
+                  : booking.status === 'Cancelled'
+                  ? 'bg-red-100 text-red-800'
+                  : booking.status === 'Completed'
+                  ? 'bg-blue-100 text-blue-800'
+                  : 'bg-green-100 text-green-800'
+              }
+            >
+              {statusFilter === 2
+                ? 'Cancelled'
+                : booking.status === 'Cancelled'
+                ? 'Cancelled'
+                : booking.status === 'Completed'
+                ? 'Completed'
+                : 'Confirmed'}
+            </Badge>
           </div>
-          <div>
-            <div className="text-sm text-neutral-500">Booking Date</div>
-            <div className="font-medium">
-              {new Date(booking.bookingDate).toLocaleDateString()}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div className="grid grid-cols-3 gap-4 p-4 bg-neutral-50 rounded-lg">
-      <div className="text-center">
-        <Calendar className="w-5 h-5 text-neutral-500 mx-auto mb-1" />
-        <div className="text-xs text-neutral-500">Check-in</div>
-        <div className="font-medium">
-          {new Date(booking.checkIn).toLocaleDateString()}
-        </div>
-      </div>
-      <div className="text-center">
-        <Calendar className="w-5 h-5 text-neutral-500 mx-auto mb-1" />
-        <div className="text-xs text-neutral-500">Check-out</div>
-        <div className="font-medium">
-          {new Date(booking.checkOut).toLocaleDateString()}
-        </div>
-      </div>
-      <div className="text-center">
-        <Users className="w-5 h-5 text-neutral-500 mx-auto mb-1" />
-        <div className="text-xs text-neutral-500">Guests</div>
-        <div className="font-medium">{booking.guests}</div>
-      </div>
-    </div>
-  </CardContent>
-</Card>
-
-                ))
-              )}
-            </div>
-
-            <div className="lg:col-span-1">
-              <Card className="sticky top-8">
-                <CardHeader>
-                  <CardTitle>Quick Actions</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <Button variant="outline" className="w-full">
-                    <Download className="w-4 h-4 mr-2" />
-                    Download Voucher
-                  </Button>
-
-                  <Button variant="outline" className="w-full">
-                    <Share2 className="w-4 h-4 mr-2" />
-                    Share Booking
-                  </Button>
-
-                  <Button
-                    className="w-full bg-primary text-white hover:bg-primary/90"
-                    onClick={() => (window.location.href = '/')} >
-                    <Home className="w-4 h-4 mr-2" />
-                    Back to Home
-                  </Button>
-
-                  <div className="pt-4 border-t">
-                    <h4 className="font-medium text-neutral-900 mb-2">Need Help?</h4>
-                    <div className="space-y-2 text-sm">
-                      <a href="/contact" className="block text-primary hover:text-primary/80">
-                        Contact Support
-                      </a>
-                      <a
-                        href="https://wa.me/919277778778"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="block text-primary hover:text-primary/80">
-                        WhatsApp Us
-                      </a>
-                      <a href="/faq" className="block text-primary hover:text-primary/80">
-                        View FAQ
-                      </a>
-                    </div>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="flex items-center gap-4">
+            <img
+              src={booking.farmImage}
+              alt={`${booking.farmName} image`}
+              className="w-32 h-32 object-cover rounded-lg"
+            />
+            <div className="flex-1 space-y-2">
+              <div className="text-xl font-semibold text-neutral-900">{booking.farmName}</div>
+              <a
+                href={booking.location_link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-neutral-600 flex items-center hover:underline text-sm"
+              >
+                <MapPin className="w-4 h-4 mr-2 text-primary" />
+                {booking.areaCity}
+              </a>
+              <div className="grid grid-cols-2 gap-4 pt-2">
+                <div>
+                  <div className="text-sm text-neutral-500">Booking ID</div>
+                  <div className="font-mono font-semibold text-lg">{booking.id}</div>
+                </div>
+                <div>
+                  <div className="text-sm text-neutral-500">Booking Date</div>
+                  <div className="font-medium">
+                    {new Date(booking.bookingDate).toLocaleDateString()}
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             </div>
           </div>
+
+          <div className="grid grid-cols-3 gap-4 p-4 bg-neutral-50 rounded-lg">
+            <div className="text-center">
+              <Calendar className="w-5 h-5 text-neutral-500 mx-auto mb-1" />
+              <div className="text-xs text-neutral-500">Check-in</div>
+              <div className="font-medium">
+                {new Date(booking.checkIn).toLocaleDateString()}
+              </div>
+            </div>
+            <div className="text-center">
+              <Calendar className="w-5 h-5 text-neutral-500 mx-auto mb-1" />
+              <div className="text-xs text-neutral-500">Check-out</div>
+              <div className="font-medium">
+                {new Date(booking.checkOut).toLocaleDateString()}
+              </div>
+            </div>
+            <div className="text-center">
+              <Users className="w-5 h-5 text-neutral-500 mx-auto mb-1" />
+              <div className="text-xs text-neutral-500">Guests</div>
+              <div className="font-medium">{booking.guests}</div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    ))
+  )}
+</div>
+
         </div>
       </section>
     </div>
   );
 }
+

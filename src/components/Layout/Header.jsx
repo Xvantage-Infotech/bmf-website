@@ -116,17 +116,19 @@ export default function Header() {
                 <Settings className="mr-2 h-4 w-4" />
                 <span>Edit Profile</span>
               </Button>
-              <Button
-                variant="outline"
-                className="w-full justify-start"
-                onClick={() => {
-                  logout();
-                  setIsMenuOpen(false);
-                }}
-              >
-                <LogOut className="mr-2 h-4 w-4" />
-                <span>LogOut</span>
-              </Button>
+             <Button
+              variant="outline"
+              className="w-full justify-start"
+              onClick={async () => {
+                await logout();
+                setIsMenuOpen(false);
+                router.push("/"); // ✅ Redirect after logout
+              }}
+            >
+              <LogOut className="mr-2 h-4 w-4" />
+              <span>LogOut</span>
+            </Button>
+
             </div>
           </div>
         ) : (
@@ -186,10 +188,16 @@ export default function Header() {
                       My Bookings
                     </DropdownMenuItem>
 
-                    <DropdownMenuItem onClick={logout}>
-                      <LogOut className="mr-2 h-4 w-4" />
-                      Logout
-                    </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={async () => {
+                      await logout();
+                      router.push("/"); // ✅ Redirect after logout
+                    }}
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Logout
+                  </DropdownMenuItem>
+
                   </DropdownMenuContent>
                 </DropdownMenu>
               ) : (

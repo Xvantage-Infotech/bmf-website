@@ -4,6 +4,7 @@ import { getBookingDetails } from '@/services/Booking/booking.service';
 import { cancelBooking } from '@/services/Booking/booking.service'; // Import the cancelBooking function
 import { useParams, useRouter } from 'next/navigation';
 import { MapPin } from 'lucide-react';
+import { API_BASE_URL } from '@/lib/utils';
 
 export default function BookingDetailsPage() {
   const { id } = useParams();
@@ -62,7 +63,7 @@ export default function BookingDetailsPage() {
         {/* Farm info */}
         <div className="flex gap-4">
           <img
-            src={`https://api.bookmyfarm.net/assets/images/farm_images/${farmImage}`}
+            src={`${API_BASE_URL}assets/images/farm_images/${farmImage}`}
             className="w-40 h-40 rounded-lg object-cover"
             alt="Farm"
           />
@@ -121,7 +122,7 @@ export default function BookingDetailsPage() {
           onClick={handleCancelBooking}
           className="w-full py-2 bg-red-100 rounded-md text-sm font-medium"
         >
-          {isCancelled ? 'Booking Cancelled' : '❌ Cancel Booking'}
+          {isCancelled ? 'Booking Cancelled' : ' Cancel Booking'}
         </button>
       </div>
 

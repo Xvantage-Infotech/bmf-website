@@ -7,6 +7,7 @@ import Script from 'next/script';
 import { createRazorpayOrder, updatePaymentStatus, verifyPaymentSignature } from '@/services/Payment/payment.service';
 import { useAuth } from '@/contexts/AuthContext';
 import { addBooking } from '@/services/Booking/booking.service';
+import { API_BASE_URL } from '@/lib/utils';
 
 
 
@@ -225,7 +226,7 @@ console.log("Using Razorpay key:", razorpayKey);
   };
 
   const image = searchParams.get('image');
-  const imageUrl = `https://api.bookmyfarm.net/assets/images/farm_images/${image}`;
+  const imageUrl = `${API_BASE_URL}assets/images/farm_images/${image}`;
 
   return (
     <>

@@ -38,3 +38,17 @@ export const getUserProfile = async (token) => {
   });
   return response.data;
 };
+
+
+export const loginOrRegisterUser = async (phone_number) => {
+  try {
+    const response = await api.post("/api/add_user", {
+      phone_number,
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error("❌ API loginOrRegisterUser failed:", error);
+    throw error;
+  }
+};

@@ -181,7 +181,14 @@ export default function Header() {
                       Wishlist
                     </DropdownMenuItem>
 
-                    <DropdownMenuItem onClick={() => router.push("/booking-confirmation")}>
+                    <DropdownMenuItem onClick={() => router.push("/myproperty")}>
+                      <Heart className="mr-2 h-4 w-4" />
+                      My Property
+                    </DropdownMenuItem>
+
+                    <DropdownMenuItem
+                      onClick={() => router.push("/booking-confirmation")}
+                    >
                       <User className="mr-2 h-4 w-4" />
                       My Bookings
                     </DropdownMenuItem>

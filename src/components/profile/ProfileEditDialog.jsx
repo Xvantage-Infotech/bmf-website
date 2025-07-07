@@ -22,7 +22,8 @@ export default function ProfileEditDialog({ isOpen, onClose }) {
   const [street, setStreet] = useState(user?.street || '');
   const [email, setEmail] = useState(user?.email || '');
   const [city, setCity] = useState(user?.city || '');
-const [dob, setDob] = useState(user?.dob ? new Date(user.dob) : undefined);
+const [dob, setDob] = useState(user?.date_of_birth ? new Date(user.date_of_birth) : undefined);
+
   const [profile_image, setProfile_image] = useState(user?.profile_image);
   const [previewImage, setPreviewImage] = useState(user?.profileImage);
 
@@ -33,12 +34,19 @@ const [dob, setDob] = useState(user?.dob ? new Date(user.dob) : undefined);
       setStreet(user.street || '');
       setEmail(user.email || '');
       setCity(user.city || '');
-      setDob(user.dob ? new Date(user.dob) : undefined);
+setDob(user.date_of_birth && typeof user.date_of_birth === 'string' && !isNaN(Date.parse(user.date_of_birth)) ? new Date(user.date_of_birth) : undefined);
+
+
       setProfile_image(user.profile_image);
       setPreviewImage(user.profile_image);
     }
   }, [isOpen, user]);
+console.log("🧪 user.dob from API:", user?.dob);
 
+const isValidDate = (d) => {
+  const parsed = new Date(d);
+  return parsed instanceof Date && !isNaN(parsed);
+};
 
 
 const handleSubmit = async (e) => {

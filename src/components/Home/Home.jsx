@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Star, Heart, Shield } from "lucide-react";
 import { getFeaturedFarms } from "@/data/staticFarms";
-import { formatPrice } from "@/lib/utils";
+import {  FARM_IMAGE_BASE_URL, formatPrice } from "@/lib/utils";
 import SearchFilters from "@/components/Search/SearchFilters";
 import SearchResultsPanel from "@/components/Search/SearchResultsPanel";
 import CategoryTabs from "@/components/Search/CategoryTabs";
@@ -81,7 +81,7 @@ export default function Homes() {
             pricePerNight: finalPrice,
             images: farm.farm_images.map(
               (img) =>
-                `https://api.bookmyfarm.net/assets/images/farm_images/${img.image}`
+                `${FARM_IMAGE_BASE_URL}/${img.image}`
             ),
             rating: farm.reviews_avg_star || 4.8,
           };
@@ -479,7 +479,7 @@ export default function Homes() {
           </a>
 
           {/* Download App */}
-          <a
+          {/* <a
             href="https://play.google.com/store/apps/details?id=com.app.bookmyfarm&hl=en_IN"
             target="_blank"
             rel="noopener noreferrer"
@@ -493,7 +493,7 @@ export default function Homes() {
             aria-label="Download App"
           >
             <Download className="w-6 h-6 sm:w-7 sm:h-7 text-white/70" />
-          </a>
+          </a> */}
         </div>
 
         {/* Toggle Button */}

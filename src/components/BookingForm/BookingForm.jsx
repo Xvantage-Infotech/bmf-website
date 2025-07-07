@@ -1,7 +1,7 @@
 
 // BookingForm.jsx
 'use client';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -21,8 +21,8 @@ import { format } from 'date-fns';
 export default function BookingForm({ farm, className = '' }) {
   const [checkIn, setCheckIn] = useState();
   const [checkOut, setCheckOut] = useState();
- const [checkInTime, setCheckInTime] = useState("7:00 AM");
-const [checkOutTime, setCheckOutTime] = useState("6:00 AM");
+ const [checkInTime, setCheckInTime] = useState();
+const [checkOutTime, setCheckOutTime] = useState();
 
   const [adults, setAdults] = useState(2);
   const [children, setChildren] = useState(0);
@@ -35,6 +35,16 @@ const [checkOutTime, setCheckOutTime] = useState("6:00 AM");
 
 const { user } = useAuth();
 const isLoggedIn = !!user?.token;
+
+
+useEffect(() => {
+  // Reset availability state when user changes any date/time input
+  setIsBooked(false);
+  setHasCheckedAvailability(false);
+  setBookingError('');
+  setFinalPrice(null);
+}, [checkIn, checkOut, checkInTime, checkOutTime]);
+
 
 const convertTo24HourFormat = (timeStr) => {
   if (!timeStr) return "00:00:00";
@@ -110,54 +120,6 @@ const pricePerNight = nights > 0 ? dynamicTotal / nights : 0;
 
 
 const router = useRouter();
-
-// const handleBooking = async () => {
-//   if (!isLoggedIn) {
-//     setIsAuthModalOpen(true);
-//     return;
-//   }
-
-//   if (!checkIn || !checkOut || isGuestLimitExceeded) return;
-
-//   const token = localStorage.getItem('accessToken');
-//   if (!token) return;
-
-//  const formatDate = (date) => {
-//   return date.toLocaleDateString('en-CA'); // returns 'YYYY-MM-DD' in local timezone
-// };
-
-
-// const payload = {
-//   farm_id: String(farm.id),
-//   start_date: formatDate(checkIn),
-//   start_time: convertTo24HourFormat(checkInTime),
-//   end_date: formatDate(checkOut),
-//   end_time: convertTo24HourFormat(checkOutTime),
-//   no_of_guest: String(adults + children),
-// };
-
-
-// try {
-//   const res = await checkBookingAvailability(payload, token);
-//   setHasCheckedAvailability(true);
-
-// if (res?.status === 0) {
-//   setIsBooked(false);
-//   setBookingError('');
-//   setFinalPrice(res.final_price); // 👈 this
-// } else {
-//   setIsBooked(true);
-//   setBookingError('This farm is already booked for the selected dates.');
-//   setFinalPrice(null);
-// }
-
-// } catch (err) {
-//   setIsBooked(false);
-//   setBookingError(err.message || 'Error checking availability.');
-// }
-
-
-// };
 
 const handleBooking = async () => {
   if (!isLoggedIn) {
@@ -246,42 +208,57 @@ const extraGuestCharge = extraGuests * (farm.person_price_weekday || 0);
 
 
   return (
-    <div className={`sticky top-8 ${className}`}>
+    // <div className={`sticky top-8 ${className}`}>
+    <div className={`sticky top-8 w-full max-w-md ${className}`}>
+
       <div className="bg-neutral-50 rounded-2xl p-6 border border-neutral-200">
         <h3 className="text-xl font-bold text-neutral-900 mb-6">Book Your Stay</h3>
 
         <div className="space-y-6">
           {/* Date Selection */}
-          <ImprovedDatePicker
-            checkIn={checkIn}
-            checkOut={checkOut}
-            checkInTime={checkInTime}
-            checkOutTime={checkOutTime}
-            onCheckInChange={setCheckIn}
-            onCheckOutChange={setCheckOut}
-            onCheckInTimeChange={setCheckInTime}
-            onCheckOutTimeChange={setCheckOutTime}
-          />
+         <ImprovedDatePicker
+  checkIn={checkIn}
+  checkOut={checkOut}
+  checkInTime={checkInTime}
+  checkOutTime={checkOutTime}
+  onCheckInChange={setCheckIn}
+  onCheckOutChange={setCheckOut}
+  onCheckInTimeChange={setCheckInTime}
+  onCheckOutTimeChange={setCheckOutTime}
+  checkInOptions={farm.check_in_time}
+  checkOutOptions={farm.check_out_time}
+/>
+
 
           {/* Guest Selection */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3">
             <div>
-              <Label className="block text-sm font-medium text-neutral-700 mb-2">Adults</Label>
-              <Select value={adults.toString()} onValueChange={(value) => setAdults(parseInt(value))}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {Array.from({ length: 100 }, (_, i) => i + 1).map((num) => (
-                    <SelectItem key={num} value={num.toString()}>
-                      {num} Adult{num !== 1 ? 's' : ''}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Label className="block text-sm font-medium text-neutral-700 mb-2">Total Booking Person</Label>
+        <input
+  type="number"
+  min={1}
+  value={adults}
+  onChange={(e) => {
+    const val = parseInt(e.target.value);
+    if (!isNaN(val) && val >= 1) {
+      setAdults(val);
+    } else if (e.target.value === '') {
+      setAdults(''); // Allow temporary empty state for manual typing
+    } else {
+      setAdults(1); // Prevent negative or 0
+    }
+  }}
+  onBlur={() => {
+    // Ensure value is reset to 1 if user leaves input empty or invalid
+    if (!adults || adults < 1) setAdults(1);
+  }}
+  className="w-full px-3 py-2 border rounded-md text-sm"
+/>
+
+
             </div>
 
-            <div>
+            {/* <div>
               <Label className="block text-sm font-medium text-neutral-700 mb-2">Children</Label>
               <Select value={children.toString()} onValueChange={(value) => setChildren(parseInt(value))}>
                 <SelectTrigger>
@@ -295,7 +272,7 @@ const extraGuestCharge = extraGuests * (farm.person_price_weekday || 0);
                   ))}
                 </SelectContent>
               </Select>
-            </div>
+            </div> */}
           </div>
 
           {/* Guest Limit Warning */}

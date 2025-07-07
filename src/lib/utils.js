@@ -165,3 +165,11 @@ export function shareOnSocial(platform, url, text = '') {
     window.open(shareUrl, '_blank', 'width=600,height=400');
   }
 }
+
+
+
+// utils/constants.ts
+export const FARM_IMAGE_BASE_URL = "https://api.bookmyfarm.net/assets/images/farm_images";
+
+export const AMENITY_ICON_BASE_URL = "https://api.bookmyfarm.net/assets/images/amenity-icons";
+export const USER_PROFILE_IMAGE_BASE_URL = "https://api.bookmyfarm.net/assets/images/user_profiles";

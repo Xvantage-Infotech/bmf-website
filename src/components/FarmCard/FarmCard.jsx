@@ -3,16 +3,27 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Heart, Bed, Users, Star, MapPin } from "lucide-react";
-import { formatPrice, generateStars } from "@/lib/utils";
+import {  FARM_IMAGE_BASE_URL, formatPrice, generateStars } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { addToWishlist } from "@/services/Wishlist/wishlist.service";
 
-export default function FarmCard({ farm, className = "" }) {
+export default function FarmCard({
+  farm,
+  className = "",
+  isFavorited: isFavoriteProp = false,
+   onToggleFavorite,
+}) {
   const [isFavorited, setIsFavorited] = useState(false);
+
+useEffect(() => {
+  setIsFavorited(isFavoriteProp);
+}, [isFavoriteProp]);
+
   const [imageIndex, setImageIndex] = useState(0);
   const [loadedImages, setLoadedImages] = useState({});
   const [isHovered, setIsHovered] = useState(false);
+  
 
   const intervalRef = useRef(null);
   const router = useRouter();
@@ -21,7 +32,7 @@ export default function FarmCard({ farm, className = "" }) {
   const images = farm.farm_images || [];
   const mainImage =
     images.length > 0
-      ? `https://api.bookmyfarm.net/assets/images/farm_images/${images[0].image}`
+      ? `${FARM_IMAGE_BASE_URL}/${images[0].image}`
       : "/placeholder.jpg";
 
   const handleClick = (e) => {
@@ -36,40 +47,46 @@ export default function FarmCard({ farm, className = "" }) {
   useEffect(() => {
     if (!isHovered || images.length <= 1) return;
 
-    if (intervalRef.current) clearInterval(intervalRef.current); // ✅ Prevent overlapping intervals
+    if (intervalRef.current) clearInterval(intervalRef.current);
 
     intervalRef.current = setInterval(() => {
       setImageIndex((prevIndex) => (prevIndex + 1) % images.length);
     }, 2000);
 
-    return () => clearInterval(intervalRef.current); // ✅ Clean up properly
+    return () => clearInterval(intervalRef.current);
   }, [isHovered, images.length]);
 
-  const toggleFavorite = async (e) => {
-    e.preventDefault();
-    e.stopPropagation();
 
-    if (!user?.token) {
-      return alert("Please login to add to wishlist");
-    }
+const toggleFavorite = async (e) => {
+  e.preventDefault();
+  e.stopPropagation();
 
-    try {
-      await addToWishlist(farm.id, user.token);
-      setIsFavorited(true);
-    } catch (err) {
-      console.error(err);
-      alert("Something went wrong");
+  if (!user?.token) {
+    return alert("Please login to add to wishlist");
+  }
+
+  try {
+    await addToWishlist(farm.id, user.token); // server toggles
+    const nextState = !isFavorited;
+    setIsFavorited(nextState);
+
+    if (onToggleFavorite) {
+      onToggleFavorite(nextState); // ✅ pass new state to parent
     }
-  };
+  } catch (err) {
+    console.error(err);
+    alert("Something went wrong");
+  }
+};
 
   const rating = parseFloat(farm.rating);
 
   return (
     <Link
       href={`/farm/${farm.id}`}
-      scroll={false} // Disable Next.js automatic scroll
+      scroll={false}
       onClick={handleClick}
-      className="block" // Ensure Link doesn't affect layout
+      className="block"
     >
       <div
         className={`farm-card animate-card-hover cursor-pointer ${className}`}
@@ -80,14 +97,14 @@ export default function FarmCard({ farm, className = "" }) {
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => {
               setIsHovered(false);
-              setImageIndex(0); // reset to first image
+              setImageIndex(0);
             }}
           >
             {images.length > 0 ? (
               images.map((img, idx) => (
                 <img
                   key={idx}
-                  src={`https://api.bookmyfarm.net/assets/images/farm_images/${img.image}`}
+                  src={`${FARM_IMAGE_BASE_URL}/${img.image}`}
                   alt={`${farm.name} - Image ${idx + 1}`}
                   className={`absolute top-0 left-0 w-full h-full object-cover transition-opacity duration-700 ${
                     idx === imageIndex ? "opacity-100 z-10" : "opacity-0 z-0"

@@ -33,7 +33,6 @@ export const fetchFarms = async (filters = {}) => {
   }
 };
 
-
 export const fetchFarmById = async (farmId) => {
   try {
     const payload = {
@@ -53,15 +52,63 @@ export const fetchFarmById = async (farmId) => {
   }
 };
 
-
-
-
 export const checkBookingAvailability = async (payload, token) => {
-  const response = await api.post('/api/check_booking', payload, {
+  const response = await api.post("/api/check_booking", payload, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
   });
 
   return response.data; // expected to return { available: true/false }
+};
+
+export const fetchPropertyCategories = async () => {
+  try {
+    const response = await api.get("/api/category");
+    return response?.data?.data || [];
+  } catch (error) {
+    console.error("Error fetching property categories:", error);
+    throw error;
+  }
+};
+
+export const fetchRulesAndPolicies = async (token) => {
+  try {
+    const response = await api.get("/api/rules-policies", {
+      headers: {
+        Accept: "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const data = response?.data;
+    return {
+      rules: data?.rules_and_policies || [],
+      cancellation: data?.cancellation_policy || [],
+      commission: data?.commission_policy || [],
+    };
+  } catch (error) {
+    console.error("Error fetching rules and policies:", error);
+    throw error;
+  }
+};
+
+export const fetchCities = async () => {
+  try {
+    const response = await api.get("/api/city");
+    return response?.data?.data || [];
+  } catch (error) {
+    console.error("Error fetching cities:", error);
+    throw error;
+  }
+};
+
+export const fetchAreas = async () => {
+  try {
+    const response = await api.get("/api/areas");
+    return response?.data?.data || [];
+  } catch (error) {
+    console.error("Error fetching areas:", error);
+    throw error;
+  }
 };

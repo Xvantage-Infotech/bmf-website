@@ -181,6 +181,11 @@ export default function Header() {
                       Wishlist
                     </DropdownMenuItem>
 
+                    <DropdownMenuItem onClick={() => router.push("/booking-confirmation")}>
+                      <User className="mr-2 h-4 w-4" />
+                      My Bookings
+                    </DropdownMenuItem>
+
                     <DropdownMenuItem onClick={logout}>
                       <LogOut className="mr-2 h-4 w-4" />
                       Logout

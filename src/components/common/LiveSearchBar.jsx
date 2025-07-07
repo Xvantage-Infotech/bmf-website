@@ -180,7 +180,7 @@ import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Search, MapPin } from "lucide-react";
 import { fetchFarms } from "@/services/Farm/farm.service";
-import { cn } from "@/lib/utils";
+import {  cn, FARM_IMAGE_BASE_URL } from "@/lib/utils";
 
 export default function LiveSearchBar({
   placeholder = "Search by farm name, location...",
@@ -313,7 +313,7 @@ export default function LiveSearchBar({
                 <img
                   src={
                     farm.farm_images?.length && farm.farm_images[0]?.image
-                      ? `https://api.bookmyfarm.net/assets/images/farm_images/${farm.farm_images[0].image}`
+                      ? `${FARM_IMAGE_BASE_URL}/${farm.farm_images[0].image}`
                       : "/placeholder.jpg"
                   }
                   alt={farm.farm_alias_name || farm.name || "Farm"}

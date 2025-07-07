@@ -262,6 +262,7 @@ console.log("Using Razorpay key:", razorpayKey);
           </div>
         </div>
 
+
         <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg shadow-inner mb-4">
           <span className="text-gray-500 line-through text-sm">
             ₹{originalPrice.toLocaleString(undefined, { maximumFractionDigits: 0 })}

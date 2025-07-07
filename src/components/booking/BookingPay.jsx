@@ -247,7 +247,7 @@ console.log("Using Razorpay key:", razorpayKey);
               </a>
             </div>
             <div className="flex items-center text-xs text-yellow-600">
-              ⭐ <span className="ml-1">{rating}(0)</span>
+              Reviews <span className="ml-1">{rating}(0)</span>
             </div>
           </div>
         </div>

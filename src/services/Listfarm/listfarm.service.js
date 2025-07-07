@@ -62,10 +62,10 @@ export const submitProperty = async (formData, token) => {
       data.append("property_agreement", formData.property_agreement);
     }
 
-    console.log("🔐 Token:", token);
-    console.log("Request Headers:", {
-      Authorization: `Bearer ${token}`,
-    });
+    console.log("📦 Sending form data:");
+    for (let pair of data.entries()) {
+      console.log(`${pair[0]}:`, pair[1]);
+    }
 
     const response = await api.post("/api/add_property", data, {
       headers: {

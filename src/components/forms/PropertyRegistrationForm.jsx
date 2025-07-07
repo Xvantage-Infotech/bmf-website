@@ -20,6 +20,8 @@ import { submitProperty } from "@/services/Listfarm/listfarm.service";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDialog } from "@/hooks/use-dialog";
 import {
+  fetchAreas,
+  fetchCities,
   fetchPropertyCategories,
   fetchRulesAndPolicies,
 } from "@/services/Farm/farm.service";
@@ -291,6 +293,8 @@ export default function PropertyRegistrationForm() {
   const [checkInOpen, setCheckInOpen] = useState(false);
   const [checkOutOpen, setCheckOutOpen] = useState(false);
   const [categories, setCategories] = useState([]);
+  const [cityOptions, setCityOptions] = useState([]);
+  const [areaOptions, setAreaOptions] = useState([]);
 
   useEffect(() => {
     fetchPropertyCategories()
@@ -298,6 +302,21 @@ export default function PropertyRegistrationForm() {
       .catch((err) => {
         console.error("Failed to load categories", err);
       });
+  }, []);
+
+  useEffect(() => {
+    const loadLocationOptions = async () => {
+      try {
+        const cities = await fetchCities();
+        const areas = await fetchAreas();
+        setCityOptions(cities);
+        setAreaOptions(areas);
+      } catch (err) {
+        console.error("Failed to load city/area options", err);
+      }
+    };
+
+    loadLocationOptions();
   }, []);
 
   // const validateField = (name, value) => {
@@ -666,30 +685,71 @@ export default function PropertyRegistrationForm() {
           />
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <InputField
-              name="city"
-              label="City"
-              refs={refs}
-              required
-              placeholder="Enter city"
-              formData={formData}
-              errors={errors}
-              handleInputChange={handleInputChange}
-              validateField={validateField}
-              setErrors={setErrors}
-            />
-            <InputField
-              name="near_by_area"
-              label="Nearby Area"
-              refs={refs}
-              required
-              placeholder="Enter nearby area/landmark"
-              formData={formData}
-              errors={errors}
-              handleInputChange={handleInputChange}
-              validateField={validateField}
-              setErrors={setErrors}
-            />
+            {/* City Dropdown */}
+            <div
+              className="space-y-2"
+              ref={(el) => (refs.current["city"] = el)}
+            >
+              <Label className="flex items-center gap-1">
+                City <span className="text-red-500">*</span>
+              </Label>
+              <Select
+                value={formData.city}
+                onValueChange={(value) => handleInputChange("city", value)}
+              >
+                <SelectTrigger className={errors.city ? "border-red-500" : ""}>
+                  <SelectValue placeholder="Select a city" />
+                </SelectTrigger>
+                <SelectContent>
+                  {cityOptions.map((city) => (
+                    <SelectItem key={city.id} value={String(city.id)}>
+                      {city.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.city && (
+                <p className="text-sm text-red-500 flex items-center gap-1">
+                  <AlertCircle className="w-4 h-4" />
+                  {errors.city}
+                </p>
+              )}
+            </div>
+
+            {/* Nearby Area Dropdown */}
+            <div
+              className="space-y-2"
+              ref={(el) => (refs.current["near_by_area"] = el)}
+            >
+              <Label className="flex items-center gap-1">
+                Nearby Area <span className="text-red-500">*</span>
+              </Label>
+              <Select
+                value={formData.near_by_area}
+                onValueChange={(value) =>
+                  handleInputChange("near_by_area", value)
+                }
+              >
+                <SelectTrigger
+                  className={errors.near_by_area ? "border-red-500" : ""}
+                >
+                  <SelectValue placeholder="Select nearby area" />
+                </SelectTrigger>
+                <SelectContent>
+                  {areaOptions.map((area) => (
+                    <SelectItem key={area.id} value={String(area.id)}>
+                      {area.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.near_by_area && (
+                <p className="text-sm text-red-500 flex items-center gap-1">
+                  <AlertCircle className="w-4 h-4" />
+                  {errors.near_by_area}
+                </p>
+              )}
+            </div>
           </div>
 
           <div
@@ -774,6 +834,7 @@ export default function PropertyRegistrationForm() {
             validateField={validateField}
             setErrors={setErrors}
           />
+
           {/* Government Photo ID */}
           <div
             className="space-y-2"
@@ -918,7 +979,7 @@ export default function PropertyRegistrationForm() {
           {/* Property Agreement */}
           <div className="space-y-2">
             <Label className="flex items-center gap-1">
-              Upload Property Agreement <span className="text-red-500">*</span>
+              Upload Property Agreement <span className="text-red-500"></span>
               <span className="text-xs text-neutral-500 ml-2">
                 (PDF, PNG, JPG – max 10 MB)
               </span>

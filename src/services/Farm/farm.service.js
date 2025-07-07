@@ -1,5 +1,4 @@
 import { api } from "@/axiosApi";
-import axios from "axios";
 
 export const fetchFarms = async (filters = {}) => {
   try {
@@ -75,7 +74,7 @@ export const fetchPropertyCategories = async () => {
 
 export const fetchRulesAndPolicies = async (token) => {
   try {
-    const response = await axios.get("/api/rules-policies", {
+    const response = await api.get("/api/rules-policies", {
       headers: {
         Accept: "application/json",
         Authorization: `Bearer ${token}`,
@@ -90,6 +89,26 @@ export const fetchRulesAndPolicies = async (token) => {
     };
   } catch (error) {
     console.error("Error fetching rules and policies:", error);
+    throw error;
+  }
+};
+
+export const fetchCities = async () => {
+  try {
+    const response = await api.get("/api/city");
+    return response?.data?.data || [];
+  } catch (error) {
+    console.error("Error fetching cities:", error);
+    throw error;
+  }
+};
+
+export const fetchAreas = async () => {
+  try {
+    const response = await api.get("/api/areas");
+    return response?.data?.data || [];
+  } catch (error) {
+    console.error("Error fetching areas:", error);
     throw error;
   }
 };

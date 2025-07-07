@@ -526,60 +526,32 @@ export default function FarmDetail() {
                   ))}
                 </TabsContent>
 
-                <TabsContent value="location">
-                  {farm.latitude && farm.longitude ? (
-                    <div className="w-full h-64 md:h-96 rounded-lg overflow-hidden">
-                      <iframe
-                        src={`https://www.google.com/maps?q=${farm.latitude},${farm.longitude}&hl=es;z=14&output=embed`}
-                        width="100%"
-                        height="100%"
-                        style={{ border: 0 }}
-                        allowFullScreen=""
-                        loading="lazy"
-                        referrerPolicy="no-referrer-when-downgrade"
-                      ></iframe>
-                    </div>
-                  ) : (
-                    <p className="text-neutral-500">
-                      Location map not available.
-                    </p>
-                  )}
-                </TabsContent>
+           <TabsContent value="location">
+  {farm.latitude && farm.longitude ? (
+    <div className="relative w-full h-64 md:h-96 rounded-lg overflow-hidden">
+      <iframe
+        src={`https://www.google.com/maps?q=${farm.latitude},${farm.longitude}&hl=es;z=14&output=embed`}
+        width="100%"
+        height="100%"
+        style={{ border: 0 }}
+        allowFullScreen=""
+        loading="lazy"
+        referrerPolicy="no-referrer-when-downgrade"
+      ></iframe>
 
-                {/* <TabsContent value="location">
-                  {farm.latitude && farm.longitude ? (
-                    <div className="w-full h-64 md:h-96 rounded-lg overflow-hidden">
-                      <iframe
-                        src={`https://www.google.com/maps?q=${farm.latitude},${farm.longitude}&hl=es;z=14&output=embed`}
-                        width="100%"
-                        height="100%"
-                        style={{ border: 0 }}
-                        allowFullScreen=""
-                        loading="lazy"
-                        referrerPolicy="no-referrer-when-downgrade"
-                      ></iframe>
-                    </div>
-                  ) : farm?.location_link ? (
-                    <div className="text-center space-y-2">
-                      <p className="text-neutral-500">
-                        Location cannot be embedded, but you can open it in
-                        Google Maps:
-                      </p>
-                      <a
-                        href={farm.location_link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-block px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition"
-                      >
-                        Open in Google Maps
-                      </a>
-                    </div>
-                  ) : (
-                    <p className="text-neutral-500">
-                      Location map not available.
-                    </p>
-                  )}
-                </TabsContent> */}
+      {/* Overlay only blocks click, not scroll/zoom */}
+      <div
+        className="absolute inset-0 z-10"
+        style={{ pointerEvents: "none" }}
+      />
+    </div>
+  ) : (
+    <p className="text-neutral-500">Location map not available.</p>
+  )}
+</TabsContent>
+
+
+
               </Tabs>
             </div>
 

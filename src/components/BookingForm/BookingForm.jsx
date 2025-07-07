@@ -1,7 +1,7 @@
 
 // BookingForm.jsx
 'use client';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -35,6 +35,16 @@ const [checkOutTime, setCheckOutTime] = useState();
 
 const { user } = useAuth();
 const isLoggedIn = !!user?.token;
+
+
+useEffect(() => {
+  // Reset availability state when user changes any date/time input
+  setIsBooked(false);
+  setHasCheckedAvailability(false);
+  setBookingError('');
+  setFinalPrice(null);
+}, [checkIn, checkOut, checkInTime, checkOutTime]);
+
 
 const convertTo24HourFormat = (timeStr) => {
   if (!timeStr) return "00:00:00";
@@ -110,54 +120,6 @@ const pricePerNight = nights > 0 ? dynamicTotal / nights : 0;
 
 
 const router = useRouter();
-
-// const handleBooking = async () => {
-//   if (!isLoggedIn) {
-//     setIsAuthModalOpen(true);
-//     return;
-//   }
-
-//   if (!checkIn || !checkOut || isGuestLimitExceeded) return;
-
-//   const token = localStorage.getItem('accessToken');
-//   if (!token) return;
-
-//  const formatDate = (date) => {
-//   return date.toLocaleDateString('en-CA'); // returns 'YYYY-MM-DD' in local timezone
-// };
-
-
-// const payload = {
-//   farm_id: String(farm.id),
-//   start_date: formatDate(checkIn),
-//   start_time: convertTo24HourFormat(checkInTime),
-//   end_date: formatDate(checkOut),
-//   end_time: convertTo24HourFormat(checkOutTime),
-//   no_of_guest: String(adults + children),
-// };
-
-
-// try {
-//   const res = await checkBookingAvailability(payload, token);
-//   setHasCheckedAvailability(true);
-
-// if (res?.status === 0) {
-//   setIsBooked(false);
-//   setBookingError('');
-//   setFinalPrice(res.final_price); // 👈 this
-// } else {
-//   setIsBooked(true);
-//   setBookingError('This farm is already booked for the selected dates.');
-//   setFinalPrice(null);
-// }
-
-// } catch (err) {
-//   setIsBooked(false);
-//   setBookingError(err.message || 'Error checking availability.');
-// }
-
-
-// };
 
 const handleBooking = async () => {
   if (!isLoggedIn) {

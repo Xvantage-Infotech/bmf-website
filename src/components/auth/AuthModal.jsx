@@ -20,6 +20,7 @@ import { Loader2 } from "lucide-react";
 import { sendOTP } from "@/lib/firebase";
 import { auth, RecaptchaVerifier } from "@/lib/firebaseConfig";
 import { authAPI } from "@/lib/api"; // Import your API
+import { loginOrRegisterUser } from "@/services/Auth/auth.service";
 
 export default function AuthModal({ isOpen, onClose }) {
   const [activeTab, setActiveTab] = useState("login");
@@ -147,7 +148,6 @@ export default function AuthModal({ isOpen, onClose }) {
     }
 
     // 🔥 STEP 1: Send OTP via Firebase only
-    console.log("Sending Firebase OTP...");
     const confirmation = await sendOTP(raw, recaptchaRef.current);
     setConfirmationResult(confirmation);
 
@@ -182,13 +182,15 @@ const handleLogin = async (values) => {
     await verifyOtpAndLogin(values.otp);
 
     // ✅ Step 2: Call backend to login and get custom JWT
-    const response = await fetch("https://api.bookmyfarm.net/api/add_user", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ phone_number: formattedPhone }),
-    });
+    // const response = await fetch("https://api.bookmyfarm.net/api/add_user", {
+    //   method: "POST",
+    //   headers: { "Content-Type": "application/json" },
+    //   body: JSON.stringify({ phone_number: formattedPhone }),
+    // });
 
-    const result = await response.json();
+    // const result = await response.json();
+
+    const result = await loginOrRegisterUser(formattedPhone);
 
     if (result?.status === 1 && result?.data?.token) {
       const backendToken = result.data.token;

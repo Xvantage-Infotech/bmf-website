@@ -8,7 +8,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { format } from 'date-fns';
 import { CalendarIcon, Upload } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { API_BASE_URL, cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { getUserProfile, updateUserProfile } from '@/services/Auth/auth.service';
 
@@ -91,7 +91,7 @@ if (previewImage instanceof File) {
 } else if (typeof previewImage === "string" && previewImage.startsWith("data:")) {
   imageUrl = previewImage; // base64 preview
 } else if (profile_image) {
-  imageUrl = `https://api.bookmyfarm.net/assets/images/user_profiles/${profile_image}`;
+  imageUrl = `${API_BASE_URL}assets/images/user_profiles/${profile_image}`;
 }
 
 

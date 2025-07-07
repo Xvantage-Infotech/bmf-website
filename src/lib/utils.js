@@ -165,3 +165,8 @@ export function shareOnSocial(platform, url, text = '') {
     window.open(shareUrl, '_blank', 'width=600,height=400');
   }
 }
+
+
+
+// utils/constants.ts
+export const API_BASE_URL = process.env.NEXT_PUBLIC_NEXT_APP_API;

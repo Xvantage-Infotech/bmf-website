@@ -1334,7 +1334,10 @@ export default function PropertyRegistrationForm() {
           <CardTitle>Check-in & Check-out Times</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div
+            className="grid grid-cols-1 md:grid-cols-2 gap-6"
+            ref={(el) => (refs.current["check_in_time"] = el)}
+          >
             <div className="space-y-2">
               <Label className="flex items-center gap-1">
                 Check-In Time <span className="text-red-500">*</span>
@@ -1385,7 +1388,10 @@ export default function PropertyRegistrationForm() {
               )}
             </div>
 
-            <div className="space-y-2">
+            <div
+              className="space-y-2"
+              ref={(el) => (refs.current["check_out_time"] = el)}
+            >
               <Label className="flex items-center gap-1">
                 Check-Out Time <span className="text-red-500">*</span>
               </Label>

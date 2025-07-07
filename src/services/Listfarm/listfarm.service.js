@@ -81,3 +81,22 @@ export const submitProperty = async (formData, token) => {
     throw error?.response?.data || error;
   }
 };
+
+export const getPropertyList = async (token) => {
+  try {
+    const response = await api.get("/api/property_list", {
+      headers: {
+        Accept: "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    console.log("[getPropertyList] Full response:", response);
+    console.log("[getPropertyList] Parsed data:", response.data?.data);
+
+    return response.data?.data || [];
+  } catch (error) {
+    console.error("[getPropertyList] Error:", error?.response?.data || error);
+    return [];
+  }
+};

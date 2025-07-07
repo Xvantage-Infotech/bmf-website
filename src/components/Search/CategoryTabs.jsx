@@ -13,6 +13,7 @@ const CITY_IDS = {
   // sevani: 10,
   saputara: 13,
   // dang: 12,
+  silvassa:15
 };
 
 const cityDisplayNames = {
@@ -27,6 +28,7 @@ const cityDisplayNames = {
   sevani: 'Sevani',
   saputara: 'Saputara',
   dang: 'Dang',
+  silvassa: 'Silvassa'
 };
 
 const cities = Object.keys(CITY_IDS);

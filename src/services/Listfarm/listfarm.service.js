@@ -91,9 +91,6 @@ export const getPropertyList = async (token) => {
       },
     });
 
-    console.log("[getPropertyList] Full response:", response);
-    console.log("[getPropertyList] Parsed data:", response.data?.data);
-
     return response.data?.data || [];
   } catch (error) {
     console.error("[getPropertyList] Error:", error?.response?.data || error);

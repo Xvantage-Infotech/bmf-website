@@ -170,6 +170,7 @@ export function shareOnSocial(platform, url, text = '') {
 
 // utils/constants.ts
 export const FARM_IMAGE_BASE_URL = "https://api.bookmyfarm.net/assets/images/farm_images";
+export const MY_PROPERTY_IMAGE_BASE_URL = "https://api-stagging.bookmyfarm.net";
 
 export const AMENITY_ICON_BASE_URL = "https://api.bookmyfarm.net/assets/images/amenity-icons";
 export const USER_PROFILE_IMAGE_BASE_URL = "https://api.bookmyfarm.net/assets/images/user_profiles";

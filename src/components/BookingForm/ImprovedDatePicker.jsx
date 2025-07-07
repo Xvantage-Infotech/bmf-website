@@ -2,7 +2,7 @@
 
 // ImprovedDatePicker.jsx
 'use client';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Calendar } from '@/components/ui/calendar';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -27,6 +27,41 @@ export default function ImprovedDatePicker({
   const [isCheckInOpen, setIsCheckInOpen] = useState(false);
   const [isCheckOutOpen, setIsCheckOutOpen] = useState(false);
 
+  const getCurrentTime12Hr = () => {
+  const now = new Date();
+  const hours = now.getHours();
+  const minutes = now.getMinutes().toString().padStart(2, '0');
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+  const hour12 = hours % 12 === 0 ? 12 : hours % 12;
+  return `${hour12}:${minutes} ${ampm}`;
+};
+
+
+useEffect(() => {
+  const today = new Date();
+  const tomorrow = new Date();
+  tomorrow.setDate(today.getDate() + 1);
+
+  if (!checkIn) {
+    onCheckInChange?.(today);
+  }
+
+  if (!checkOut) {
+    onCheckOutChange?.(tomorrow);
+  }
+
+  // ✅ Default check-in time
+  if (!checkInTime) {
+    const fallback = formattedCheckInOptions[0] || getCurrentTime12Hr();
+    onCheckInTimeChange?.(fallback);
+  }
+
+  // ✅ Default check-out time
+  if (!checkOutTime) {
+    const fallback = formattedCheckOutOptions[0] || getCurrentTime12Hr();
+    onCheckOutTimeChange?.(fallback);
+  }
+}, []);
 
 
 const convert24To12Hour = (timeStr) => {

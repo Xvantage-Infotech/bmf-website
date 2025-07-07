@@ -19,7 +19,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useRouter } from "next/navigation";
-import { Heart } from "lucide-react";
+import { Heart, Home } from "lucide-react";
 
 export default function Header() {
   const pathname = usePathname();
@@ -116,17 +116,19 @@ export default function Header() {
                 <Settings className="mr-2 h-4 w-4" />
                 <span>Edit Profile</span>
               </Button>
-              <Button
-                variant="outline"
-                className="w-full justify-start"
-                onClick={() => {
-                  logout();
-                  setIsMenuOpen(false);
-                }}
-              >
-                <LogOut className="mr-2 h-4 w-4" />
-                <span>LogOut</span>
-              </Button>
+             <Button
+              variant="outline"
+              className="w-full justify-start"
+              onClick={async () => {
+                await logout();
+                setIsMenuOpen(false);
+                router.push("/"); // ✅ Redirect after logout
+              }}
+            >
+              <LogOut className="mr-2 h-4 w-4" />
+              <span>LogOut</span>
+            </Button>
+
             </div>
           </div>
         ) : (
@@ -181,15 +183,30 @@ export default function Header() {
                       Wishlist
                     </DropdownMenuItem>
 
-                    <DropdownMenuItem onClick={() => router.push("/booking-confirmation")}>
+                    <DropdownMenuItem
+                      onClick={() => router.push("/myproperty")}
+                    >
+                      <Home className="mr-2 h-4 w-4" />
+                      My Property
+                    </DropdownMenuItem>
+
+                    <DropdownMenuItem
+                      onClick={() => router.push("/booking-confirmation")}
+                    >
                       <User className="mr-2 h-4 w-4" />
                       My Bookings
                     </DropdownMenuItem>
 
-                    <DropdownMenuItem onClick={logout}>
-                      <LogOut className="mr-2 h-4 w-4" />
-                      Logout
-                    </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={async () => {
+                      await logout();
+                      router.push("/"); // ✅ Redirect after logout
+                    }}
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Logout
+                  </DropdownMenuItem>
+
                   </DropdownMenuContent>
                 </DropdownMenu>
               ) : (

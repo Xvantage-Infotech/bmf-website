@@ -26,6 +26,7 @@ export const  CITY_IDS = {
   sevani: 10,
   saputara: 13,
   dang: 12,
+  silvassa: 15
 };
 
 export const FACILITY_OPTIONS = [

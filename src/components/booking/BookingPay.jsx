@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { MapPin } from 'lucide-react';
+import { Calendar, MapPin, Users } from 'lucide-react';
 import Script from 'next/script';
 import { createRazorpayOrder, updatePaymentStatus, verifyPaymentSignature } from '@/services/Payment/payment.service';
 import { useAuth } from '@/contexts/AuthContext';
@@ -252,7 +252,7 @@ console.log("Using Razorpay key:", razorpayKey);
           </div>
         </div>
 
-        <div className="bg-white shadow rounded-xl p-4 mb-4">
+        {/* <div className="bg-white shadow rounded-xl p-4 mb-4">
           <h3 className="text-lg font-semibold mb-3">Your Booking</h3>
           <div className="text-sm space-y-2">
             <p><strong>Booking Name:</strong> {bookingName}</p>
@@ -260,7 +260,38 @@ console.log("Using Razorpay key:", razorpayKey);
             <p><strong>Check in:</strong> {checkIn} – {checkInTime}</p>
             <p><strong>Check out:</strong> {checkOut} – {checkOutTime}</p>
           </div>
+        </div> */}
+
+        <div className="bg-white shadow rounded-xl p-3 mb-4">
+             <p><strong>Booking Name:</strong> {bookingName}</p>
+         
         </div>
+
+        <div className="grid grid-cols-3 gap-4 p-4 bg-neutral-50 rounded-lg mb-4">
+          {/* <h3 className="text-lg font-semibold mb-3">Your Booking</h3>
+             <p><strong>Booking Name:</strong> {bookingName}</p> */}
+            <div className="text-center">
+              <Calendar className="w-5 h-5 text-neutral-500 mx-auto mb-1" />
+              <div className="text-xs text-neutral-500">Check-in</div>
+              <div className="font-medium">
+                {checkIn}
+              </div>
+               <p className="text-xs text-gray-400">{checkInTime}</p>
+            </div>
+            <div className="text-center">
+              <Calendar className="w-5 h-5 text-neutral-500 mx-auto mb-1" />
+              <div className="text-xs text-neutral-500">Check-out</div>
+              <div className="font-medium">
+                 {checkOut}
+              </div>
+              <p className="text-xs text-gray-400">{checkOutTime}</p>
+            </div>
+            <div className="text-center">
+              <Users className="w-5 h-5 text-neutral-500 mx-auto mb-1" />
+              <div className="text-xs text-neutral-500">Guests</div>
+              <div className="font-medium"> {guest}</div>
+            </div>
+          </div>
 
 
         <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg shadow-inner mb-4">

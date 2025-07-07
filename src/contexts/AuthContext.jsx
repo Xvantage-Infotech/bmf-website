@@ -137,6 +137,8 @@ const updateUser = (updatedData) => {
       console.error("Signup error:", err);
     }
   };
+
+  
 const logout = async () => {
   try {
     await signOut(auth); // ✅ Kill Firebase session

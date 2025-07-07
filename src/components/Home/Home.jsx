@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Star, Heart, Shield } from "lucide-react";
 import { getFeaturedFarms } from "@/data/staticFarms";
-import { API_BASE_URL, formatPrice } from "@/lib/utils";
+import {  FARM_IMAGE_BASE_URL, formatPrice } from "@/lib/utils";
 import SearchFilters from "@/components/Search/SearchFilters";
 import SearchResultsPanel from "@/components/Search/SearchResultsPanel";
 import CategoryTabs from "@/components/Search/CategoryTabs";
@@ -81,7 +81,7 @@ export default function Homes() {
             pricePerNight: finalPrice,
             images: farm.farm_images.map(
               (img) =>
-                `${API_BASE_URL}assets/images/farm_images/${img.image}`
+                `${FARM_IMAGE_BASE_URL}/${img.image}`
             ),
             rating: farm.reviews_avg_star || 4.8,
           };

@@ -4,7 +4,7 @@ import { getBookingDetails } from '@/services/Booking/booking.service';
 import { cancelBooking } from '@/services/Booking/booking.service'; // Import the cancelBooking function
 import { useParams, useRouter } from 'next/navigation';
 import { MapPin } from 'lucide-react';
-import { API_BASE_URL } from '@/lib/utils';
+import { FARM_IMAGE_BASE_URL } from '@/lib/utils';
 
 export default function BookingDetailsPage() {
   const { id } = useParams();
@@ -63,7 +63,7 @@ export default function BookingDetailsPage() {
         {/* Farm info */}
         <div className="flex gap-4">
           <img
-            src={`${API_BASE_URL}assets/images/farm_images/${farmImage}`}
+            src={`${FARM_IMAGE_BASE_URL}/${farmImage}`}
             className="w-40 h-40 rounded-lg object-cover"
             alt="Farm"
           />

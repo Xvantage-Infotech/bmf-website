@@ -15,7 +15,7 @@ import {
 import { getBookingList } from '@/services/Booking/booking.service';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
-import { API_BASE_URL } from '@/lib/utils';
+import { FARM_IMAGE_BASE_URL } from '@/lib/utils';
 
 export default function BookingConfirmation() {
   const [bookings, setBookings] = useState([]);
@@ -75,7 +75,7 @@ export default function BookingConfirmation() {
             bookingDate: new Date().toISOString(),
             status: bookingStatus, // Use the booking status here
             farmImage: farm.farm_images?.length
-              ? `${API_BASE_URL}assets/images/farm_images/${farm.farm_images[0].image}`
+              ? `${FARM_IMAGE_BASE_URL}/${farm.farm_images[0].image}`
               : '/placeholder.jpg',
           };
         });

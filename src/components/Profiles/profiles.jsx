@@ -7,7 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import ProfileEditDialog from '@/components/profile/ProfileEditDialog';
 import { Pencil } from 'lucide-react';
 import { format } from 'date-fns';
-import { API_BASE_URL } from '@/lib/utils';
+import {  USER_PROFILE_IMAGE_BASE_URL } from '@/lib/utils';
 
 export default function Profiles() {
   const { user, isAuthenticated } = useAuth();
@@ -38,7 +38,7 @@ export default function Profiles() {
         
     {user?.profile_image ? (
   <img
-    src={`${API_BASE_URL}assets/images/user_profiles/${user.profile_image}`}
+    src={`${USER_PROFILE_IMAGE_BASE_URL}/${user.profile_image}`}
     alt="Profile"
     className="w-24 h-24 rounded-full object-cover mb-4 border-4 border-primary"
   />

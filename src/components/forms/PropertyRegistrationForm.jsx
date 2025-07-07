@@ -104,7 +104,6 @@ export default function PropertyRegistrationForm() {
 
     // Directly set user_id in formData
     const formDataWithUserId = { ...formData, user_id: user.id };
-
     setIsSubmitting(true);
 
     try {

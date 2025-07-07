@@ -62,6 +62,11 @@ export const submitProperty = async (formData, token) => {
       data.append("property_agreement", formData.property_agreement);
     }
 
+    console.log("🔐 Token:", token);
+    console.log("Request Headers:", {
+      Authorization: `Bearer ${token}`,
+    });
+
     const response = await api.post("/api/add_property", data, {
       headers: {
         Accept: "application/json",
@@ -71,6 +76,7 @@ export const submitProperty = async (formData, token) => {
     });
     return response.data;
   } catch (error) {
+    console.log(error);
     console.error("❌ [submitProperty] Error:", error);
     throw error?.response?.data || error;
   }

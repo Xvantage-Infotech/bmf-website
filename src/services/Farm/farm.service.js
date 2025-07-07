@@ -1,4 +1,5 @@
 import { api } from "@/axiosApi";
+import axios from "axios";
 
 export const fetchFarms = async (filters = {}) => {
   try {
@@ -33,7 +34,6 @@ export const fetchFarms = async (filters = {}) => {
   }
 };
 
-
 export const fetchFarmById = async (farmId) => {
   try {
     const payload = {
@@ -53,11 +53,8 @@ export const fetchFarmById = async (farmId) => {
   }
 };
 
-
-
-
 export const checkBookingAvailability = async (payload, token) => {
-  const response = await api.post('/api/check_booking', payload, {
+  const response = await api.post("/api/check_booking", payload, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -66,21 +63,19 @@ export const checkBookingAvailability = async (payload, token) => {
   return response.data; // expected to return { available: true/false }
 };
 
-
-
 export const fetchPropertyCategories = async () => {
   try {
-    const response = await api.get('/api/category');
+    const response = await api.get("/api/category");
     return response?.data?.data || [];
   } catch (error) {
-    console.error('Error fetching property categories:', error);
+    console.error("Error fetching property categories:", error);
     throw error;
   }
 };
 
 export const fetchRulesAndPolicies = async (token) => {
   try {
-    const response = await api.get("/api/rules-policies", {
+    const response = await axios.get("/api/rules-policies", {
       headers: {
         Accept: "application/json",
         Authorization: `Bearer ${token}`,

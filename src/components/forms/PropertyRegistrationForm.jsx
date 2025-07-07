@@ -102,7 +102,6 @@ export default function PropertyRegistrationForm() {
       return;
     }
 
-
     // Directly set user_id in formData
     const formDataWithUserId = { ...formData, user_id: user.id };
 
@@ -230,11 +229,22 @@ export default function PropertyRegistrationForm() {
     fetchRules();
   }, []);
 
-  // if (!agreed) {
-  //   setExpanded(true);
-  //   document.getElementById("agree")?.scrollIntoView({ behavior: "smooth" });
-  //   return;
-  // }
+  const cleanParagraphs = (htmlString) =>
+    htmlString
+      .split("</p>")
+      .map((p) => p.trim())
+      .filter((p) => {
+        const textContent = p.replace(/<[^>]*>?/gm, "").trim();
+        return (
+          textContent.length > 0 &&
+          p !== "<p><br>" &&
+          p !== "<p>&nbsp;" &&
+          !p.toLowerCase().includes("<br>")
+        );
+      })
+      .map((p, i) => (
+        <div key={i} dangerouslySetInnerHTML={{ __html: p + "</p>" }} />
+      ));
 
   const [formData, setFormData] = useState({
     // Backend-required fields
@@ -1512,33 +1522,30 @@ export default function PropertyRegistrationForm() {
               <h4 className="font-semibold mb-2 text-gray-800">
                 Rules & Policies
               </h4>
-              <ul className="list-none space-y-1">
-                {rulesData.rules_and_policies.map((item, i) => (
-                  <li key={`rule-${i}`}>{item}</li>
-                ))}
-              </ul>
+              <div className="space-y-1">
+                {rulesData.rules_and_policies.length > 0 &&
+                  cleanParagraphs(rulesData.rules_and_policies[0])}
+              </div>
             </div>
 
             <div>
               <h4 className="font-semibold mt-4 mb-2 text-gray-800">
                 Cancellation Policy
               </h4>
-              <ul className="list-none space-y-1">
-                {rulesData.cancellation_policy.map((item, i) => (
-                  <li key={`cancel-${i}`}>{item}</li>
-                ))}
-              </ul>
+              <div className="space-y-1">
+                {rulesData.cancellation_policy.length > 0 &&
+                  cleanParagraphs(rulesData.cancellation_policy[0])}
+              </div>
             </div>
 
             <div>
               <h4 className="font-semibold mt-4 mb-2 text-gray-800">
                 Commission Policy
               </h4>
-              <ul className="list-none space-y-1">
-                {rulesData.commission_policy.map((item, i) => (
-                  <li key={`commission-${i}`}>{item}</li>
-                ))}
-              </ul>
+              <div className="space-y-1">
+                {rulesData.commission_policy.length > 0 &&
+                  cleanParagraphs(rulesData.commission_policy[0])}
+              </div>
             </div>
           </div>
         )}

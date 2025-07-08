@@ -195,6 +195,7 @@ if (typeof window !== 'undefined') {
 }
 
 export {
+  app,
   auth,
   RecaptchaVerifier,
   signInWithPhoneNumber

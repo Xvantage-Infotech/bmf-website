@@ -18,7 +18,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2 } from "lucide-react";
 import { sendOTP } from "@/lib/firebase";
-import { auth, RecaptchaVerifier } from "@/lib/firebaseConfig";
+import { app, auth, RecaptchaVerifier } from "@/lib/firebaseConfig";
 import { authAPI } from "@/lib/api"; // Import your API
 import { loginOrRegisterUser } from "@/services/Auth/auth.service";
 
@@ -85,7 +85,7 @@ export default function AuthModal({ isOpen, onClose }) {
         await new Promise((resolve) => setTimeout(resolve, 100));
 
         // Create new RecaptchaVerifier
-      recaptchaRef.current = new RecaptchaVerifier(
+   recaptchaRef.current = new RecaptchaVerifier(
   auth,
   "recaptcha-container",
   {
@@ -103,7 +103,7 @@ export default function AuthModal({ isOpen, onClose }) {
       setIsRecaptchaReady(false);
     }
   },
-  auth.app // ✅ pass this explicitly to fix Enterprise fallback bug
+  app // ✅ pass the actual app instance, not `auth.app`
 );
 
 

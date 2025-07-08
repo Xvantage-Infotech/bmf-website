@@ -87,7 +87,7 @@ export default function FarmDetail() {
     autoScrollTimeoutRef.current = null;
   };
 
-  const loopCount = 10; // or any large number
+  const loopCount = 100; // or any large number
   const extendedImages = Array.from(
     { length: loopCount },
     () => farmImages
@@ -188,7 +188,8 @@ export default function FarmDetail() {
   }, [farmImages.length]);
 
   useEffect(() => {
-    const container = scrollRef.current;
+  
+  const container = scrollRef.current;
     if (!container) return;
 
     const handleScrollEnd = () => {
@@ -206,6 +207,7 @@ export default function FarmDetail() {
       container.removeEventListener("scrollend", handleScrollEnd);
     };
   }, [selectedImageIndex, extendedImages.length]);
+
 
   useEffect(() => {
     if (!farmId) return;

@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Phone, Mail, MapPin, Clock, MessageCircle, Send } from "lucide-react";
+import { useDialog } from "@/hooks/use-dialog";
 
 export default function Contact() {
   const [formData, setFormData] = useState({
@@ -18,6 +19,7 @@ export default function Contact() {
     subject: "",
     message: "",
   });
+  const { show } = useDialog();
 
   const handleSubmit = async (e) => {
     e.preventDefault();

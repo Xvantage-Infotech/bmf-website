@@ -7,6 +7,7 @@ import { FARM_IMAGE_BASE_URL, formatPrice, generateStars } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { addToWishlist } from "@/services/Wishlist/wishlist.service";
+import { useDialog } from "@/hooks/use-dialog";
 
 export default function FarmCard({
   farm,
@@ -23,6 +24,7 @@ export default function FarmCard({
   const [imageIndex, setImageIndex] = useState(0);
   const [loadedImages, setLoadedImages] = useState({});
   const [isHovered, setIsHovered] = useState(false);
+  const { show } = useDialog();
 
   const intervalRef = useRef(null);
   const router = useRouter();

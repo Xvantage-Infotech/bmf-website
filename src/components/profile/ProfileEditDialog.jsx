@@ -24,6 +24,7 @@ import {
   getUserProfile,
   updateUserProfile,
 } from "@/services/Auth/auth.service";
+import { useDialog } from "@/hooks/use-dialog";
 
 export default function ProfileEditDialog({ isOpen, onClose }) {
   const { user, updateUser } = useAuth();
@@ -35,6 +36,7 @@ export default function ProfileEditDialog({ isOpen, onClose }) {
   const [dob, setDob] = useState(
     user?.date_of_birth ? new Date(user.date_of_birth) : undefined
   );
+  const { show } = useDialog();
 
   const [profile_image, setProfile_image] = useState(user?.profile_image);
   const [previewImage, setPreviewImage] = useState(user?.profileImage);

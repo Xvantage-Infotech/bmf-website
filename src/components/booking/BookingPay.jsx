@@ -12,6 +12,7 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import { addBooking } from "@/services/Booking/booking.service";
 import { FARM_IMAGE_BASE_URL } from "@/lib/utils";
+import { useDialog } from "@/hooks/use-dialog";
 
 export default function BookingPay() {
   const [showPolicy, setShowPolicy] = useState(false);
@@ -19,6 +20,7 @@ export default function BookingPay() {
 
   const searchParams = useSearchParams();
   const { user } = useAuth(); // Access logged-in user
+  const { show } = useDialog();
 
   function convertTo24Hour(timeStr) {
     if (!timeStr || timeStr.toLowerCase() === "undefined") return null;

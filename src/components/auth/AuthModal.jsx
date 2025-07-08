@@ -181,14 +181,7 @@ const handleLogin = async (values) => {
     // ✅ Step 1: Verify OTP with Firebase
     await verifyOtpAndLogin(values.otp);
 
-    // ✅ Step 2: Call backend to login and get custom JWT
-    // const response = await fetch("https://api.bookmyfarm.net/api/add_user", {
-    //   method: "POST",
-    //   headers: { "Content-Type": "application/json" },
-    //   body: JSON.stringify({ phone_number: formattedPhone }),
-    // });
 
-    // const result = await response.json();
 
     const result = await loginOrRegisterUser(formattedPhone);
 

@@ -14,36 +14,6 @@ export const AuthProvider = ({ children }) => {
   const [error, setError] = useState(null);
   const [authInitialized, setAuthInitialized] = useState(false);
 
- 
-
-// useEffect(() => {
-//   const token = localStorage.getItem("accessToken");
-
-//   if (token) {
-//     setUser({ token });
-//   }
-
-//   const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-//     if (firebaseUser) {
-//       firebaseUser.getIdToken().then((firebaseToken) => {
-//         localStorage.setItem("firebaseToken", firebaseToken);
-//          setUser((prev) => ({
-//     ...prev,
-//     firebaseToken,
-//   }));
-//       });
-//     } else {
-//       if (!token) {
-//         setUser(null);
-//         localStorage.removeItem("accessToken");
-//       }
-//     }
-
-//     setAuthInitialized(true);
-//   });
-
-//   return () => unsubscribe();
-// }, []);
 
 
 useEffect(() => {

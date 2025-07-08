@@ -412,14 +412,18 @@ export default function FarmDetail() {
                     <div>
                       {/* Price section */}
                       <div className="text-3xl font-bold text-primary flex flex-col md:flex-row md:items-center gap-1 justify-end">
-                        <div className="flex items-center justify-end gap-3">
+                        {/* For Mobile View: Stack original and current price */}
+                        <div className="flex flex-col items-end md:flex-row md:gap-3">
                           {percent > 0 && (
-                            <span className="text-xl line-through text-neutral-800 font-semibold">
+                            <span className="text-xl line-through text-neutral-800 font-semibold md:block mb-1 md:mb-0">
                               ₹{originalPrice.toLocaleString("en-IN")}
                             </span>
                           )}
-                          <span>₹{price.toLocaleString("en-IN")}</span>
+                          <span className="text-xl md:text-3xl font-bold text-primary">
+                            ₹{price.toLocaleString("en-IN")}
+                          </span>
                         </div>
+
                         {/* Discount badge - consistent size */}
                         {percent > 0 && (
                           <div className="inline-flex items-center gap-1 px-2 py-0.5 border border-yellow-300 border-dashed rounded-full bg-yellow-50 text-yellow-700 text-sm font-medium mt-1 md:mt-0 w-fit ml-auto md:ml-0">

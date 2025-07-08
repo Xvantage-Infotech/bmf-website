@@ -239,7 +239,7 @@ const formattedCheckOutOptions = checkOutOptions.map(convert24To12Hour);
             </div>
           </div>
 
-          {checkIn && checkOut && nights > 0 && (
+          {/* {checkIn && checkOut && nights > 0 && (
             <div className="mt-4 p-3 bg-gradient-to-r from-primary/10 to-primary/5 rounded-lg border border-primary/20">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-1">
@@ -256,7 +256,25 @@ const formattedCheckOutOptions = checkOutOptions.map(convert24To12Hour);
 
               </div>
             </div>
-          )}
+          )} */}
+          {checkIn && checkOut && nights > 0 && (
+  <div className="mt-4 p-3 bg-gradient-to-r from-primary/10 to-primary/5 rounded-lg border border-primary/20">
+    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
+      <div className="flex items-center gap-1">
+        <ArrowRight className="w-4 h-4 text-primary" />
+        <span className="text-sm font-medium text-neutral-700">
+          Duration: {nights} night{nights !== 1 ? 's' : ''}
+        </span>
+      </div>
+      <div className="text-sm text-neutral-500 sm:text-right">
+        <span className="text-xs whitespace-nowrap">
+          {formatDate(checkIn)} → {formatDate(checkOut)}
+        </span>
+      </div>
+    </div>
+  </div>
+)}
+
         </CardContent>
       </Card>
 

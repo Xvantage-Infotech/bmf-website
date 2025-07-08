@@ -208,21 +208,30 @@ export default function FarmCard({
 
           {/* Price and discount */}
           {(() => {
-          const finalPrice = parseFloat(farm.final_price) || 0;  // This is the final price after the discount
+           const finalPrice = parseFloat(farm.final_price) || 0;  // This is the final price after the discount
 const discountPercent = parseFloat(farm.increase_percentage) || 0;  // This is the discount percentage
 
 // Calculate the original price before the discount was applied
 const originalPrice = finalPrice / (1 - (discountPercent / 100));
 
+// Function to round to the nearest 50 and return an integer
+const roundToNearest50 = (price) => {
+  return Math.round(price / 50) * 50;
+};
+
 // Display the price after discount
-const price = finalPrice;
+const price = roundToNearest50(finalPrice);
+
+// Display the original price after discount
+const originalPriceRounded = roundToNearest50(originalPrice);
+
 
             return (
               <div className="mt-2 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   {discountPercent  > 0 && (
                     <span className="text-base line-through text-[#737373] font-normal">
-                      {formatPrice(originalPrice)}
+                      {formatPrice(originalPriceRounded)}
                     </span>
                   )}
                   <span className="text-lg font-bold text-black">

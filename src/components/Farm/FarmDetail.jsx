@@ -409,9 +409,16 @@ const discountPercent = parseFloat(farm.increase_percentage) || 0;  // This is t
 // Calculate the original price before the discount was applied
 const originalPrice = finalPrice / (1 - (discountPercent / 100));
 
-// Display the price after discount
-const price = finalPrice;
+// Function to round to the nearest 50 and return an integer
+const roundToNearest50 = (price) => {
+  return Math.round(price / 50) * 50;
+};
 
+// Display the price after discount
+const price = roundToNearest50(finalPrice);
+
+// Display the original price after discount
+const originalPriceRounded = roundToNearest50(originalPrice);
                   return (
                     <div>
                       {/* Price section */}
@@ -419,7 +426,7 @@ const price = finalPrice;
       <div className="flex items-center justify-end gap-3">
         {discountPercent > 0 && (
           <span className="text-xl line-through text-neutral-800 font-semibold">
-            ₹{originalPrice.toLocaleString("en-IN")}
+            ₹{originalPriceRounded.toLocaleString("en-IN")}
           </span>
         )}
         <span>₹{price.toLocaleString("en-IN")}</span>

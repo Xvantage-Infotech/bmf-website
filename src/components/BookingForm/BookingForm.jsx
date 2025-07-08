@@ -121,7 +121,24 @@ const nights = checkIn && checkOut
 const pricePerNight = nights > 0 ? dynamicTotal / nights : 0;
   const totalGuests = adults + children;
   const isGuestLimitExceeded = totalGuests > farm.maxGuests;
-  const isBookingValid = checkIn && checkOut && (nights > 0 || checkIn.toLocaleDateString() === checkOut.toLocaleDateString()) && !isGuestLimitExceeded;
+  const isCheckInBeforeCheckOut = () => {
+  if (checkIn && checkOut && checkInTime && checkOutTime) {
+    const checkInDate = new Date(checkIn);
+    const checkOutDate = new Date(checkOut);
+
+    // If both check-in and check-out are the same day, compare their times
+    if (checkInDate.toLocaleDateString() === checkOutDate.toLocaleDateString()) {
+      const checkInTimeDate = new Date(`${checkInDate.toLocaleDateString()} ${checkInTime}`);
+      const checkOutTimeDate = new Date(`${checkOutDate.toLocaleDateString()} ${checkOutTime}`);
+
+      return checkInTimeDate < checkOutTimeDate; // Returns true if check-in is before check-out
+    }
+  }
+  return true; // Default to true (valid) if times are not set
+};
+
+const isBookingValid = checkIn && checkOut && isCheckInBeforeCheckOut() && (nights > 0 || checkIn.toLocaleDateString() === checkOut.toLocaleDateString()) && !isGuestLimitExceeded;
+
 
 
 const router = useRouter();
@@ -324,6 +341,7 @@ const extraGuestCharge = extraGuests * (farm.person_price_weekday || 0);
     ? 'Book Now'
     : 'Check Availability'}
 </Button>
+
 
 
 {bookingError && (

@@ -238,10 +238,14 @@ export default function Homes() {
               </Link>
             ))} */}
             {featuredFarms.map((farm) => {
-              const increase = Math.round(
-                (farm.final_price * farm.increase_percentage) / 100
-              );
-              const originalPrice = farm.final_price + increase;
+              const finalPrice = parseFloat(farm.final_price) || 0;  // This is the final price after the discount
+const discountPercent = parseFloat(farm.increase_percentage) || 0;  // This is the discount percentage
+
+// Calculate the original price before the discount was applied
+const originalPrice = finalPrice / (1 - (discountPercent / 100));
+
+// Display the price after discount
+const price = finalPrice;
               return (
                 <Link key={farm.id} href={`/farm/${farm.id}`}>
                   <div className="group relative overflow-hidden rounded-3xl h-96 cursor-pointer transform transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl">

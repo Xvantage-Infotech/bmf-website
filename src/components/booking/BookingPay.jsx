@@ -61,15 +61,18 @@ export default function BookingPay() {
   const areaCity = searchParams.get("areaCity");
   const rating = searchParams.get("rating") || "0";
   const housePolicy = searchParams.get("houseCancellationPolicy");
-  const increasePercentage = parseFloat(
-    searchParams.get("increase_percentage") || "0"
-  );
-  const discountedPrice = parseFloat(price || "0");
 
-  const originalPrice =
-    increasePercentage > 0
-      ? discountedPrice * (1 + increasePercentage / 100)
-      : discountedPrice;
+const increasePercentage = parseFloat(searchParams.get("increase_percentage") || "0");  // The discount percentage
+const discountedPrice = parseFloat(price || "0");  // The final price after discount
+
+// Calculate the original price before the discount was applied
+const originalPrice = 
+  increasePercentage > 0 
+    ? discountedPrice / (1 - increasePercentage / 100)  // Reverse the percentage decrease to find the original price
+    : discountedPrice;  // If no discount, original price is the same as the final price
+
+console.log(`Original Price: ₹${originalPrice.toLocaleString("en-IN")}`);
+
 
   const router = useRouter();
 

@@ -112,11 +112,16 @@ const dynamicTotal = checkIn && checkOut
   ? calculateDynamicTotalPrice(new Date(checkIn), new Date(checkOut), checkInTime, checkOutTime)
   : 0;
 
-const nights = checkIn && checkOut ? calculateNights(checkIn, checkOut) : 0;
+const nights = checkIn && checkOut
+  ? checkIn.toLocaleDateString() === checkOut.toLocaleDateString() 
+    ? 1 // Same date, but different times (valid for 1 night)
+    : calculateNights(checkIn, checkOut)
+  : 0;
+
 const pricePerNight = nights > 0 ? dynamicTotal / nights : 0;
   const totalGuests = adults + children;
   const isGuestLimitExceeded = totalGuests > farm.maxGuests;
-  const isBookingValid = checkIn && checkOut && nights > 0 && !isGuestLimitExceeded;
+  const isBookingValid = checkIn && checkOut && (nights > 0 || checkIn.toLocaleDateString() === checkOut.toLocaleDateString()) && !isGuestLimitExceeded;
 
 
 const router = useRouter();

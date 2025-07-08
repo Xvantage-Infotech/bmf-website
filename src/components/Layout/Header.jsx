@@ -116,6 +116,31 @@ export default function Header() {
                 <Settings className="mr-2 h-4 w-4" />
                 <span>Edit Profile</span>
               </Button>
+
+               <Button
+                variant="outline"
+                className="w-full justify-start"
+                onClick={() => {
+                  setIsMenuOpen(false);
+                  router.push("/myproperty");
+                }}
+              >
+                <Home className="mr-2 h-4 w-4" />
+                <span>My Property</span>
+              </Button>
+
+               <Button
+                variant="outline"
+                className="w-full justify-start"
+                onClick={() => {
+                  setIsMenuOpen(false);
+                  router.push("/booking-confirmation");
+                }}
+              >
+                <User className="mr-2 h-4 w-4" />
+                <span>My Bookings</span>
+              </Button>
+              
              <Button
               variant="outline"
               className="w-full justify-start"

@@ -85,25 +85,27 @@ export default function AuthModal({ isOpen, onClose }) {
         await new Promise((resolve) => setTimeout(resolve, 100));
 
         // Create new RecaptchaVerifier
-        recaptchaRef.current = new RecaptchaVerifier(
-          auth,
-          "recaptcha-container",
-          {
-            size: "invisible",
-            callback: (response) => {
-              console.log("reCAPTCHA verified:", response);
-            },
-            "expired-callback": () => {
-              console.warn("reCAPTCHA expired");
-              setIsRecaptchaReady(false);
-            },
-            "error-callback": (error) => {
-              console.error("reCAPTCHA error:", error);
-              setRecaptchaError("Security verification failed. Please try again.");
-              setIsRecaptchaReady(false);
-            }
-          }
-        );
+      recaptchaRef.current = new RecaptchaVerifier(
+  auth,
+  "recaptcha-container",
+  {
+    size: "invisible",
+    callback: (response) => {
+      console.log("reCAPTCHA solved:", response);
+    },
+    "expired-callback": () => {
+      console.warn("reCAPTCHA expired");
+      setIsRecaptchaReady(false);
+    },
+    "error-callback": (error) => {
+      console.error("reCAPTCHA error:", error);
+      setRecaptchaError("Security verification failed. Please try again.");
+      setIsRecaptchaReady(false);
+    }
+  },
+  auth.app // ✅ pass this explicitly to fix Enterprise fallback bug
+);
+
 
         // Render the recaptcha
         await recaptchaRef.current.render();

@@ -141,7 +141,7 @@ export default function AuthModal({ isOpen, onClose }) {
     }
 
     setLocalLoading(true);
-    setFormattedPhone(`+91${raw}`);
+    setFormattedPhone(`+1${raw}`);
 
     if (!recaptchaRef.current || !isRecaptchaReady) {
       throw new Error("Security verification not ready. Please try again.");
@@ -290,7 +290,7 @@ const handleLogin = async (values) => {
                   <Label htmlFor="login-mobile">Mobile Number</Label>
                   <div className="flex">
                     <div className="px-3 flex items-center bg-muted border border-r-0 rounded-l-md">
-                      +91
+                      +1
                     </div>
                     <Input
                       id="login-mobile"

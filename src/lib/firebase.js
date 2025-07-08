@@ -40,9 +40,9 @@ export const sendOTP = async (phoneNumber, verifier) => {
       throw new Error('reCAPTCHA verifier not properly initialized');
     }
 
-    const formattedPhone = `+91${phoneNumber.replace(/\D/g, '')}`;
+    const formattedPhone = `+1${phoneNumber.replace(/\D/g, '')}`;
     
-    if (!/^\+91\d{10}$/.test(formattedPhone)) {
+    if (!/^\+1\d{10}$/.test(formattedPhone)) {
       throw new Error('Invalid phone number format');
     }
 

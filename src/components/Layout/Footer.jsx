@@ -174,7 +174,7 @@ export default function Footer() {
             </p>
             <div className="flex gap-4">
               <a
-                href="https://play.google.com/store/search?q=bookmyfarm&c=apps&hl=en_IN"
+                href="https://play.google.com/store/apps/details?id=com.app.bookmyfarm&hl=en_IN"
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -184,11 +184,7 @@ export default function Footer() {
                   className="h-10 hover:scale-105 transition-transform"
                 />
               </a>
-              <a
-                href="#"
-                target=""
-                rel="noopener noreferrer"
-              >
+              <a href="#" target="" rel="noopener noreferrer">
                 <img
                   src="/appstore-img.svg"
                   alt="App Store"

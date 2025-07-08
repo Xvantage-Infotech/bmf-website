@@ -1,20 +1,22 @@
-'use client';
-import { useEffect, useState } from 'react';
-import { getBookingDetails } from '@/services/Booking/booking.service';
-import { cancelBooking } from '@/services/Booking/booking.service'; // Import the cancelBooking function
-import { useParams, useRouter } from 'next/navigation';
-import { MapPin } from 'lucide-react';
-import { FARM_IMAGE_BASE_URL } from '@/lib/utils';
+"use client";
+import { useEffect, useState } from "react";
+import { getBookingDetails } from "@/services/Booking/booking.service";
+import { cancelBooking } from "@/services/Booking/booking.service"; // Import the cancelBooking function
+import { useParams, useRouter } from "next/navigation";
+import { MapPin } from "lucide-react";
+import { FARM_IMAGE_BASE_URL } from "@/lib/utils";
+import { useDialog } from "@/hooks/use-dialog";
 
 export default function BookingDetailsPage() {
   const { id } = useParams();
   const router = useRouter(); // useRouter hook to programmatically navigate
   const [details, setDetails] = useState(null);
   const [isCancelled, setIsCancelled] = useState(false);
+  const { show } = useDialog();
 
   useEffect(() => {
     const fetchData = async () => {
-      const token = localStorage.getItem('accessToken');
+      const token = localStorage.getItem("accessToken");
       if (!token) return;
 
       const res = await getBookingDetails(id, token);
@@ -30,22 +32,38 @@ export default function BookingDetailsPage() {
 
   const farm = details.farm;
   const farmImage = farm.farm_images?.[0]?.image;
-  const statusLabel = details.status === 1 ? 'Upcoming' : details.status === 0 ? 'Complete' : 'Cancelled';
-  const statusColor = details.status === 1 ? 'bg-blue-100 text-blue-600' : details.status === 0 ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600';
+  const statusLabel =
+    details.status === 1
+      ? "Upcoming"
+      : details.status === 0
+      ? "Complete"
+      : "Cancelled";
+  const statusColor =
+    details.status === 1
+      ? "bg-blue-100 text-blue-600"
+      : details.status === 0
+      ? "bg-green-100 text-green-600"
+      : "bg-red-100 text-red-600";
 
   const handleCancelBooking = async () => {
-    const token = localStorage.getItem('accessToken');
+    const token = localStorage.getItem("accessToken");
     if (!token) return;
 
     try {
       const res = await cancelBooking(id, token);
       if (res.status === 1) {
         setIsCancelled(true);
-        alert('Booking has been cancelled successfully.');
-        router.push('/booking-confirmation'); // Navigate to booking confirmation page after success
+        show({
+          title: "Booking Cancelled",
+          description: "Booking has been cancelled successfully.",
+        });
+        router.push("/booking-confirmation"); // Navigate to booking confirmation page after success
       }
     } catch (error) {
-      alert('Failed to cancel the booking. Please try again.');
+      show({
+        title: "Cancel Failed",
+        description: "Failed to cancel the booking. Please try again.",
+      });
     }
   };
 
@@ -56,7 +74,9 @@ export default function BookingDetailsPage() {
       {/* Farm Details */}
       <div className="bg-white shadow rounded-xl p-3 relative">
         {/* Status label */}
-        <span className={`absolute top-2 right-2 text-xs px-3 py-1 rounded-full ${statusColor}`}>
+        <span
+          className={`absolute top-2 right-2 text-xs px-3 py-1 rounded-full ${statusColor}`}
+        >
           {statusLabel}
         </span>
 
@@ -69,7 +89,9 @@ export default function BookingDetailsPage() {
           />
           <div className="flex-1">
             <p className="text-sm text-primary font-semibold mb-2">Farm</p>
-            <h2 className="text-base font-bold text-neutral-900 mb-2">{farm.farm_alias_name}</h2>
+            <h2 className="text-base font-bold text-neutral-900 mb-2">
+              {farm.farm_alias_name}
+            </h2>
             <a
               href={farm.location_link}
               target="_blank"
@@ -88,11 +110,15 @@ export default function BookingDetailsPage() {
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
           <div>
             <p className="text-sm text-gray-500">Booking Name</p>
-            <p className="text-lg font-semibold text-neutral-800">{details.user.name}</p>
+            <p className="text-lg font-semibold text-neutral-800">
+              {details.user.name}
+            </p>
           </div>
           <div>
             <p className="text-sm text-gray-500">Number of Guests</p>
-            <p className="text-lg font-semibold text-neutral-800">{details.no_of_guest}</p>
+            <p className="text-lg font-semibold text-neutral-800">
+              {details.no_of_guest}
+            </p>
           </div>
         </div>
 
@@ -101,14 +127,14 @@ export default function BookingDetailsPage() {
           <div className="text-center">
             <p className="text-sm text-gray-500">Check-in</p>
             <p className="text-base font-semibold text-neutral-900">
-              {new Date(details.check_in_date).toLocaleDateString('en-GB')}
+              {new Date(details.check_in_date).toLocaleDateString("en-GB")}
             </p>
             <p className="text-xs text-gray-400">{details.check_in_time}</p>
           </div>
           <div className="text-center">
             <p className="text-sm text-gray-500">Check-out</p>
             <p className="text-base font-semibold text-neutral-900">
-              {new Date(details.check_out_date).toLocaleDateString('en-GB')}
+              {new Date(details.check_out_date).toLocaleDateString("en-GB")}
             </p>
             <p className="text-xs text-gray-400">{details.check_out_time}</p>
           </div>
@@ -122,7 +148,7 @@ export default function BookingDetailsPage() {
           onClick={handleCancelBooking}
           className="w-full py-2 bg-red-100 rounded-md text-sm font-medium"
         >
-          {isCancelled ? 'Booking Cancelled' : ' Cancel Booking'}
+          {isCancelled ? "Booking Cancelled" : " Cancel Booking"}
         </button>
       </div>
 

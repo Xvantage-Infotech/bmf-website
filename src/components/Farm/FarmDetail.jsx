@@ -403,29 +403,39 @@ export default function FarmDetail() {
               {/* Right side - price and discount */}
               <div className="text-right">
                 {(() => {
-                  const price = parseFloat(farm.final_price) || 0;
-                  const percent = parseFloat(farm.increase_percentage) || 0;
-                  const increase = Math.round((price * percent) / 100);
-                  const originalPrice = price + increase;
+                  const finalPrice = parseFloat(farm.final_price) || 0; // This is the final price after the discount
+                  const discountPercent =
+                    parseFloat(farm.increase_percentage) || 0; // This is the discount percentage
 
+                  // Calculate the original price before the discount was applied
+                  const originalPrice =
+                    finalPrice / (1 - discountPercent / 100);
+
+                  // Function to round to the nearest 50 and return an integer
+                  const roundToNearest50 = (price) => {
+                    return Math.round(price / 50) * 50;
+                  };
+
+                  // Display the price after discount
+                  const price = roundToNearest50(finalPrice);
+
+                  // Display the original price after discount
+                  const originalPriceRounded = roundToNearest50(originalPrice);
                   return (
                     <div>
                       {/* Price section */}
+
                       <div className="text-3xl font-bold text-primary flex flex-col md:flex-row md:items-center gap-1 justify-end">
-                        {/* For Mobile View: Stack original and current price */}
-                        <div className="flex flex-col items-end md:flex-row md:gap-3">
-                          {percent > 0 && (
-                            <span className="text-xl line-through text-neutral-800 font-semibold md:block mb-1 md:mb-0">
-                              ₹{originalPrice.toLocaleString("en-IN")}
+                        <div className="flex items-center justify-end gap-3">
+                          {discountPercent > 0 && (
+                            <span className="text-xl line-through text-neutral-800 font-semibold">
+                              ₹{originalPriceRounded.toLocaleString("en-IN")}
                             </span>
                           )}
-                          <span className="text-xl md:text-3xl font-bold text-primary">
-                            ₹{price.toLocaleString("en-IN")}
-                          </span>
+                          <span>₹{price.toLocaleString("en-IN")}</span>
                         </div>
-
                         {/* Discount badge - consistent size */}
-                        {percent > 0 && (
+                        {discountPercent > 0 && (
                           <div className="inline-flex items-center gap-1 px-2 py-0.5 border border-yellow-300 border-dashed rounded-full bg-yellow-50 text-yellow-700 text-sm font-medium mt-1 md:mt-0 w-fit ml-auto md:ml-0">
                             <svg
                               xmlns="http://www.w3.org/2000/svg"
@@ -434,7 +444,7 @@ export default function FarmDetail() {
                             >
                               <path d="M21.41 11.58l-9-9A2 2 0 0 0 11 2H4a2 2 0 0 0-2 2v7a2 2 0 0 0 .59 1.41l9 9a2 2 0 0 0 2.83 0l7-7a2 2 0 0 0-.01-2.83ZM7.5 7A1.5 1.5 0 1 1 9 5.5 1.5 1.5 0 0 1 7.5 7Z" />
                             </svg>
-                            {percent}% off
+                            {discountPercent}% off
                           </div>
                         )}
                       </div>

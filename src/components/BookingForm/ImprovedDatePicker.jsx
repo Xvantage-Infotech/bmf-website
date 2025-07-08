@@ -39,29 +39,30 @@ export default function ImprovedDatePicker({
 
 useEffect(() => {
   const today = new Date();
-  const tomorrow = new Date();
-  tomorrow.setDate(today.getDate() + 1);
-
+  
+  // Set checkIn to today if not already set
   if (!checkIn) {
     onCheckInChange?.(today);
   }
 
+  // Set checkOut to today initially if not already set
   if (!checkOut) {
-    onCheckOutChange?.(tomorrow);
+    onCheckOutChange?.(today);
   }
 
-  // ✅ Default check-in time
+  // Default check-in time
   if (!checkInTime) {
     const fallback = formattedCheckInOptions[0] || getCurrentTime12Hr();
     onCheckInTimeChange?.(fallback);
   }
 
-  // ✅ Default check-out time
+  // Default check-out time
   if (!checkOutTime) {
     const fallback = formattedCheckOutOptions[0] || getCurrentTime12Hr();
     onCheckOutTimeChange?.(fallback);
   }
 }, []);
+
 
 
 const convert24To12Hour = (timeStr) => {
@@ -83,24 +84,26 @@ const formattedCheckOutOptions = checkOutOptions.map(convert24To12Hour);
 
   const nights = checkIn && checkOut ? calculateNights(checkIn, checkOut) : 0;
 
-  const handleCheckInSelect = (date) => {
-    onCheckInChange?.(date);
-    setIsCheckInOpen(false);
+const handleCheckInSelect = (date) => {
+  onCheckInChange?.(date);
+  setIsCheckInOpen(false);  // Close the calendar popup after selecting the date
 
+  // If no checkInTime is selected, set default from available options
+  if (!checkInTime && formattedCheckInOptions.length) {
+    onCheckInTimeChange?.(formattedCheckInOptions[0]);
+  }
 
-    if (!checkInTime && formattedCheckInOptions.length) {
-  onCheckInTimeChange?.(formattedCheckInOptions[0]);
-}
+  // If the selected check-in date is greater than or equal to checkOut, reset checkOut
+  if (date && checkOut && checkOut <= date) {
+    onCheckOutChange?.(undefined);
+  }
 
+  // If a check-in date is selected but checkOut is still not set, open check-out date picker
+  if (date && !checkOut) {
+    setTimeout(() => setIsCheckOutOpen(true), 200);
+  }
+};
 
-    if (date && checkOut && checkOut <= date) {
-      onCheckOutChange?.(undefined);
-    }
-
-    if (date && !checkOut) {
-      setTimeout(() => setIsCheckOutOpen(true), 200);
-    }
-  };
 
   const handleCheckOutSelect = (date) => {
     onCheckOutChange?.(date);
@@ -112,14 +115,13 @@ const formattedCheckOutOptions = checkOutOptions.map(convert24To12Hour);
 }
 
 
-  const getMinCheckOutDate = () => {
-    if (checkIn) {
-      const minDate = new Date(checkIn);
-      minDate.setDate(minDate.getDate() + 1);
-      return minDate;
-    }
-    return tomorrow;
-  };
+const getMinCheckOutDate = () => {
+  if (checkIn) {
+    return checkIn; // Allow check-out to be the same day as check-in
+  }
+  return tomorrow; // Default to tomorrow if checkIn is not set
+};
+
 
   return (
     <div className={cn("space-y-4", className)}>

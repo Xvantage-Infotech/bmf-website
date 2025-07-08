@@ -78,67 +78,35 @@ export default function BookingForm({ farm, className = "" }) {
   ) => {
     if (!start || !end) return 0;
 
-    const prices = {
-      full_day_weekday: parseFloat(farm.full_day_price_weekday || 0),
-      half_day_weekday: parseFloat(farm.half_day_price_weekday || 0),
-      full_day_weekend: parseFloat(farm.full_day_price_weekend || 0),
-      half_day_weekend: parseFloat(farm.half_day_price_weekend || 0),
-    };
 
-    let total = 0;
-    const curr = new Date(start);
+const nights = checkIn && checkOut
+  ? checkIn.toLocaleDateString() === checkOut.toLocaleDateString() 
+    ? 1 // Same date, but different times (valid for 1 night)
+    : calculateNights(checkIn, checkOut)
+  : 0;
 
-    while (curr < end) {
-      const isWeekendDay = isWeekend(curr);
-      const isLastDay = curr.toDateString() === new Date(end).toDateString();
-
-      // Full day for all days before last
-      if (!isLastDay) {
-        total += isWeekendDay
-          ? prices.full_day_weekend
-          : prices.full_day_weekday;
-      } else {
-        // Last day is treated as half day if end time is before 5PM
-        const isHalfDay =
-          checkOutTime?.includes("AM") ||
-          checkOutTime?.startsWith("1") ||
-          checkOutTime?.startsWith("2") ||
-          checkOutTime?.startsWith("3") ||
-          checkOutTime?.startsWith("4");
-
-        if (isHalfDay) {
-          total += isWeekendDay
-            ? prices.half_day_weekend
-            : prices.half_day_weekday;
-        } else {
-          total += isWeekendDay
-            ? prices.full_day_weekend
-            : prices.full_day_weekday;
-        }
-      }
-
-      curr.setDate(curr.getDate() + 1);
-    }
-
-    return total;
-  };
-
-  const dynamicTotal =
-    checkIn && checkOut
-      ? calculateDynamicTotalPrice(
-          new Date(checkIn),
-          new Date(checkOut),
-          checkInTime,
-          checkOutTime
-        )
-      : 0;
-
-  const nights = checkIn && checkOut ? calculateNights(checkIn, checkOut) : 0;
-  const pricePerNight = nights > 0 ? dynamicTotal / nights : 0;
+const pricePerNight = nights > 0 ? dynamicTotal / nights : 0;
   const totalGuests = adults + children;
   const isGuestLimitExceeded = totalGuests > farm.maxGuests;
-  const isBookingValid =
-    checkIn && checkOut && nights > 0 && !isGuestLimitExceeded;
+  const isCheckInBeforeCheckOut = () => {
+  if (checkIn && checkOut && checkInTime && checkOutTime) {
+    const checkInDate = new Date(checkIn);
+    const checkOutDate = new Date(checkOut);
+
+    // If both check-in and check-out are the same day, compare their times
+    if (checkInDate.toLocaleDateString() === checkOutDate.toLocaleDateString()) {
+      const checkInTimeDate = new Date(`${checkInDate.toLocaleDateString()} ${checkInTime}`);
+      const checkOutTimeDate = new Date(`${checkOutDate.toLocaleDateString()} ${checkOutTime}`);
+
+      return checkInTimeDate < checkOutTimeDate; // Returns true if check-in is before check-out
+    }
+  }
+  return true; // Default to true (valid) if times are not set
+};
+
+const isBookingValid = checkIn && checkOut && isCheckInBeforeCheckOut() && (nights > 0 || checkIn.toLocaleDateString() === checkOut.toLocaleDateString()) && !isGuestLimitExceeded;
+
+
 
   const router = useRouter();
 
@@ -318,24 +286,30 @@ export default function BookingForm({ farm, className = "" }) {
           )}
 
           {/* Booking Button */}
-          <Button
-            onClick={
-              hasCheckedAvailability ? handleConfirmBooking : handleBooking
-            }
-            disabled={!isBookingValid || isBooked}
-            className="w-full bg-primary text-white hover:bg-primary/90 disabled:opacity-50"
-            size="lg"
-          >
-            {!checkIn || !checkOut
-              ? "Select Dates"
-              : isGuestLimitExceeded
-              ? "Too Many Guests"
-              : isBooked
-              ? "Booked"
-              : hasCheckedAvailability
-              ? "Book Now"
-              : "Check Availability"}
-          </Button>
+
+<Button
+  onClick={hasCheckedAvailability ? handleConfirmBooking : handleBooking}
+  disabled={!isBookingValid || isBooked}
+  className="w-full bg-primary text-white hover:bg-primary/90 disabled:opacity-50"
+  size="lg"
+>
+  {!checkIn || !checkOut
+    ? 'Select Dates'
+    : isGuestLimitExceeded
+    ? 'Too Many Guests'
+    : isBooked
+    ? 'Booked'
+    : hasCheckedAvailability
+    ? 'Book Now'
+    : 'Check Availability'}
+</Button>
+
+
+
+{bookingError && (
+  <p className="text-sm text-red-600 text-center mt-2">{bookingError}</p>
+)}
+
 
           {bookingError && (
             <p className="text-sm text-red-600 text-center mt-2">

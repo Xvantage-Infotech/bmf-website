@@ -208,17 +208,30 @@ export default function FarmCard({
 
           {/* Price and discount */}
           {(() => {
-            const price = parseFloat(farm.final_price) || 0;
-            const percent = parseFloat(farm.increase_percentage) || 0;
-            const increase = Math.round((price * percent) / 100);
-            const originalPrice = price + increase;
+           const finalPrice = parseFloat(farm.final_price) || 0;  // This is the final price after the discount
+const discountPercent = parseFloat(farm.increase_percentage) || 0;  // This is the discount percentage
+
+// Calculate the original price before the discount was applied
+const originalPrice = finalPrice / (1 - (discountPercent / 100));
+
+// Function to round to the nearest 50 and return an integer
+const roundToNearest50 = (price) => {
+  return Math.round(price / 50) * 50;
+};
+
+// Display the price after discount
+const price = roundToNearest50(finalPrice);
+
+// Display the original price after discount
+const originalPriceRounded = roundToNearest50(originalPrice);
+
 
             return (
               <div className="mt-2 flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  {percent > 0 && (
+                  {discountPercent  > 0 && (
                     <span className="text-base line-through text-[#737373] font-normal">
-                      {formatPrice(originalPrice)}
+                      {formatPrice(originalPriceRounded)}
                     </span>
                   )}
                   <span className="text-lg font-bold text-black">
@@ -226,7 +239,7 @@ export default function FarmCard({
                   </span>
                 </div>
 
-                {percent > 0 && (
+                {discountPercent  > 0 && (
                   <div className="inline-flex items-center gap-1 px-2 py-0.5 border border-yellow-300 border-dashed rounded-full bg-yellow-50 text-yellow-700 text-xs font-medium">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -235,7 +248,7 @@ export default function FarmCard({
                     >
                       <path d="M21.41 11.58l-9-9A2 2 0 0 0 11 2H4a2 2 0 0 0-2 2v7a2 2 0 0 0 .59 1.41l9 9a2 2 0 0 0 2.83 0l7-7a2 2 0 0 0-.01-2.83ZM7.5 7A1.5 1.5 0 1 1 9 5.5 1.5 1.5 0 0 1 7.5 7Z" />
                     </svg>
-                    {percent}% off
+                    {discountPercent }% off
                   </div>
                 )}
               </div>

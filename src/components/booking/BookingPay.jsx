@@ -93,12 +93,12 @@ console.log('Order Response:', data);
       }
 
       // Get Razorpay key based on environment
-const razorpayKey =
-  window.location.hostname === 'localhost'
-    ? process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID_LOCAL
-    : process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID_PRODUCTION;
+// const razorpayKey =
+//   window.location.hostname === 'localhost'
+//     ? process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID_LOCAL
+//     : process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID_PRODUCTION;
 
-// const razorpayKey = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID_PRODUCTION;
+const razorpayKey = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID_PRODUCTION;
 
 
 

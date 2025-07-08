@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Phone, Mail, MapPin, Clock, MessageCircle, Send } from "lucide-react";
-import { useDialog } from "@/hooks/use-dialog";
+// import { useDialog } from "@/hooks/use-dialog";
 
 export default function Contact() {
   const [formData, setFormData] = useState({
@@ -19,7 +19,7 @@ export default function Contact() {
     subject: "",
     message: "",
   });
-  const { show } = useDialog();
+  // const { show } = useDialog();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -38,10 +38,7 @@ export default function Contact() {
         "wvwJX6k0s712hImO9" // 🔁 Replace with your actual Public Key from EmailJS
       );
 
-      show({
-        title: "Success",
-        description: "Message sent successfully!",
-      });
+      alert("Message sent successfully!");
 
       setFormData({
         name: "",
@@ -52,10 +49,7 @@ export default function Contact() {
       });
     } catch (error) {
       console.error("EmailJS error:", error);
-      show({
-        title: "Failed to send message",
-        description: "Please try again later.",
-      });
+      alert("Failed to send message. Please try again later.");
     }
   };
 

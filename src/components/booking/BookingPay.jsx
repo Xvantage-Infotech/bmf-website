@@ -12,7 +12,7 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import { addBooking } from "@/services/Booking/booking.service";
 import { FARM_IMAGE_BASE_URL } from "@/lib/utils";
-import { useDialog } from "@/hooks/use-dialog";
+// import { useDialog } from "@/hooks/use-dialog";
 
 export default function BookingPay() {
   const [showPolicy, setShowPolicy] = useState(false);
@@ -20,7 +20,7 @@ export default function BookingPay() {
 
   const searchParams = useSearchParams();
   const { user } = useAuth(); // Access logged-in user
-  const { show } = useDialog();
+  // const { show } = useDialog();
 
   function convertTo24Hour(timeStr) {
     if (!timeStr || timeStr.toLowerCase() === "undefined") return null;
@@ -62,35 +62,31 @@ export default function BookingPay() {
   const rating = searchParams.get("rating") || "0";
   const housePolicy = searchParams.get("houseCancellationPolicy");
 
-const increasePercentage = parseFloat(searchParams.get("increase_percentage") || "0");  // The discount percentage
-const discountedPrice = parseFloat(price || "0");  // The final price after discount
+  const increasePercentage = parseFloat(
+    searchParams.get("increase_percentage") || "0"
+  ); // The discount percentage
+  const discountedPrice = parseFloat(price || "0"); // The final price after discount
 
-// Calculate the original price before the discount was applied
-const originalPrice = 
-  increasePercentage > 0 
-    ? discountedPrice / (1 - increasePercentage / 100)  // Reverse the percentage decrease to find the original price
-    : discountedPrice;  // If no discount, original price is the same as the final price
+  // Calculate the original price before the discount was applied
+  const originalPrice =
+    increasePercentage > 0
+      ? discountedPrice / (1 - increasePercentage / 100) // Reverse the percentage decrease to find the original price
+      : discountedPrice; // If no discount, original price is the same as the final price
 
-console.log(`Original Price: ₹${originalPrice.toLocaleString("en-IN")}`);
-
+  console.log(`Original Price: ₹${originalPrice.toLocaleString("en-IN")}`);
 
   const router = useRouter();
 
   const handlePayNow = async () => {
     if (!agreedToPolicy) {
-      show({
-        title: "Policy Agreement Required",
-        description: "Please agree to the House & Cancellation Policy first.",
-      });
+      alert("Policy Agreement Required: Please agree to the House & Cancellation Policy first.");
       return;
     }
 
     const accessToken = localStorage.getItem("accessToken");
     if (!accessToken) {
-      show({
-        title: "Login Required",
-        description: "Login required to proceed.",
-      });
+     alert("Login Required: Login required to proceed.");
+
       return;
     }
 
@@ -102,10 +98,8 @@ console.log(`Original Price: ₹${originalPrice.toLocaleString("en-IN")}`);
       console.log("Order Response:", data);
 
       if (status !== 1 || !data.order_id) {
-        show({
-          title: "Order Failed",
-          description: "Order creation failed.",
-        });
+        alert("Order Failed: Order creation failed.");
+
         return;
       }
 
@@ -118,10 +112,7 @@ console.log(`Original Price: ₹${originalPrice.toLocaleString("en-IN")}`);
       const razorpayKey = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID_LOCAL;
 
       if (typeof window.Razorpay === "undefined") {
-        show({
-          title: "Razorpay Not Loaded",
-          description: "Razorpay SDK not loaded. Please refresh.",
-        });
+        alert("Razorpay Not Loaded: Razorpay SDK not loaded. Please refresh.");
         return;
       }
 
@@ -171,23 +162,16 @@ console.log(`Original Price: ₹${originalPrice.toLocaleString("en-IN")}`);
                   router.push(`/booking-confirmation`);
                 }
               } else {
-                show({
-                  title: "Booking Failed",
-                  description: "Payment succeeded, but booking failed.",
-                });
+                alert("Booking Failed: Payment succeeded, but booking failed.");
               }
             } else {
-              show({
-                title: "Payment Failed",
-                description: "Payment verification failed.",
-              });
+              alert("Payment Failed: Payment verification failed.");
             }
           } catch (error) {
             console.error("Error in payment handler:", error);
-            show({
-              title: "Verification Error",
-              description: "Something went wrong during verification.",
-            });
+            alert(
+              "Verification Error: Something went wrong during verification."
+            );
           }
         },
 
@@ -225,10 +209,7 @@ console.log(`Original Price: ₹${originalPrice.toLocaleString("en-IN")}`);
             order_id: data.order_id,
             status: "Fail",
           });
-          show({
-            title: "Payment Failed",
-            description: "Payment failed.",
-          });
+          alert("Payment Failed: Payment failed.");
         } catch (err) {
           console.error("Fail status error:", err);
         }
@@ -241,10 +222,7 @@ console.log(`Original Price: ₹${originalPrice.toLocaleString("en-IN")}`);
       console.log("🚀 ~ handlePayNow ~ options.order_id:", options.order_id);
     } catch (error) {
       console.error("Payment error:", error.response?.data || error);
-      show({
-        title: "Payment Error",
-        description: "Something went wrong. Try again.",
-      });
+      alert("Payment Error: Something went wrong. Try again.");
     }
   };
 

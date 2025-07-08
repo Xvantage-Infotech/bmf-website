@@ -7,7 +7,7 @@ import { FARM_IMAGE_BASE_URL, formatPrice, generateStars } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { addToWishlist } from "@/services/Wishlist/wishlist.service";
-import { useDialog } from "@/hooks/use-dialog";
+// import { useDialog } from "@/hooks/use-dialog";
 
 export default function FarmCard({
   farm,
@@ -24,7 +24,7 @@ export default function FarmCard({
   const [imageIndex, setImageIndex] = useState(0);
   const [loadedImages, setLoadedImages] = useState({});
   const [isHovered, setIsHovered] = useState(false);
-  const { show } = useDialog();
+  // const { show } = useDialog();
 
   const intervalRef = useRef(null);
   const router = useRouter();
@@ -62,10 +62,8 @@ export default function FarmCard({
     e.stopPropagation();
 
     if (!user?.token) {
-      show({
-        title: "Login Required",
-        description: "Please login to add to wishlist",
-      });
+      alert("Please login to add to wishlist");
+
       return;
     }
 
@@ -79,10 +77,7 @@ export default function FarmCard({
       }
     } catch (err) {
       console.error(err);
-      show({
-        title: "Error",
-        description: "Something went wrong",
-      });
+      alert("Something went wrong");
     }
   };
 
@@ -208,28 +203,27 @@ export default function FarmCard({
 
           {/* Price and discount */}
           {(() => {
-           const finalPrice = parseFloat(farm.final_price) || 0;  // This is the final price after the discount
-const discountPercent = parseFloat(farm.increase_percentage) || 0;  // This is the discount percentage
+            const finalPrice = parseFloat(farm.final_price) || 0; // This is the final price after the discount
+            const discountPercent = parseFloat(farm.increase_percentage) || 0; // This is the discount percentage
 
-// Calculate the original price before the discount was applied
-const originalPrice = finalPrice / (1 - (discountPercent / 100));
+            // Calculate the original price before the discount was applied
+            const originalPrice = finalPrice / (1 - discountPercent / 100);
 
-// Function to round to the nearest 50 and return an integer
-const roundToNearest50 = (price) => {
-  return Math.round(price / 50) * 50;
-};
+            // Function to round to the nearest 50 and return an integer
+            const roundToNearest50 = (price) => {
+              return Math.round(price / 50) * 50;
+            };
 
-// Display the price after discount
-const price = roundToNearest50(finalPrice);
+            // Display the price after discount
+            const price = roundToNearest50(finalPrice);
 
-// Display the original price after discount
-const originalPriceRounded = roundToNearest50(originalPrice);
-
+            // Display the original price after discount
+            const originalPriceRounded = roundToNearest50(originalPrice);
 
             return (
               <div className="mt-2 flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  {discountPercent  > 0 && (
+                  {discountPercent > 0 && (
                     <span className="text-base line-through text-[#737373] font-normal">
                       {formatPrice(originalPriceRounded)}
                     </span>
@@ -239,7 +233,7 @@ const originalPriceRounded = roundToNearest50(originalPrice);
                   </span>
                 </div>
 
-                {discountPercent  > 0 && (
+                {discountPercent > 0 && (
                   <div className="inline-flex items-center gap-1 px-2 py-0.5 border border-yellow-300 border-dashed rounded-full bg-yellow-50 text-yellow-700 text-xs font-medium">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -248,7 +242,7 @@ const originalPriceRounded = roundToNearest50(originalPrice);
                     >
                       <path d="M21.41 11.58l-9-9A2 2 0 0 0 11 2H4a2 2 0 0 0-2 2v7a2 2 0 0 0 .59 1.41l9 9a2 2 0 0 0 2.83 0l7-7a2 2 0 0 0-.01-2.83ZM7.5 7A1.5 1.5 0 1 1 9 5.5 1.5 1.5 0 0 1 7.5 7Z" />
                     </svg>
-                    {discountPercent }% off
+                    {discountPercent}% off
                   </div>
                 )}
               </div>

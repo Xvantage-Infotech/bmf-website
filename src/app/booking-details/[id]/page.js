@@ -5,14 +5,14 @@ import { cancelBooking } from "@/services/Booking/booking.service"; // Import th
 import { useParams, useRouter } from "next/navigation";
 import { MapPin } from "lucide-react";
 import { FARM_IMAGE_BASE_URL } from "@/lib/utils";
-import { useDialog } from "@/hooks/use-dialog";
+// import { useDialog } from "@/hooks/use-dialog";
 
 export default function BookingDetailsPage() {
   const { id } = useParams();
   const router = useRouter(); // useRouter hook to programmatically navigate
   const [details, setDetails] = useState(null);
   const [isCancelled, setIsCancelled] = useState(false);
-  const { show } = useDialog();
+  // const { show } = useDialog();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -53,17 +53,11 @@ export default function BookingDetailsPage() {
       const res = await cancelBooking(id, token);
       if (res.status === 1) {
         setIsCancelled(true);
-        show({
-          title: "Booking Cancelled",
-          description: "Booking has been cancelled successfully.",
-        });
+        alert("Booking has been cancelled successfully.");
         router.push("/booking-confirmation"); // Navigate to booking confirmation page after success
       }
     } catch (error) {
-      show({
-        title: "Cancel Failed",
-        description: "Failed to cancel the booking. Please try again.",
-      });
+      alert("Failed to cancel the booking. Please try again.");
     }
   };
 

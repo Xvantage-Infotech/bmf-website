@@ -18,7 +18,7 @@ import { Upload, X, CheckCircle, AlertCircle } from "lucide-react";
 import { FACILITY_OPTIONS, TIME_OPTIONS } from "@/constants/categories";
 import { submitProperty } from "@/services/Listfarm/listfarm.service";
 import { useAuth } from "@/contexts/AuthContext";
-import { useDialog } from "@/hooks/use-dialog";
+// import { useDialog } from "@/hooks/use-dialog";
 import {
   fetchAreas,
   fetchCities,
@@ -80,7 +80,7 @@ const InputField = ({
 
 export default function PropertyRegistrationForm() {
   const { user } = useAuth();
-  const { show } = useDialog();
+  // const { show } = useDialog();
   const refs = useRef({});
 
   const handleSubmit = async (e) => {
@@ -94,10 +94,8 @@ export default function PropertyRegistrationForm() {
     }
 
     if (!user?.token) {
-      show({
-        title: "Login Required",
-        description: "Please log in to register your property.",
-      });
+      alert("Login Required: Please log in to register your property.");
+
       console.error("❌ No token found for user");
       return;
     }
@@ -114,10 +112,7 @@ export default function PropertyRegistrationForm() {
     try {
       const response = await submitProperty(formDataWithUserId, user.token);
 
-      show({
-        title: "Property Submitted!",
-        description: "We’ll review it and get back to you soon.",
-      });
+      alert("Property Submitted! We’ll review it and get back to you soon.");
 
       setFormData({
         user_id: user.id, // Ensure user_id is correctly set here
@@ -162,12 +157,10 @@ export default function PropertyRegistrationForm() {
       setErrors({});
     } catch (error) {
       console.error("❌ Error submitting property:", error);
-      show({
-        title: "Submission Failed",
-        description:
-          error?.message ||
-          "There was an error submitting your application. Please try again.",
-      });
+      alert(
+        error?.message ||
+          "There was an error submitting your application. Please try again."
+      );
     } finally {
       setIsSubmitting(false);
     }

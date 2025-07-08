@@ -21,14 +21,14 @@ import { sendOTP } from "@/lib/firebase";
 import { app, auth, RecaptchaVerifier } from "@/lib/firebaseConfig";
 import { authAPI } from "@/lib/api"; // Import your API
 import { loginOrRegisterUser } from "@/services/Auth/auth.service";
-import { useDialog } from "@/hooks/use-dialog";
+// import { useDialog } from "@/hooks/use-dialog";
 
 export default function AuthModal({ isOpen, onClose }) {
   const [activeTab, setActiveTab] = useState("login");
   const [isOtpSent, setIsOtpSent] = useState(false);
   const [formattedPhone, setFormattedPhone] = useState("");
   const [localLoading, setLocalLoading] = useState(false);
-  const { show } = useDialog();
+  // const { show } = useDialog();
 
   const {
     confirmationResult,
@@ -87,27 +87,28 @@ export default function AuthModal({ isOpen, onClose }) {
         await new Promise((resolve) => setTimeout(resolve, 100));
 
         // Create new RecaptchaVerifier
-   recaptchaRef.current = new RecaptchaVerifier(
-  auth,
-  "recaptcha-container",
-  {
-    size: "invisible",
-    callback: (response) => {
-      console.log("reCAPTCHA solved:", response);
-    },
-    "expired-callback": () => {
-      console.warn("reCAPTCHA expired");
-      setIsRecaptchaReady(false);
-    },
-    "error-callback": (error) => {
-      console.error("reCAPTCHA error:", error);
-      setRecaptchaError("Security verification failed. Please try again.");
-      setIsRecaptchaReady(false);
-    }
-  },
-  app // ✅ pass the actual app instance, not `auth.app`
-);
-
+        recaptchaRef.current = new RecaptchaVerifier(
+          auth,
+          "recaptcha-container",
+          {
+            size: "invisible",
+            callback: (response) => {
+              console.log("reCAPTCHA solved:", response);
+            },
+            "expired-callback": () => {
+              console.warn("reCAPTCHA expired");
+              setIsRecaptchaReady(false);
+            },
+            "error-callback": (error) => {
+              console.error("reCAPTCHA error:", error);
+              setRecaptchaError(
+                "Security verification failed. Please try again."
+              );
+              setIsRecaptchaReady(false);
+            },
+          },
+          app // ✅ pass the actual app instance, not `auth.app`
+        );
 
         // Render the recaptcha
         await recaptchaRef.current.render();
@@ -168,10 +169,7 @@ export default function AuthModal({ isOpen, onClose }) {
         errorMessage = "Security verification failed. Please try again.";
       }
 
-      show({
-        title: "OTP Error",
-        description: errorMessage || "Failed to send OTP",
-      });
+      alert("OTP Error: " + (errorMessage || "Failed to send OTP"));
     } finally {
       setLocalLoading(false);
     }
@@ -179,10 +177,7 @@ export default function AuthModal({ isOpen, onClose }) {
 
   const handleLogin = async (values) => {
     if (!values.otp || values.otp.length < 4) {
-      show({
-        title: "Invalid OTP",
-        description: "Please enter a valid OTP",
-      });
+      alert("Invalid OTP. Please enter a valid OTP.");
       return;
     }
 
@@ -218,19 +213,13 @@ export default function AuthModal({ isOpen, onClose }) {
       onClose();
     } catch (error) {
       console.error("Login failed:", error);
-      show({
-        title: "Login Failed",
-        description: "Login failed. Please try again.",
-      });
+      alert("Login failed. Please try again.");
     }
   };
 
   const handleSignup = async (values) => {
     if (!values.name || !values.otp) {
-      show({
-        title: "Missing Details",
-        description: "Name and OTP are required",
-      });
+      alert("Name and OTP are required");
       return;
     }
 

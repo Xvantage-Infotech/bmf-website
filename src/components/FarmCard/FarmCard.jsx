@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Heart, Bed, Users, Star, MapPin } from "lucide-react";
-import {  FARM_IMAGE_BASE_URL, formatPrice, generateStars } from "@/lib/utils";
+import { FARM_IMAGE_BASE_URL, formatPrice, generateStars } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { addToWishlist } from "@/services/Wishlist/wishlist.service";
@@ -12,18 +12,17 @@ export default function FarmCard({
   farm,
   className = "",
   isFavorited: isFavoriteProp = false,
-   onToggleFavorite,
+  onToggleFavorite,
 }) {
   const [isFavorited, setIsFavorited] = useState(false);
 
-useEffect(() => {
-  setIsFavorited(isFavoriteProp);
-}, [isFavoriteProp]);
+  useEffect(() => {
+    setIsFavorited(isFavoriteProp);
+  }, [isFavoriteProp]);
 
   const [imageIndex, setImageIndex] = useState(0);
   const [loadedImages, setLoadedImages] = useState({});
   const [isHovered, setIsHovered] = useState(false);
-  
 
   const intervalRef = useRef(null);
   const router = useRouter();
@@ -56,28 +55,34 @@ useEffect(() => {
     return () => clearInterval(intervalRef.current);
   }, [isHovered, images.length]);
 
+  const toggleFavorite = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
 
-const toggleFavorite = async (e) => {
-  e.preventDefault();
-  e.stopPropagation();
-
-  if (!user?.token) {
-    return alert("Please login to add to wishlist");
-  }
-
-  try {
-    await addToWishlist(farm.id, user.token); // server toggles
-    const nextState = !isFavorited;
-    setIsFavorited(nextState);
-
-    if (onToggleFavorite) {
-      onToggleFavorite(nextState); // ✅ pass new state to parent
+    if (!user?.token) {
+      show({
+        title: "Login Required",
+        description: "Please login to add to wishlist",
+      });
+      return;
     }
-  } catch (err) {
-    console.error(err);
-    alert("Something went wrong");
-  }
-};
+
+    try {
+      await addToWishlist(farm.id, user.token); // server toggles
+      const nextState = !isFavorited;
+      setIsFavorited(nextState);
+
+      if (onToggleFavorite) {
+        onToggleFavorite(nextState); // ✅ pass new state to parent
+      }
+    } catch (err) {
+      console.error(err);
+      show({
+        title: "Error",
+        description: "Something went wrong",
+      });
+    }
+  };
 
   const rating = parseFloat(farm.rating);
 

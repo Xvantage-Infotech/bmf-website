@@ -94,7 +94,10 @@ export default function PropertyRegistrationForm() {
     }
 
     if (!user?.token) {
-      alert("Please log in to register your property.");
+      show({
+        title: "Login Required",
+        description: "Please log in to register your property.",
+      });
       console.error("❌ No token found for user");
       return;
     }
@@ -159,10 +162,12 @@ export default function PropertyRegistrationForm() {
       setErrors({});
     } catch (error) {
       console.error("❌ Error submitting property:", error);
-      alert(
-        error?.message ||
-          "There was an error submitting your application. Please try again."
-      );
+      show({
+        title: "Submission Failed",
+        description:
+          error?.message ||
+          "There was an error submitting your application. Please try again.",
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -651,7 +656,7 @@ export default function PropertyRegistrationForm() {
     if (!formData.government_photo_id) {
       newErrors.government_photo_id = "Government Photo ID is required";
     }
-    
+
     if (
       !Array.isArray(formData.bank_details_check_photo) ||
       formData.bank_details_check_photo.length === 0

@@ -3,7 +3,12 @@ const { add } = require("date-fns");
 
 import { useParams } from "next/navigation";
 import { useState, useEffect } from "react";
-import { AMENITY_ICON_BASE_URL, FARM_IMAGE_BASE_URL, formatPrice, generateStars } from "@/lib/utils";
+import {
+  AMENITY_ICON_BASE_URL,
+  FARM_IMAGE_BASE_URL,
+  formatPrice,
+  generateStars,
+} from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -33,7 +38,8 @@ export default function FarmDetail() {
   const [farm, setFarm] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const [selectedImageIndex, setSelectedImageIndex] = useState(1);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(null);
+
   const [autoScrollEnabled, setAutoScrollEnabled] = useState(true);
 
   // Move this declaration above the useEffect
@@ -56,7 +62,7 @@ export default function FarmDetail() {
     };
   }, []);
 
-  const scrollToIndex = (index) => {
+  const scrollToIndex = (index, smooth = true) => {
     const container = scrollRef.current;
     if (!container || !container.children.length) return;
 
@@ -68,7 +74,7 @@ export default function FarmDetail() {
         offset - container.clientWidth / 2 + child.clientWidth / 2;
       container.scrollTo({
         left: scrollPos,
-        behavior: "smooth",
+        behavior: smooth ? "smooth" : "auto",
       });
     }
   };
@@ -79,21 +85,6 @@ export default function FarmDetail() {
     clearTimeout(autoScrollTimeoutRef.current); // 🆕 also cancel any pending timeout
     autoScrollRef.current = null;
     autoScrollTimeoutRef.current = null;
-  };
-
-  const handleNext = () => {
-    stopAutoScroll();
-    const nextIndex = (selectedImageIndex + 1) % extendedImages.length;
-    scrollToIndex(nextIndex);
-    setSelectedImageIndex(nextIndex);
-  };
-
-  const handlePrev = () => {
-    stopAutoScroll();
-    const prevIndex =
-      (selectedImageIndex - 1 + extendedImages.length) % extendedImages.length;
-    scrollToIndex(prevIndex);
-    setSelectedImageIndex(prevIndex);
   };
 
   const loopCount = 10; // or any large number
@@ -153,6 +144,49 @@ export default function FarmDetail() {
     }
   }, [farmImages.length]);
 
+  const middleChunkStart = farmImages.length * Math.floor(loopCount / 2);
+
+  const handleNext = () => {
+    stopAutoScroll();
+    let nextIndex = selectedImageIndex + 1;
+    setSelectedImageIndex(nextIndex);
+    scrollToIndex(nextIndex);
+
+    if (nextIndex >= extendedImages.length - farmImages.length) {
+      setTimeout(() => {
+        const resetTo = middleChunkStart;
+        scrollToIndex(resetTo, false);
+        setSelectedImageIndex(resetTo);
+      }, 350);
+    }
+  };
+
+  const handlePrev = () => {
+    stopAutoScroll();
+    let prevIndex = selectedImageIndex - 1;
+    setSelectedImageIndex(prevIndex);
+    scrollToIndex(prevIndex);
+
+    if (prevIndex < farmImages.length) {
+      setTimeout(() => {
+        const resetTo = middleChunkStart + farmImages.length - 1;
+        scrollToIndex(resetTo, false);
+        setSelectedImageIndex(resetTo);
+      }, 350);
+    }
+  };
+
+  useEffect(() => {
+    if (farmImages.length > 0 && selectedImageIndex === null) {
+      setSelectedImageIndex(middleChunkStart);
+      // Defer scroll to after DOM paints (avoids flicker)
+      setTimeout(() => {
+        scrollToIndex(middleChunkStart, false);
+      }, 0);
+    }
+    // eslint-disable-next-line
+  }, [farmImages.length]);
+
   useEffect(() => {
     const container = scrollRef.current;
     if (!container) return;
@@ -204,64 +238,6 @@ export default function FarmDetail() {
         setLoading(false);
       }
     };
-
-    // const loadFarm = async () => {
-    //   try {
-    //     const data = await fetchFarmById(farmId);
-
-    //     let latitude = null;
-    //     let longitude = null;
-
-    //     const extractLatLng = (url) => {
-    //       // Match `?q=lat,lng` OR `@lat,lng` patterns
-    //       const match = url.match(
-    //         /[@?]([-+]?[0-9]*\.?[0-9]+),\s*([-+]?[0-9]*\.?[0-9]+)/
-    //       );
-    //       if (match && match.length >= 3) {
-    //         return { lat: match[1], lng: match[2] };
-    //       }
-    //       return { lat: null, lng: null };
-    //     };
-
-    //     if (data?.location_link) {
-    //       // Try extracting from original URL
-    //       const directMatch = extractLatLng(data.location_link);
-    //       latitude = directMatch.lat;
-    //       longitude = directMatch.lng;
-
-    //       // If not found and it's a short URL, try resolving
-    //       if (
-    //         (!latitude || !longitude) &&
-    //         data.location_link.includes("maps.app.goo.gl")
-    //       ) {
-    //         try {
-    //           const response = await fetch(data.location_link, {
-    //             method: "GET",
-    //             redirect: "follow",
-    //           });
-
-    //           const finalURL = response.url;
-    //           const resolvedMatch = extractLatLng(finalURL);
-
-    //           latitude = resolvedMatch.lat;
-    //           longitude = resolvedMatch.lng;
-    //         } catch (err) {
-    //           console.error("Failed to resolve short maps URL:", err);
-    //         }
-    //       }
-    //     }
-
-    //     setFarm({
-    //       ...data,
-    //       latitude,
-    //       longitude,
-    //     });
-    //   } catch (e) {
-    //     console.error(e);
-    //   } finally {
-    //     setLoading(false);
-    //   }
-    // };
 
     loadFarm();
   }, [farmId]);
@@ -403,6 +379,7 @@ export default function FarmDetail() {
                   <button
                     className="absolute left-0 z-10 bg-white/70 hover:bg-white rounded-full shadow p-1"
                     onClick={handlePrev}
+                    disabled={selectedImageIndex === null}
                   >
                     <ChevronLeft className="w-6 h-6 text-primary" />
                   </button>
@@ -412,18 +389,19 @@ export default function FarmDetail() {
                     className="flex gap-4 overflow-x-auto snap-x scroll-smooth px-16 scrollbar-hide"
                     style={{ scrollPadding: "0 50%" }}
                   >
-                    {extendedImages.map((img, index) => (
-                      <div
-                        key={index}
-                        className="flex-shrink-0 w-[100%] md:w-[80%] lg:w-[80%] snap-center transition-transform duration-300"
-                      >
-                        <img
-                          src={`${FARM_IMAGE_BASE_URL}/${img.image}`}
-                          alt={`Farm image ${index + 1}`}
-                          className="w-full h-full object-cover rounded-2xl shadow"
-                        />
-                      </div>
-                    ))}
+                    {selectedImageIndex !== null &&
+                      extendedImages.map((img, index) => (
+                        <div
+                          key={index}
+                          className="flex-shrink-0 w-[100%] md:w-[80%] lg:w-[80%] snap-center transition-transform duration-300"
+                        >
+                          <img
+                            src={`${FARM_IMAGE_BASE_URL}/${img.image}`}
+                            alt={`Farm image ${index + 1}`}
+                            className="w-full h-full object-cover rounded-2xl shadow"
+                          />
+                        </div>
+                      ))}
                   </div>
 
                   <button
@@ -526,32 +504,31 @@ export default function FarmDetail() {
                   ))}
                 </TabsContent>
 
-           <TabsContent value="location">
-  {farm.latitude && farm.longitude ? (
-    <div className="relative w-full h-64 md:h-96 rounded-lg overflow-hidden">
-      <iframe
-        src={`https://www.google.com/maps?q=${farm.latitude},${farm.longitude}&hl=es;z=14&output=embed`}
-        width="100%"
-        height="100%"
-        style={{ border: 0 }}
-        allowFullScreen=""
-        loading="lazy"
-        referrerPolicy="no-referrer-when-downgrade"
-      ></iframe>
+                <TabsContent value="location">
+                  {farm.latitude && farm.longitude ? (
+                    <div className="relative w-full h-64 md:h-96 rounded-lg overflow-hidden">
+                      <iframe
+                        src={`https://www.google.com/maps?q=${farm.latitude},${farm.longitude}&hl=es;z=14&output=embed`}
+                        width="100%"
+                        height="100%"
+                        style={{ border: 0 }}
+                        allowFullScreen=""
+                        loading="lazy"
+                        referrerPolicy="no-referrer-when-downgrade"
+                      ></iframe>
 
-      {/* Overlay only blocks click, not scroll/zoom */}
-      <div
-        className="absolute inset-0 z-10"
-        style={{ pointerEvents: "none" }}
-      />
-    </div>
-  ) : (
-    <p className="text-neutral-500">Location map not available.</p>
-  )}
-</TabsContent>
-
-
-
+                      {/* Overlay only blocks click, not scroll/zoom */}
+                      <div
+                        className="absolute inset-0 z-10"
+                        style={{ pointerEvents: "none" }}
+                      />
+                    </div>
+                  ) : (
+                    <p className="text-neutral-500">
+                      Location map not available.
+                    </p>
+                  )}
+                </TabsContent>
               </Tabs>
             </div>
 

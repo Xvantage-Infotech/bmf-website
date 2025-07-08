@@ -21,12 +21,14 @@ import { sendOTP } from "@/lib/firebase";
 import { app, auth, RecaptchaVerifier } from "@/lib/firebaseConfig";
 import { authAPI } from "@/lib/api"; // Import your API
 import { loginOrRegisterUser } from "@/services/Auth/auth.service";
+import { useDialog } from "@/hooks/use-dialog";
 
 export default function AuthModal({ isOpen, onClose }) {
   const [activeTab, setActiveTab] = useState("login");
   const [isOtpSent, setIsOtpSent] = useState(false);
   const [formattedPhone, setFormattedPhone] = useState("");
   const [localLoading, setLocalLoading] = useState(false);
+  const { show } = useDialog();
 
   const {
     confirmationResult,
@@ -111,10 +113,11 @@ export default function AuthModal({ isOpen, onClose }) {
         await recaptchaRef.current.render();
         setIsRecaptchaReady(true);
         setRecaptchaError(null);
-        
       } catch (err) {
         console.error("reCAPTCHA initialization failed:", err);
-        setRecaptchaError("Security verification failed. Please refresh the page.");
+        setRecaptchaError(
+          "Security verification failed. Please refresh the page."
+        );
         setIsRecaptchaReady(false);
       }
     };
@@ -134,102 +137,107 @@ export default function AuthModal({ isOpen, onClose }) {
     };
   }, [isOpen]);
 
-
   const handleSendOtp = async (phoneNumber) => {
-  try {
-    const raw = phoneNumber.replace(/\D/g, "");
-    if (!raw || raw.length !== 10) {
-      throw new Error("Enter a valid 10-digit number");
-    }
+    try {
+      const raw = phoneNumber.replace(/\D/g, "");
+      if (!raw || raw.length !== 10) {
+        throw new Error("Enter a valid 10-digit number");
+      }
 
-    setLocalLoading(true);
-    setFormattedPhone(`+91${raw}`);
+      setLocalLoading(true);
+      setFormattedPhone(`+91${raw}`);
 
-    if (!recaptchaRef.current || !isRecaptchaReady) {
-      throw new Error("Security verification not ready. Please try again.");
-    }
+      if (!recaptchaRef.current || !isRecaptchaReady) {
+        throw new Error("Security verification not ready. Please try again.");
+      }
 
-    // 🔥 STEP 1: Send OTP via Firebase only
-    const confirmation = await sendOTP(raw, recaptchaRef.current);
-    setConfirmationResult(confirmation);
+      // 🔥 STEP 1: Send OTP via Firebase only
+      const confirmation = await sendOTP(raw, recaptchaRef.current);
+      setConfirmationResult(confirmation);
 
-    setIsOtpSent(true);
+      setIsOtpSent(true);
+    } catch (err) {
+      console.error("❌ Failed to send OTP:", err);
 
-  } catch (err) {
-    console.error("❌ Failed to send OTP:", err);
+      let errorMessage = err.message;
+      if (err.code === "auth/too-many-requests") {
+        errorMessage = "Too many attempts. Please try again later.";
+      } else if (err.code === "auth/invalid-phone-number") {
+        errorMessage = "Invalid phone number format.";
+      } else if (err.code === "auth/captcha-check-failed") {
+        errorMessage = "Security verification failed. Please try again.";
+      }
 
-    let errorMessage = err.message;
-    if (err.code === "auth/too-many-requests") {
-      errorMessage = "Too many attempts. Please try again later.";
-    } else if (err.code === "auth/invalid-phone-number") {
-      errorMessage = "Invalid phone number format.";
-    } else if (err.code === "auth/captcha-check-failed") {
-      errorMessage = "Security verification failed. Please try again.";
-    }
-
-    alert(errorMessage || "Failed to send OTP");
-  } finally {
-    setLocalLoading(false);
-  }
-};
-
-const handleLogin = async (values) => {
-  if (!values.otp || values.otp.length < 4) {
-    alert("Please enter a valid OTP");
-    return;
-  }
-
-  try {
-    // ✅ Step 1: Verify OTP with Firebase
-    await verifyOtpAndLogin(values.otp);
-
-
-
-    const result = await loginOrRegisterUser(formattedPhone);
-
-    if (result?.status === 1 && result?.data?.token) {
-      const backendToken = result.data.token;
-
-      // ✅ Save backend token in localStorage (for future API calls)
-      localStorage.setItem("accessToken", backendToken);
-
-      // ✅ Optional: store in user context for access inside app
-      updateUser({
-        token: backendToken,
-        id: result.data.id,
-        phone_number: result.data.phone_number,
-        name: result.data.name,
-        date_of_birth: result.data.date_of_birth,
-        profile_image: result.data.profile_image,
-        // Add more user fields if needed
+      show({
+        title: "OTP Error",
+        description: errorMessage || "Failed to send OTP",
       });
+    } finally {
+      setLocalLoading(false);
+    }
+  };
 
-      console.log("✅ Backend token saved and user updated");
-    } else {
-      console.warn("❌ Token not received from backend");
+  const handleLogin = async (values) => {
+    if (!values.otp || values.otp.length < 4) {
+      show({
+        title: "Invalid OTP",
+        description: "Please enter a valid OTP",
+      });
+      return;
     }
 
-    setIsOtpSent(false);
-    onClose();
-  } catch (error) {
-    console.error("Login failed:", error);
-    alert("Login failed. Please try again.");
-  }
-};
+    try {
+      // ✅ Step 1: Verify OTP with Firebase
+      await verifyOtpAndLogin(values.otp);
 
+      const result = await loginOrRegisterUser(formattedPhone);
 
+      if (result?.status === 1 && result?.data?.token) {
+        const backendToken = result.data.token;
 
+        // ✅ Save backend token in localStorage (for future API calls)
+        localStorage.setItem("accessToken", backendToken);
+
+        // ✅ Optional: store in user context for access inside app
+        updateUser({
+          token: backendToken,
+          id: result.data.id,
+          phone_number: result.data.phone_number,
+          name: result.data.name,
+          date_of_birth: result.data.date_of_birth,
+          profile_image: result.data.profile_image,
+          // Add more user fields if needed
+        });
+
+        console.log("✅ Backend token saved and user updated");
+      } else {
+        console.warn("❌ Token not received from backend");
+      }
+
+      setIsOtpSent(false);
+      onClose();
+    } catch (error) {
+      console.error("Login failed:", error);
+      show({
+        title: "Login Failed",
+        description: "Login failed. Please try again.",
+      });
+    }
+  };
 
   const handleSignup = async (values) => {
     if (!values.name || !values.otp) {
-      alert("Name and OTP are required");
+      show({
+        title: "Missing Details",
+        description: "Name and OTP are required",
+      });
       return;
     }
 
     try {
       // 🔥 STEP 1: Verify OTP with Firebase
       await verifyOtpAndLogin(values.otp);
-      
+
       // 🔥 STEP 2: Also verify with your backend
       try {
         await authAPI.verifyOTP(formattedPhone, values.otp);
@@ -237,13 +245,13 @@ const handleLogin = async (values) => {
       } catch (backendError) {
         console.warn("Backend OTP verification failed:", backendError);
       }
-      
+
       // 🔥 STEP 3: Create user account
       await signup({
         name: values.name,
         mobileNumber: formattedPhone,
       });
-      
+
       setIsOtpSent(false);
       onClose();
     } catch (error) {
@@ -253,12 +261,18 @@ const handleLogin = async (values) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]" aria-describedby="auth-modal-description">
+      <DialogContent
+        className="sm:max-w-[425px]"
+        aria-describedby="auth-modal-description"
+      >
         <DialogHeader>
           <DialogTitle className="text-center text-xl font-semibold">
             Log In or Sign Up
           </DialogTitle>
-          <DialogDescription id="auth-modal-description" className="text-center">
+          <DialogDescription
+            id="auth-modal-description"
+            className="text-center"
+          >
             Enter your mobile number to continue with OTP verification
           </DialogDescription>
         </DialogHeader>

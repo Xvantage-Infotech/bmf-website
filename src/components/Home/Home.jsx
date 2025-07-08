@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Star, Heart, Shield } from "lucide-react";
 import { getFeaturedFarms } from "@/data/staticFarms";
-import {  FARM_IMAGE_BASE_URL, formatPrice } from "@/lib/utils";
+import { FARM_IMAGE_BASE_URL, formatPrice } from "@/lib/utils";
 import SearchFilters from "@/components/Search/SearchFilters";
 import SearchResultsPanel from "@/components/Search/SearchResultsPanel";
 import CategoryTabs from "@/components/Search/CategoryTabs";
@@ -80,8 +80,7 @@ export default function Homes() {
             increase_percentage: increasePercentage,
             pricePerNight: finalPrice,
             images: farm.farm_images.map(
-              (img) =>
-                `${FARM_IMAGE_BASE_URL}/${img.image}`
+              (img) => `${FARM_IMAGE_BASE_URL}/${img.image}`
             ),
             rating: farm.reviews_avg_star || 4.8,
           };
@@ -419,23 +418,6 @@ export default function Homes() {
           }
         `}
         >
-          {/* Facebook */}
-          <a
-            href="https://facebook.com/bookmyfarm"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="
-            w-12 h-12 sm:w-14 sm:h-14
-            bg-blue-600 hover:bg-blue-700
-            text-white rounded-full shadow-lg
-            flex items-center justify-center
-            transition-all
-          "
-            aria-label="Facebook"
-          >
-            <Facebook className="w-6 h-6 sm:w-7 sm:h-7" />
-          </a>
-
           {/* Instagram */}
           <a
             href="https://instagram.com/book_my_farms"

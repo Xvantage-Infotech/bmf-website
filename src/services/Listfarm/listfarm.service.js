@@ -4,7 +4,7 @@ export const submitProperty = async (formData, token) => {
   try {
     const data = new FormData();
 
-    // Append user_id and other form data
+    // Append user_id and other form data (unchanged)
     data.append("user_id", formData.user_id);
     data.append("name", formData.name);
     data.append("size", formData.size);
@@ -26,7 +26,7 @@ export const submitProperty = async (formData, token) => {
     data.append("referral_code", formData.referral_code || "");
     data.append("house_rule_policy", formData.house_rule_policy);
     data.append("description", formData.description);
-    data.append("kids_swimming", formData.kids_swimming ? "1" : "0"); // Send as "1" or "0"
+    data.append("kids_swimming", formData.kids_swimming ? "1" : "0");
     data.append("category_id", formData.category_id);
 
     // Facilities (comma-separated)
@@ -35,7 +35,7 @@ export const submitProperty = async (formData, token) => {
       formData.facilities.map((f) => f.trim()).join(",")
     );
 
-    // Time arrays - required field name: check_in_time[] and check_out_time[]
+    // Time arrays
     formData.check_in_time.forEach((time) =>
       data.append("check_in_time[]", time)
     );
@@ -43,21 +43,28 @@ export const submitProperty = async (formData, token) => {
       data.append("check_out_time[]", time)
     );
 
-    // Photos
+    // Photos (multiple)
     formData.photos.forEach((file) => {
       data.append("photos[]", file);
     });
 
-    // Document uploads
+    // Government Photo ID - if you want to allow multi, change to array and use below
+    // (For now, keep single file as per your form)
     if (formData.government_photo_id) {
       data.append("government_photo_id", formData.government_photo_id);
     }
-    if (formData.bank_details_check_photo) {
-      data.append(
-        "bank_details_check_photo",
-        formData.bank_details_check_photo
-      );
+
+    // Bank Details Check Photo (MULTIPLE)
+    if (
+      formData.bank_details_check_photo &&
+      Array.isArray(formData.bank_details_check_photo)
+    ) {
+      formData.bank_details_check_photo.forEach((file) => {
+        data.append("bank_details_check_photo[]", file);
+      });
     }
+
+    // Property Agreement (single file)
     if (formData.property_agreement) {
       data.append("property_agreement", formData.property_agreement);
     }

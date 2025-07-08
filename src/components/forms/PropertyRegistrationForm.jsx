@@ -147,7 +147,7 @@ export default function PropertyRegistrationForm() {
 
         // Document upload fields
         government_photo_id: null,
-        bank_details_check_photo: null,
+        bank_details_check_photo: [],
         property_agreement: null,
 
         // Not sent to backend
@@ -277,7 +277,7 @@ export default function PropertyRegistrationForm() {
 
     // New document upload fields
     government_photo_id: null,
-    bank_details_check_photo: null,
+    bank_details_check_photo: [],
     property_agreement: null,
 
     // Extra frontend-only fields (not sent to backend)
@@ -356,6 +356,43 @@ export default function PropertyRegistrationForm() {
   //   }
   //   return "";
   // };
+
+  const handleMultiFileUpload = (field, files, type = "image") => {
+    if (!files) return;
+
+    const newFiles = Array.from(files);
+    const validFiles = newFiles.filter((file) => {
+      const isValidType =
+        type === "image"
+          ? file.type.startsWith("image/")
+          : file.type.startsWith("image/") || file.type.startsWith("video/");
+      const isValidSize = file.size <= 10 * 1024 * 1024;
+      return isValidType && isValidSize;
+    });
+
+    if (validFiles.length !== newFiles.length) {
+      setErrors((prev) => ({
+        ...prev,
+        [field]: `Some files were rejected. Only ${
+          type === "image" ? "images" : "images/videos"
+        } under 10MB are allowed.`,
+      }));
+    }
+
+    const updatedFiles = [...formData[field], ...validFiles].slice(0, 10);
+    setFormData((prev) => ({
+      ...prev,
+      [field]: updatedFiles,
+    }));
+
+    // Clear error for this field if at least one valid file
+    if (validFiles.length && errors[field]) {
+      setErrors((prev) => ({
+        ...prev,
+        [field]: undefined,
+      }));
+    }
+  };
 
   const handleMultiSelect = (key, value) => {
     setFormData((prev) => {
@@ -478,9 +515,20 @@ export default function PropertyRegistrationForm() {
   //   const updatedFiles = formData.propertyPhotos.filter((_, i) => i !== index);
   //   handleInputChange("propertyPhotos", updatedFiles);
   // };
-  const removeFile = (index) => {
-    const updatedFiles = formData.photos.filter((_, i) => i !== index);
-    handleInputChange("photos", updatedFiles);
+  // Generic removeFile for any field
+  const removeFile = (field, index) => {
+    setFormData((prev) => {
+      const updatedFiles = prev[field].filter((_, i) => i !== index);
+      return {
+        ...prev,
+        [field]: updatedFiles,
+      };
+    });
+    // Optionally clear error for that field
+    setErrors((prev) => ({
+      ...prev,
+      [field]: undefined,
+    }));
   };
 
   // const validateForm = () => {
@@ -599,6 +647,17 @@ export default function PropertyRegistrationForm() {
         newErrors[field] = "This field is required";
       }
     });
+
+    if (!formData.government_photo_id) {
+      newErrors.government_photo_id = "Government Photo ID is required";
+    }
+    
+    if (
+      !Array.isArray(formData.bank_details_check_photo) ||
+      formData.bank_details_check_photo.length === 0
+    ) {
+      newErrors.bank_details_check_photo = "Bank Cheque Photo is required";
+    }
 
     // Additional validation for specific fields
     if (formData.facilities.length === 0) {
@@ -846,22 +905,27 @@ export default function PropertyRegistrationForm() {
                 (PDF, PNG, JPG – max 10 MB)
               </span>
             </Label>
-
             <div className="border-2 border-dashed border-neutral-300 rounded-lg p-6 text-center">
               <input
                 type="file"
                 id="government_photo_id"
                 accept="image/*,.pdf"
                 className="hidden"
-                ref={governmentIdRef} // ✅ Add ref here
-                onChange={(e) =>
+                ref={governmentIdRef}
+                onChange={(e) => {
+                  const file = e.target.files[0];
                   setFormData((prev) => ({
                     ...prev,
-                    government_photo_id: e.target.files[0],
-                  }))
-                }
+                    government_photo_id: file,
+                  }));
+                  if (file && errors.government_photo_id) {
+                    setErrors((prev) => ({
+                      ...prev,
+                      government_photo_id: undefined,
+                    }));
+                  }
+                }}
               />
-
               <label htmlFor="government_photo_id" className="cursor-pointer">
                 <Upload className="w-8 h-8 text-neutral-400 mx-auto mb-2" />
                 <p className="text-neutral-600">Click to upload document</p>
@@ -870,7 +934,6 @@ export default function PropertyRegistrationForm() {
                 </p>
               </label>
             </div>
-
             {formData.government_photo_id && (
               <div className="mt-2">
                 <div className="relative w-32 aspect-square rounded-lg overflow-hidden border">
@@ -893,7 +956,7 @@ export default function PropertyRegistrationForm() {
                         government_photo_id: null,
                       }));
                       if (governmentIdRef.current) {
-                        governmentIdRef.current.value = ""; // ✅ Reset input
+                        governmentIdRef.current.value = "";
                       }
                     }}
                     className="absolute top-1 right-1 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600"
@@ -906,9 +969,15 @@ export default function PropertyRegistrationForm() {
                 </p>
               </div>
             )}
+            {errors.government_photo_id && (
+              <p className="text-sm text-red-500 flex items-center gap-1 mt-1">
+                <AlertCircle className="w-4 h-4" />
+                {errors.government_photo_id}
+              </p>
+            )}
           </div>
 
-          {/* Bank Details Check Photo */}
+          {/* Bank Details Check Photo (Multiple) */}
           <div
             className="space-y-2"
             ref={(el) => (refs.current["bank_details_check_photo"] = el)}
@@ -917,7 +986,7 @@ export default function PropertyRegistrationForm() {
               Upload Bank Details / Cancelled Cheque{" "}
               <span className="text-red-500">*</span>
               <span className="text-xs text-neutral-500 ml-2">
-                (PNG, JPG – max 10 MB)
+                (PNG, JPG – max 10 MB each, up to 10 files)
               </span>
             </Label>
 
@@ -926,13 +995,15 @@ export default function PropertyRegistrationForm() {
                 type="file"
                 id="bank_details_check_photo"
                 accept="image/*"
-                ref={bankDetailsRef} // ✅ Add ref here
+                multiple
+                ref={bankDetailsRef}
                 className="hidden"
                 onChange={(e) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    bank_details_check_photo: e.target.files[0],
-                  }))
+                  handleMultiFileUpload(
+                    "bank_details_check_photo",
+                    e.target.files,
+                    "image"
+                  )
                 }
               />
               <label
@@ -940,39 +1011,48 @@ export default function PropertyRegistrationForm() {
                 className="cursor-pointer"
               >
                 <Upload className="w-8 h-8 text-neutral-400 mx-auto mb-2" />
-                <p className="text-neutral-600">Click to upload image</p>
-                <p className="text-xs text-neutral-500 mt-1">JPG, PNG only</p>
+                <p className="text-neutral-600">Click to upload images</p>
+                <p className="text-xs text-neutral-500 mt-1">
+                  JPG, PNG up to 10MB each
+                </p>
               </label>
             </div>
 
-            {formData.bank_details_check_photo && (
-              <div className="mt-2">
-                <div className="relative w-32 aspect-square rounded-lg overflow-hidden border">
-                  <img
-                    src={URL.createObjectURL(formData.bank_details_check_photo)}
-                    alt="Bank Cheque"
-                    className="w-full h-full object-cover"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setFormData((prev) => ({
-                        ...prev,
-                        bank_details_check_photo: null,
-                      }));
-                      if (bankDetailsRef.current) {
-                        bankDetailsRef.current.value = ""; // ✅ Reset input
-                      }
-                    }}
-                    className="absolute top-1 right-1 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
+            {/* Preview selected files */}
+            {Array.isArray(formData.bank_details_check_photo) &&
+              formData.bank_details_check_photo.length > 0 && (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+                  {formData.bank_details_check_photo.map((file, index) => (
+                    <div key={index} className="relative">
+                      <div className="aspect-square bg-neutral-100 rounded-lg flex items-center justify-center relative overflow-hidden border">
+                        <img
+                          src={URL.createObjectURL(file)}
+                          alt="Bank Cheque"
+                          className="w-full h-full object-cover"
+                        />
+                        <button
+                          type="button"
+                          onClick={() =>
+                            removeFile("bank_details_check_photo", index)
+                          }
+                          className="absolute top-1 right-1 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                      <p className="text-xs mt-1 text-neutral-700 truncate">
+                        {file.name}
+                      </p>
+                    </div>
+                  ))}
                 </div>
-                <p className="text-xs mt-1 text-neutral-700 truncate">
-                  {formData.bank_details_check_photo.name}
-                </p>
-              </div>
+              )}
+
+            {errors.bank_details_check_photo && (
+              <p className="text-sm text-red-500 flex items-center gap-1 mt-1">
+                <AlertCircle className="w-4 h-4" />
+                {errors.bank_details_check_photo}
+              </p>
             )}
           </div>
 
@@ -1538,7 +1618,7 @@ export default function PropertyRegistrationForm() {
                       )}
                       <button
                         type="button"
-                        onClick={() => removeFile(index)}
+                        onClick={() => removeFile("photos", index)}
                         className="absolute top-1 right-1 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600"
                       >
                         <X className="w-4 h-4" />

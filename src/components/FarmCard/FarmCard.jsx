@@ -199,7 +199,21 @@ export default function FarmCard({
           {/* Rating and Reviews */}
           <div className="flex items-center justify-between">
             <div className="flex items-center text-sm">
-              <div className="flex mr-2">{generateStars(rating)}</div>
+              {/* Full Yellow Star SVG */}
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="w-4 h-4 text-yellow-500 mr-1"
+              >
+                <polygon points="12 17.27 18.18 21 15.54 13.97 21 9.24 14.81 8.63 12 2 9.19 8.63 3 9.24 8.46 13.97 5.82 21 12 17.27" />
+              </svg>
+
+              {/* Display Rating */}
               <span className="text-neutral-600">
                 {farm.reviews_avg_star} ({farm.reviews_count} review
                 {farm.reviews_count !== 1 ? "s" : ""})

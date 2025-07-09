@@ -63,9 +63,10 @@
 // };
 
 
-// import { signInWithPhoneNumber } from 'firebase/auth';
-// import { auth } from './firebaseConfig';
 
+// import { getAuth, signInWithPhoneNumber } from "firebase/auth";
+
+// // Function to send OTP
 // export const sendOTP = async (phoneNumber, verifier) => {
 //   try {
 //     // Verify verifier is properly initialized
@@ -73,20 +74,31 @@
 //       throw new Error('reCAPTCHA verifier not properly initialized');
 //     }
 
+//     // Format phone number (for India: +91)
 //     const formattedPhone = `+91${phoneNumber.replace(/\D/g, '')}`;
-    
+
+//     // Validate phone number format
 //     if (!/^\+91\d{10}$/.test(formattedPhone)) {
 //       throw new Error('Invalid phone number format');
 //     }
 
-//     console.log('Sending OTP to:', formattedPhone);
-//     const confirmation = await signInWithPhoneNumber(auth, formattedPhone, verifier);
+//     console.log('harsh Sending OTP to:', formattedPhone);
+
+//     // Get Firebase auth instance
+//     const auth = getAuth();
     
+//     // Send OTP using Firebase authentication
+//     const confirmationResult = await signInWithPhoneNumber(auth, formattedPhone, verifier);
+
+//     // Successfully sent OTP
 //     console.log('OTP sent successfully');
-//     return confirmation;
+//     window.confirmationResult = confirmationResult; // Store the confirmationResult in global window object
+    
+//     return confirmationResult;
     
 //   } catch (err) {
-//     console.error('Error in sendOTP:', {
+//     // Log error and rethrow it
+//     console.error('harsh Error in sendOTP:', {
 //       error: err,
 //       message: err.message,
 //       stack: err.stack
@@ -97,11 +109,9 @@
 
 
 
+import { signInWithPhoneNumber } from 'firebase/auth';
+import { auth } from './firebaseConfig';
 
-
-import { getAuth, signInWithPhoneNumber } from "firebase/auth";
-
-// Function to send OTP
 export const sendOTP = async (phoneNumber, verifier) => {
   try {
     // Verify verifier is properly initialized
@@ -109,31 +119,20 @@ export const sendOTP = async (phoneNumber, verifier) => {
       throw new Error('reCAPTCHA verifier not properly initialized');
     }
 
-    // Format phone number (for India: +91)
     const formattedPhone = `+91${phoneNumber.replace(/\D/g, '')}`;
-
-    // Validate phone number format
+    
     if (!/^\+91\d{10}$/.test(formattedPhone)) {
       throw new Error('Invalid phone number format');
     }
 
-    console.log('harsh Sending OTP to:', formattedPhone);
-
-    // Get Firebase auth instance
-    const auth = getAuth();
+    console.log('Sending OTP to:', formattedPhone);
+    const confirmation = await signInWithPhoneNumber(auth, formattedPhone, verifier);
     
-    // Send OTP using Firebase authentication
-    const confirmationResult = await signInWithPhoneNumber(auth, formattedPhone, verifier);
-
-    // Successfully sent OTP
     console.log('OTP sent successfully');
-    window.confirmationResult = confirmationResult; // Store the confirmationResult in global window object
-    
-    return confirmationResult;
+    return confirmation;
     
   } catch (err) {
-    // Log error and rethrow it
-    console.error('harsh Error in sendOTP:', {
+    console.error('Error in sendOTP:', {
       error: err,
       message: err.message,
       stack: err.stack
@@ -141,3 +140,7 @@ export const sendOTP = async (phoneNumber, verifier) => {
     throw new Error(err.message || 'Failed to send OTP');
   }
 };
+
+
+
+

@@ -187,7 +187,7 @@ export default function BookingPay() {
               } else {
                 show({
                   title: "Booking Failed",
-                  description: "Payment succeeded, but booking failed.",
+                  description: "Payment succeeded, but your booking failed.",
                 });
               }
             } else {

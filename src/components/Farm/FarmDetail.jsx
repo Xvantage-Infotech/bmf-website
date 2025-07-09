@@ -1,5 +1,4 @@
 "use client";
-const { add } = require("date-fns");
 
 import { useParams } from "next/navigation";
 import { useState, useEffect, useMemo } from "react";
@@ -31,19 +30,25 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useRef } from "react";
 import { useRouter } from "next/navigation";
 
+import { Swiper, SwiperSlide } from "swiper/react";
+import "swiper/css"; // Import Swiper styles
+import "swiper/css/navigation"; // Import Navigation module styles
+import "swiper/css/pagination"; // Import Pagination module styles
+
+// Import Swiper required modules
+import { Autoplay } from "swiper/modules";
+
 export default function FarmDetail() {
   const params = useParams();
   const farmId = parseInt(params?.id);
   const [farm, setFarm] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [selectedImageIndex, setSelectedImageIndex] = useState(0); // Start with the first image
-  const [autoScrollEnabled, setAutoScrollEnabled] = useState(true); // Auto-scrolling control
-  const [imageLoading, setImageLoading] = useState(true);
-  const [scrollDirection, setScrollDirection] = useState("forward"); // Added to handle scroll direction
+  const swiperRef = useRef(null);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
   const farmImages = farm?.farm_images || [];
-  const scrollRef = useRef(null);
 
+  // Fetch farm data
   useEffect(() => {
     const loadFarm = async () => {
       try {
@@ -59,246 +64,22 @@ export default function FarmDetail() {
     loadFarm();
   }, [farmId]);
 
-  const handleImageLoad = () => {
-    const container = scrollRef.current;
-    if (!container) return;
-
-    const images = container.querySelectorAll("img");
-    const imagesLoaded = Array.from(images).every((img) => img.complete);
-
-    if (imagesLoaded) {
-      setImageLoading(false); // Hide the loader when images are loaded
-    }
+  // Handle slide change
+  const handleSlideChange = (swiper) => {
+    setSelectedImageIndex(swiper.activeIndex); // Update the selected image index
   };
-
-  const scrollToIndex = (index, smooth = true) => {
-    const container = scrollRef.current;
-    if (!container || !container.children.length) return;
-
-    const actualIndex = index;
-    const child = container.children[actualIndex];
-    if (child) {
-      const offset = child.offsetLeft - container.offsetLeft;
-      const scrollPos =
-        offset - container.clientWidth / 2 + child.clientWidth / 2;
-      container.scrollTo({
-        left: scrollPos,
-        behavior: smooth ? "smooth" : "auto",
-      });
-    }
-  };
-
-  const handleNext = () => {
-    stopAutoScroll(); // Stop auto-scrolling when next is clicked
-    let nextIndex = selectedImageIndex + 1;
-    if (nextIndex >= farmImages.length) nextIndex = 0; // Loop to the first image
-    setSelectedImageIndex(nextIndex);
-    scrollToIndex(nextIndex);
-  };
-
-  const handlePrev = () => {
-    stopAutoScroll(); // Stop auto-scrolling when prev is clicked
-    let prevIndex = selectedImageIndex - 1;
-    if (prevIndex < 0) prevIndex = farmImages.length - 1; // Loop to the last image
-    setSelectedImageIndex(prevIndex);
-    scrollToIndex(prevIndex);
-  };
-
-  // Auto-scrolling every 3 seconds
-  useEffect(() => {
-    if (!farm || farmImages.length <= 1 || !autoScrollEnabled) return;
-
-    const autoScrollInterval = setInterval(() => {
-      if (scrollDirection === "forward") {
-        let nextIndex = selectedImageIndex + 1;
-        if (nextIndex >= farmImages.length) {
-          nextIndex = farmImages.length - 2; // Loop to second last image to reverse
-          setScrollDirection("reverse"); // Change direction to reverse
-        }
-        setSelectedImageIndex(nextIndex);
-        scrollToIndex(nextIndex);
-      } else if (scrollDirection === "reverse") {
-        let prevIndex = selectedImageIndex - 1;
-        if (prevIndex < 0) {
-          prevIndex = 1; // Skip the first image and go back to the second image
-          setScrollDirection("forward"); // Change direction back to forward
-        }
-        setSelectedImageIndex(prevIndex);
-        scrollToIndex(prevIndex);
-      }
-    }, 3000); // Auto-scroll every 3 seconds
-
-    return () => {
-      clearInterval(autoScrollInterval); // Cleanup the interval on component unmount or when auto-scroll is disabled
-    };
-  }, [
-    farm,
-    farmImages.length,
-    selectedImageIndex,
-    autoScrollEnabled,
-    scrollDirection,
-  ]);
 
   const stopAutoScroll = () => {
-    setAutoScrollEnabled(false); // Disable auto-scrolling when the user interacts with the carousel
+    if (swiperRef.current) {
+      swiperRef.current.swiper.autoplay.stop();
+    }
   };
 
-  // useEffect(() => {
-  //   if ("scrollRestoration" in window.history) {
-  //     window.history.scrollRestoration = "manual";
-  //   }
-
-  //   return () => {
-  //     if ("scrollRestoration" in window.history) {
-  //       window.history.scrollRestoration = "auto";
-  //     }
-  //   };
-  // }, []);
-
-  // const scrollToIndex = (index, smooth = true) => {
-  //   const container = scrollRef.current;
-  //   if (!container || !container.children.length) return;
-
-  //   const actualIndex = index + 1;
-  //   const child = container.children[actualIndex];
-  //   if (child) {
-  //     const offset = child.offsetLeft - container.offsetLeft;
-  //     const scrollPos =
-  //       offset - container.clientWidth / 2 + child.clientWidth / 2;
-  //     container.scrollTo({
-  //       left: scrollPos,
-  //       behavior: smooth ? "smooth" : "auto",
-  //     });
-  //   }
-  // };
-
-  // const stopAutoScroll = () => {
-  //   setAutoScrollEnabled(false); // 🆕 disable future auto scroll
-  //   clearInterval(autoScrollRef.current);
-  //   clearTimeout(autoScrollTimeoutRef.current); // 🆕 also cancel any pending timeout
-  //   autoScrollRef.current = null;
-  //   autoScrollTimeoutRef.current = null;
-  // };
-
-  // const loopCount = 100; // or any large number
-  // const extendedImages = Array.from(
-  //   { length: loopCount },
-  //   () => farmImages
-  // ).flat();
-
-  // useEffect(() => {
-  //   // Scroll to top when detail page loads
-  //   window.scrollTo(0, 0);
-
-  //   // Disable browser's automatic scroll restoration
-  //   if ("scrollRestoration" in window.history) {
-  //     window.history.scrollRestoration = "manual";
-  //   }
-
-  //   return () => {
-  //     // Re-enable when component unmounts
-  //     if ("scrollRestoration" in window.history) {
-  //       window.history.scrollRestoration = "auto";
-  //     }
-  //   };
-  // }, []);
-
-  // // Auto-scroll carousel every 3s
-  // useEffect(() => {
-  //   if (!farm || extendedImages.length <= 1 || !autoScrollEnabled) return;
-
-  //   let index = selectedImageIndex;
-
-  //   autoScrollTimeoutRef.current = setTimeout(() => {
-  //     autoScrollRef.current = setInterval(() => {
-  //       index = (index + 1) % extendedImages.length;
-  //       scrollToIndex(index);
-  //       setSelectedImageIndex(index);
-  //     }, 3000);
-  //   }, 1000);
-
-  //   return () => {
-  //     clearTimeout(autoScrollTimeoutRef.current);
-  //     clearInterval(autoScrollRef.current);
-  //   };
-  // }, [farm, extendedImages.length, autoScrollEnabled]);
-
-  // useEffect(() => {
-  //   if (scrollRef.current && farmImages.length > 1) {
-  //     const initialIndex = 1;
-  //     const child = scrollRef.current.children[initialIndex + 1];
-  //     if (child) {
-  //       child.scrollIntoView({
-  //         behavior: "auto",
-  //         inline: "center",
-  //         block: "nearest",
-  //       });
-  //     }
-  //   }
-  // }, [farmImages.length]);
-
-  // const middleChunkStart = farmImages.length * Math.floor(loopCount / 2);
-
-  // const handleNext = () => {
-  //   stopAutoScroll();
-  //   let nextIndex = selectedImageIndex + 1;
-  //   setSelectedImageIndex(nextIndex);
-  //   scrollToIndex(nextIndex);
-
-  //   if (nextIndex >= extendedImages.length - farmImages.length) {
-  //     setTimeout(() => {
-  //       const resetTo = middleChunkStart;
-  //       scrollToIndex(resetTo, false);
-  //       setSelectedImageIndex(resetTo);
-  //     }, 350);
-  //   }
-  // };
-
-  // const handlePrev = () => {
-  //   stopAutoScroll();
-  //   let prevIndex = selectedImageIndex - 1;
-  //   setSelectedImageIndex(prevIndex);
-  //   scrollToIndex(prevIndex);
-
-  //   if (prevIndex < farmImages.length) {
-  //     setTimeout(() => {
-  //       const resetTo = middleChunkStart + farmImages.length - 1;
-  //       scrollToIndex(resetTo, false);
-  //       setSelectedImageIndex(resetTo);
-  //     }, 350);
-  //   }
-  // };
-
-  // useEffect(() => {
-  //   if (farmImages.length > 0 && selectedImageIndex === null) {
-  //     setSelectedImageIndex(middleChunkStart);
-  //     // Defer scroll to after DOM paints (avoids flicker)
-  //     setTimeout(() => {
-  //       scrollToIndex(middleChunkStart, false);
-  //     }, 0);
-  //   }
-  //   // eslint-disable-next-line
-  // }, [farmImages.length]);
-
-  // useEffect(() => {
-  //   const container = scrollRef.current;
-  //   if (!container) return;
-
-  //   const handleScrollEnd = () => {
-  //     const threshold = extendedImages.length - farmImages.length;
-
-  //     if (selectedImageIndex >= threshold) {
-  //       const resetTo = farmImages.length; // reset after a few loops
-  //       scrollToIndex(resetTo);
-  //       setSelectedImageIndex(resetTo);
-  //     }
-  //   };
-
-  //   container.addEventListener("scrollend", handleScrollEnd);
-  //   return () => {
-  //     container.removeEventListener("scrollend", handleScrollEnd);
-  //   };
-  // }, [selectedImageIndex, extendedImages.length]);
+  const startAutoScroll = () => {
+    if (swiperRef.current) {
+      swiperRef.current.swiper.autoplay.start();
+    }
+  };
 
   useEffect(() => {
     if (!farmId) return;
@@ -471,85 +252,42 @@ export default function FarmDetail() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 p-8">
             {/* Left */}
             <div className="lg:col-span-2">
-              {/* <div className="relative overflow-hidden mb-8">
+              <div
+                onMouseEnter={stopAutoScroll}
+                onMouseLeave={startAutoScroll}
+                className="relative overflow-hidden mb-8"
+              >
                 <div className="relative flex items-center">
-                  <button
-                    className="absolute left-0 z-10 bg-white/70 hover:bg-white rounded-full shadow p-1"
-                    onClick={handlePrev}
-                    disabled={selectedImageIndex === null}
+                  <Swiper
+                    ref={swiperRef}
+                    modules={[Autoplay]} // Only keep Autoplay module
+                    loop={true}
+                    spaceBetween={20}
+                    slidesPerView={1.6}
+                    centeredSlides={true}
+                    onSlideChange={handleSlideChange}
+                    autoplay={{
+                      delay: 3000,
+                      disableOnInteraction: false,
+                      pauseOnMouseEnter: true,
+                    }}
+                    className="w-full"
                   >
-                    <ChevronLeft className="w-6 h-6 text-primary" />
-                  </button>
-
-                  <div
-                    ref={scrollRef}
-                    className="flex gap-4 overflow-x-auto snap-x scroll-smooth px-16 scrollbar-hide"
-                    style={{ scrollPadding: "0 50%" }}
-                  >
-                    {selectedImageIndex !== null &&
-                      extendedImages.map((img, index) => (
-                        <div
-                          key={index}
-                          className="flex-shrink-0 w-[100%] md:w-[80%] lg:w-[80%] snap-center transition-transform duration-300"
-                        >
+                    {farmImages.map((img, index) => (
+                      <SwiperSlide
+                        key={img.id}
+                        className="flex-shrink-0 w-[60%]"
+                      >
+                        <div className="transition-transform duration-300">
                           <img
                             src={`${FARM_IMAGE_BASE_URL}/${img.image}`}
                             alt={`Farm image ${index + 1}`}
                             className="w-full h-full object-cover rounded-2xl shadow"
                           />
                         </div>
-                      ))}
-                  </div>
-
-                  <button
-                    className="absolute right-0 z-10 bg-white/70 hover:bg-white rounded-full shadow p-1"
-                    onClick={handleNext}
-                  >
-                    <ChevronRight className="w-6 h-6 text-primary" />
-                  </button>
-                </div>
-              </div> */}
-              <div className="relative overflow-hidden mb-8">
-                <div className="relative flex items-center">
-                  {/* Previous button */}
-                  <button
-                    className="absolute left-0 z-10 bg-white/70 hover:bg-white rounded-full shadow p-1"
-                    onClick={handlePrev}
-                    disabled={selectedImageIndex === 0}
-                  >
-                    <ChevronLeft className="w-6 h-6 text-primary" />
-                  </button>
-
-                  {/* Image carousel */}
-                  <div
-                    ref={scrollRef}
-                    className="flex gap-4 overflow-x-auto snap-x scroll-smooth px-16 scrollbar-hide"
-                    style={{ scrollPadding: "0 50%" }}
-                  >
-                    {selectedImageIndex !== null &&
-                      farmImages.map((img, index) => (
-                        <div
-                          key={index}
-                          className="flex-shrink-0 w-[100%] md:w-[80%] lg:w-[80%] snap-center transition-transform duration-300"
-                        >
-                          <img
-                            src={`${FARM_IMAGE_BASE_URL}/${img.image}`}
-                            alt={`Farm image ${index + 1}`}
-                            className="w-full h-full object-cover rounded-2xl shadow"
-                            onLoad={handleImageLoad}
-                          />
-                        </div>
-                      ))}
-                  </div>
-
-                  {/* Next button */}
-                  <button
-                    className="absolute right-0 z-10 bg-white/70 hover:bg-white rounded-full shadow p-1"
-                    onClick={handleNext}
-                    disabled={selectedImageIndex === farmImages.length - 1}
-                  >
-                    <ChevronRight className="w-6 h-6 text-primary" />
-                  </button>
+                      </SwiperSlide>
+                    ))}
+                  </Swiper>
                 </div>
               </div>
 

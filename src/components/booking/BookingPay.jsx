@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Calendar, MapPin, Users } from "lucide-react";
 import Script from "next/script";
@@ -17,10 +17,19 @@ import { useDialog } from "@/hooks/use-dialog";
 export default function BookingPay() {
   const [showPolicy, setShowPolicy] = useState(false);
   const [agreedToPolicy, setAgreedToPolicy] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const searchParams = useSearchParams();
   const { user } = useAuth(); // Access logged-in user
   const { show } = useDialog();
+
+  // Simulate page loading with useEffect
+  useEffect(() => {
+    // Simulate a loading period (replace with real data fetch if necessary)
+    setTimeout(() => {
+      setLoading(false); // Set loading to false when the page is ready
+    }, 1000); // Adjust this timeout to the actual loading time if needed
+  }, []);
 
   function convertTo24Hour(timeStr) {
     if (!timeStr || timeStr.toLowerCase() === "undefined") return null;
@@ -258,129 +267,130 @@ export default function BookingPay() {
 
   return (
     <>
-      <Script
-        src="https://checkout.razorpay.com/v1/checkout.js"
-        strategy="afterInteractive"
-      />
-      <div className="max-w-md mx-auto p-4 mb-16">
-        <div className="flex bg-white shadow rounded-xl overflow-hidden mb-4">
+      {loading ? (
+        <div className="min-h-screen flex flex-col justify-center items-center bg-white">
           <img
-            src={imageUrl}
-            alt={farmName}
-            className="w-48 h-40 object-cover"
+            src="/bmflogofoot.svg"
+            alt="Book My Farm Logo"
+            className="w-40 h-40 md:w-60 md:h-60 animate-pulse mb-6"
           />
-          <div className="flex flex-col justify-between p-3 flex-1">
-            <div>
-              <h2 className="text-sm font-semibold text-green-700 mb-2">
-                Farm
-              </h2>
-              <h1 className="text-base font-bold leading-tight mb-2">
-                {farmName}
-              </h1>
-              <a
-                href={farmLocation}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center text-xs text-gray-500 hover:text-green-700 transition"
-              >
-                <MapPin className="w-4 h-4 mr-1 text-gray-400" />
-                {areaCity}
-              </a>
-            </div>
-            <div className="flex items-center text-xs text-yellow-600">
-              Reviews <span className="ml-1">{rating}(0)</span>
-            </div>
-          </div>
-        </div>
-
-        {/* <div className="bg-white shadow rounded-xl p-4 mb-4">
-          <h3 className="text-lg font-semibold mb-3">Your Booking</h3>
-          <div className="text-sm space-y-2">
-            <p><strong>Booking Name:</strong> {bookingName}</p>
-            <p><strong>Number of Guests:</strong> {guest}</p>
-            <p><strong>Check in:</strong> {checkIn} – {checkInTime}</p>
-            <p><strong>Check out:</strong> {checkOut} – {checkOutTime}</p>
-          </div>
-        </div> */}
-
-        <div className="bg-white shadow rounded-xl p-3 mb-4">
-          <p>
-            <strong>Booking Name:</strong> {bookingName}
+          <p className="text-neutral-500 text-sm animate-pulse">
+            Loading your saved farms...
           </p>
         </div>
-
-        <div className="grid grid-cols-3 gap-4 p-4 bg-neutral-50 rounded-lg mb-4">
-          {/* <h3 className="text-lg font-semibold mb-3">Your Booking</h3>
-             <p><strong>Booking Name:</strong> {bookingName}</p> */}
-          <div className="text-center">
-            <Calendar className="w-5 h-5 text-neutral-500 mx-auto mb-1" />
-            <div className="text-xs text-neutral-500">Check-in</div>
-            <div className="font-medium">{checkIn}</div>
-            <p className="text-xs text-gray-400">{checkInTime}</p>
-          </div>
-          <div className="text-center">
-            <Calendar className="w-5 h-5 text-neutral-500 mx-auto mb-1" />
-            <div className="text-xs text-neutral-500">Check-out</div>
-            <div className="font-medium">{checkOut}</div>
-            <p className="text-xs text-gray-400">{checkOutTime}</p>
-          </div>
-          <div className="text-center">
-            <Users className="w-5 h-5 text-neutral-500 mx-auto mb-1" />
-            <div className="text-xs text-neutral-500">Guests</div>
-            <div className="font-medium"> {guest}</div>
-          </div>
-        </div>
-
-        <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg shadow-inner mb-4">
-          <span className="text-gray-500 line-through text-sm">
-            ₹
-            {originalPrice.toLocaleString(undefined, {
-              maximumFractionDigits: 0,
-            })}
-          </span>
-          <span className="text-green-700 font-bold text-xl">
-            ₹
-            {discountedPrice.toLocaleString(undefined, {
-              maximumFractionDigits: 0,
-            })}
-          </span>
-        </div>
-
-        <div className="mb-4">
-          <div className="flex items-start space-x-2">
-            <input
-              type="checkbox"
-              checked={agreedToPolicy}
-              onChange={(e) => setAgreedToPolicy(e.target.checked)}
-              className="form-checkbox mt-1 text-green-600"
+      ) : (
+        <div className="max-w-md mx-auto p-4 mb-16">
+          <Script
+            src="https://checkout.razorpay.com/v1/checkout.js"
+            strategy="afterInteractive"
+          />
+          <div className="flex bg-white shadow rounded-xl overflow-hidden mb-4">
+            <img
+              src={imageUrl}
+              alt={farmName}
+              className="w-48 h-40 object-cover"
             />
-            <span className="text-sm">
-              Agree to the{" "}
-              <button
-                className="underline text-green-600 hover:text-green-700"
-                onClick={() => setShowPolicy(!showPolicy)}
-                type="button"
-              >
-                House & Cancellation Policy
-              </button>
+            <div className="flex flex-col justify-between p-3 flex-1">
+              <div>
+                <h2 className="text-sm font-semibold text-green-700 mb-2">
+                  Farm
+                </h2>
+                <h1 className="text-base font-bold leading-tight mb-2">
+                  {farmName}
+                </h1>
+                <a
+                  href={farmLocation}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center text-xs text-gray-500 hover:text-green-700 transition"
+                >
+                  <MapPin className="w-4 h-4 mr-1 text-gray-400" />
+                  {areaCity}
+                </a>
+              </div>
+              <div className="flex items-center text-xs text-yellow-600">
+                Reviews <span className="ml-1">{rating}(0)</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white shadow rounded-xl p-3 mb-4">
+            <p>
+              <strong>Booking Name:</strong> {bookingName}
+            </p>
+          </div>
+
+          <div className="grid grid-cols-3 gap-4 p-4 bg-neutral-50 rounded-lg mb-4">
+            <div className="text-center">
+              <Calendar className="w-5 h-5 text-neutral-500 mx-auto mb-1" />
+              <div className="text-xs text-neutral-500">Check-in</div>
+              <div className="font-medium">{checkIn}</div>
+              <p className="text-xs text-gray-400">{checkInTime}</p>
+            </div>
+            <div className="text-center">
+              <Calendar className="w-5 h-5 text-neutral-500 mx-auto mb-1" />
+              <div className="text-xs text-neutral-500">Check-out</div>
+              <div className="font-medium">{checkOut}</div>
+              <p className="text-xs text-gray-400">{checkOutTime}</p>
+            </div>
+            <div className="text-center">
+              <Users className="w-5 h-5 text-neutral-500 mx-auto mb-1" />
+              <div className="text-xs text-neutral-500">Guests</div>
+              <div className="font-medium">{guest}</div>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg shadow-inner mb-4">
+            <span className="text-gray-500 line-through text-sm">
+              ₹
+              {originalPrice.toLocaleString(undefined, {
+                maximumFractionDigits: 0,
+              })}
+            </span>
+            <span className="text-green-700 font-bold text-xl">
+              ₹
+              {discountedPrice.toLocaleString(undefined, {
+                maximumFractionDigits: 0,
+              })}
             </span>
           </div>
 
-          {showPolicy && housePolicy && (
-            <div
-              className="mt-2 p-3 border rounded-lg bg-gray-50 text-sm text-gray-700"
-              dangerouslySetInnerHTML={{ __html: housePolicy }}
-            />
-          )}
-        </div>
+          <div className="mb-4">
+            <div className="flex items-start space-x-2">
+              <input
+                type="checkbox"
+                checked={agreedToPolicy}
+                onChange={(e) => setAgreedToPolicy(e.target.checked)}
+                className="form-checkbox mt-1 text-green-600"
+              />
+              <span className="text-sm">
+                Agree to the{" "}
+                <button
+                  className="underline text-green-600 hover:text-green-700"
+                  onClick={() => setShowPolicy(!showPolicy)}
+                  type="button"
+                >
+                  House & Cancellation Policy
+                </button>
+              </span>
+            </div>
 
-        <button
-          className="w-full py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl font-semibold"
-          onClick={handlePayNow}
-        >
-          Pay Now
-        </button>
-      </div>
+            {showPolicy && housePolicy && (
+              <div
+                className="mt-2 p-3 border rounded-lg bg-gray-50 text-sm text-gray-700"
+                dangerouslySetInnerHTML={{ __html: housePolicy }}
+              />
+            )}
+          </div>
+
+          <button
+            className="w-full py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl font-semibold"
+            onClick={handlePayNow}
+          >
+            Pay Now
+          </button>
+        </div>
+      )}
     </>
   );
 }

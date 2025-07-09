@@ -3,7 +3,6 @@ import { auth } from './firebaseConfig';
 
 export const sendOTP = async (phoneNumber, verifier) => {
   try {
-    logger.info('sendOTP called with phoneNumber:', phoneNumber);
     // Verify verifier is properly initialized
     if (!verifier || typeof verifier.verify !== 'function') {
       throw new Error('reCAPTCHA verifier not properly initialized');

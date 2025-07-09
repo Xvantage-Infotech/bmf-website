@@ -30,86 +30,34 @@
 
 
 
-// import { signInWithPhoneNumber } from 'firebase/auth';
-// import { auth } from './firebaseConfig';
+import { signInWithPhoneNumber } from 'firebase/auth';
+import { auth } from './firebaseConfig';
 
-// export const sendOTP = async (phoneNumber, verifier) => {
-//   try {
-//     // Verify verifier is properly initialized
-//     if (!verifier || typeof verifier.verify !== 'function') {
-//       throw new Error('reCAPTCHA verifier not properly initialized');
-//     }
-
-//     const formattedPhone = `+91${phoneNumber.replace(/\D/g, '')}`;
-    
-//     if (!/^\+91\d{10}$/.test(formattedPhone)) {
-//       throw new Error('Invalid phone number format');
-//     }
-
-//     console.log('Sending OTP to:', formattedPhone);
-//     const confirmation = await signInWithPhoneNumber(auth, formattedPhone, verifier);
-//     console.log('OTP sent successfully');
-//     return confirmation;
-    
-//   } catch (err) {
-//     console.error('Error in sendOTP:', {
-//       error: err,
-//       message: err.message,
-//       stack: err.stack
-//     });
-//     throw new Error(err.message || 'Failed to send OTP');
-//   }
-// };
-
-
-
-
-import { signInWithPhoneNumber, RecaptchaVerifier } from "firebase/auth";
-import { auth } from "./firebaseConfig";
-
-
-let recaptchaVerifier; // avoid recreating on every call
-
-export const sendOTP = async (phoneNumber) => {
+export const sendOTP = async (phoneNumber, verifier) => {
   try {
-    const raw = phoneNumber.replace(/\D/g, '');
-    const formattedPhone = `+91${raw}`;
+    // Verify verifier is properly initialized
+    if (!verifier || typeof verifier.verify !== 'function') {
+      throw new Error('reCAPTCHA verifier not properly initialized');
+    }
 
+    const formattedPhone = `+91${phoneNumber.replace(/\D/g, '')}`;
+    
     if (!/^\+91\d{10}$/.test(formattedPhone)) {
-      throw new Error("Invalid phone number format");
+      throw new Error('Invalid phone number format');
     }
 
-    // 🔒 Ensure auth is initialized
-    if (!auth) throw new Error("Firebase auth not initialized");
-
-    // 🧠 Only init once
-    if (!recaptchaVerifier) {
-      recaptchaVerifier = new RecaptchaVerifier(
-        "recaptcha-container",
-        {
-          size: "invisible",
-          callback: (response) => {
-            console.log("✅ reCAPTCHA solved:", response);
-          },
-        },
-        auth // ✅ pass `auth` as 3rd param, always
-      );
-
-      await recaptchaVerifier.render();
-    }
-
-    const confirmation = await signInWithPhoneNumber(auth, formattedPhone, recaptchaVerifier);
-    console.log("✅ OTP sent successfully");
+    console.log('Sending OTP to:', formattedPhone);
+    const confirmation = await signInWithPhoneNumber(auth, formattedPhone, verifier);
+    console.log('OTP sent successfully');
     return confirmation;
-
+    
   } catch (err) {
-    console.error("❌ Error sending OTP:", {
-      code: err?.code,
-      message: err?.message,
-      stack: err?.stack,
+    console.error('Error in sendOTP:', {
+      error: err,
+      message: err.message,
+      stack: err.stack
     });
-    throw err;
+    throw new Error(err.message || 'Failed to send OTP');
   }
 };
-
 

@@ -12,7 +12,7 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import { addBooking } from "@/services/Booking/booking.service";
 import { FARM_IMAGE_BASE_URL } from "@/lib/utils";
-// import { useDialog } from "@/hooks/use-dialog";
+import { useDialog } from "@/hooks/use-dialog";
 
 export default function BookingPay() {
   const [showPolicy, setShowPolicy] = useState(false);
@@ -20,7 +20,7 @@ export default function BookingPay() {
 
   const searchParams = useSearchParams();
   const { user } = useAuth(); // Access logged-in user
-  // const { show } = useDialog();
+  const { show } = useDialog();
 
   function convertTo24Hour(timeStr) {
     if (!timeStr || timeStr.toLowerCase() === "undefined") return null;
@@ -79,13 +79,20 @@ export default function BookingPay() {
 
   const handlePayNow = async () => {
     if (!agreedToPolicy) {
-      alert("Policy Agreement Required: Please agree to the House & Cancellation Policy first.");
+      show({
+        title: "Policy Agreement Required",
+        description: "Please agree to the House & Cancellation Policy first.",
+      });
+
       return;
     }
 
     const accessToken = localStorage.getItem("accessToken");
     if (!accessToken) {
-     alert("Login Required: Login required to proceed.");
+      show({
+        title: "Login Required",
+        description: "Login required to proceed.",
+      });
 
       return;
     }
@@ -98,7 +105,10 @@ export default function BookingPay() {
       console.log("Order Response:", data);
 
       if (status !== 1 || !data.order_id) {
-        alert("Order Failed: Order creation failed.");
+        show({
+          title: "Order Failed",
+          description: "Order creation failed.",
+        });
 
         return;
       }
@@ -112,7 +122,11 @@ export default function BookingPay() {
       const razorpayKey = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID_LOCAL;
 
       if (typeof window.Razorpay === "undefined") {
-        alert("Razorpay Not Loaded: Razorpay SDK not loaded. Please refresh.");
+        show({
+          title: "Razorpay Not Loaded",
+          description: "Razorpay SDK not loaded. Please refresh.",
+        });
+
         return;
       }
 
@@ -162,16 +176,23 @@ export default function BookingPay() {
                   router.push(`/booking-confirmation`);
                 }
               } else {
-                alert("Booking Failed: Payment succeeded, but booking failed.");
+                show({
+                  title: "Booking Failed",
+                  description: "Payment succeeded, but booking failed.",
+                });
               }
             } else {
-              alert("Payment Failed: Payment verification failed.");
+              show({
+                title: "Payment Failed",
+                description: "Payment verification failed.",
+              });
             }
           } catch (error) {
             console.error("Error in payment handler:", error);
-            alert(
-              "Verification Error: Something went wrong during verification."
-            );
+            show({
+              title: "Verification Error",
+              description: "Something went wrong during verification.",
+            });
           }
         },
 
@@ -209,7 +230,10 @@ export default function BookingPay() {
             order_id: data.order_id,
             status: "Fail",
           });
-          alert("Payment Failed: Payment failed.");
+          show({
+            title: "Payment Failed",
+            description: "Payment failed.",
+          });
         } catch (err) {
           console.error("Fail status error:", err);
         }
@@ -222,7 +246,10 @@ export default function BookingPay() {
       console.log("🚀 ~ handlePayNow ~ options.order_id:", options.order_id);
     } catch (error) {
       console.error("Payment error:", error.response?.data || error);
-      alert("Payment Error: Something went wrong. Try again.");
+      show({
+        title: "Payment Error",
+        description: "Something went wrong. Try again.",
+      });
     }
   };
 

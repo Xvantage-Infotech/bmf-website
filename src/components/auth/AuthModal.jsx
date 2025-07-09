@@ -21,14 +21,14 @@ import { sendOTP } from "@/lib/firebase";
 import { app, auth, RecaptchaVerifier } from "@/lib/firebaseConfig";
 import { authAPI } from "@/lib/api"; // Import your API
 import { loginOrRegisterUser } from "@/services/Auth/auth.service";
-// import { useDialog } from "@/hooks/use-dialog";
+import { useDialog } from "@/hooks/use-dialog";
 
 export default function AuthModal({ isOpen, onClose }) {
   const [activeTab, setActiveTab] = useState("login");
   const [isOtpSent, setIsOtpSent] = useState(false);
   const [formattedPhone, setFormattedPhone] = useState("");
   const [localLoading, setLocalLoading] = useState(false);
-  // const { show } = useDialog();
+  const { show } = useDialog();
 
   const {
     confirmationResult,
@@ -169,7 +169,10 @@ export default function AuthModal({ isOpen, onClose }) {
         errorMessage = "Security verification failed. Please try again.";
       }
 
-      alert("OTP Error: " + (errorMessage || "Failed to send OTP"));
+      show({
+        title: "OTP Error",
+        description: errorMessage || "Failed to send OTP",
+      });
     } finally {
       setLocalLoading(false);
     }
@@ -177,7 +180,11 @@ export default function AuthModal({ isOpen, onClose }) {
 
   const handleLogin = async (values) => {
     if (!values.otp || values.otp.length < 4) {
-      alert("Invalid OTP. Please enter a valid OTP.");
+      show({
+        title: "Invalid OTP",
+        description: "Please enter a valid OTP.",
+      });
+
       return;
     }
 
@@ -213,13 +220,20 @@ export default function AuthModal({ isOpen, onClose }) {
       onClose();
     } catch (error) {
       console.error("Login failed:", error);
-      alert("Login failed. Please try again.");
+      show({
+        title: "Login Failed",
+        description: "Please try again.",
+      });
     }
   };
 
   const handleSignup = async (values) => {
     if (!values.name || !values.otp) {
-      alert("Name and OTP are required");
+      show({
+        title: "Missing Fields",
+        description: "Name and OTP are required.",
+      });
+
       return;
     }
 

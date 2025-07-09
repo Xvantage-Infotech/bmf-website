@@ -183,15 +183,6 @@ if (typeof window !== 'undefined') {
   // Set language to device language
   auth.useDeviceLanguage();
   
-  // Configure reCAPTCHA settings
-  // auth.settings = {
-  //   appVerificationDisabledForTesting: false
-  // };
-  
-  // For development - uncomment if you want to test with emulator
-  // if (process.env.NODE_ENV === 'development') {
-  //   connectAuthEmulator(auth, "http://localhost:9099");
-  // }
 }
 
 export {

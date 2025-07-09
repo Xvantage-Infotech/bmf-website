@@ -22,6 +22,7 @@ import { app, auth, RecaptchaVerifier } from "@/lib/firebaseConfig";
 import { authAPI } from "@/lib/api"; // Import your API
 import { loginOrRegisterUser } from "@/services/Auth/auth.service";
 import { useDialog } from "@/hooks/use-dialog";
+import { useRouter } from "next/navigation";
 
 export default function AuthModal({ isOpen, onClose }) {
   const [activeTab, setActiveTab] = useState("login");
@@ -29,6 +30,7 @@ export default function AuthModal({ isOpen, onClose }) {
   const [formattedPhone, setFormattedPhone] = useState("");
   const [localLoading, setLocalLoading] = useState(false);
   const { show } = useDialog();
+  const router = useRouter();
 
   const {
     confirmationResult,
@@ -218,6 +220,7 @@ export default function AuthModal({ isOpen, onClose }) {
         });
 
         console.log("✅ Backend token saved and user updated");
+        router.push('/profile');
       } else {
         console.warn("❌ Token not received from backend");
       }

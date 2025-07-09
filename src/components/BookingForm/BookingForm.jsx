@@ -81,24 +81,51 @@ const calculateDynamicTotalPrice = (start, end, checkInTime, checkOutTime) => {
   };
 
   let total = 0;
-  const curr = new Date(start);
+  const sameDay = start.toDateString() === end.toDateString();
 
+  if (sameDay) {
+    const isWeekendDay = isWeekend(start);
+    const isHalfDay =
+      checkOutTime?.includes("AM") ||
+      checkOutTime?.startsWith("1") ||
+      checkOutTime?.startsWith("2") ||
+      checkOutTime?.startsWith("3") ||
+      checkOutTime?.startsWith("4");
+
+    total += isHalfDay
+      ? isWeekendDay
+        ? prices.half_day_weekend
+        : prices.half_day_weekday
+      : isWeekendDay
+      ? prices.full_day_weekend
+      : prices.full_day_weekday;
+
+    return total;
+  }
+
+  // Multi-day booking logic
+  const curr = new Date(start);
   while (curr < end) {
     const isWeekendDay = isWeekend(curr);
     const isLastDay = curr.toDateString() === new Date(end).toDateString();
 
-    // Full day for all days before last
     if (!isLastDay) {
       total += isWeekendDay ? prices.full_day_weekend : prices.full_day_weekday;
     } else {
-      // Last day is treated as half day if end time is before 5PM
-      const isHalfDay = checkOutTime?.includes("AM") || checkOutTime?.startsWith("1") || checkOutTime?.startsWith("2") || checkOutTime?.startsWith("3") || checkOutTime?.startsWith("4");
+      const isHalfDay =
+        checkOutTime?.includes("AM") ||
+        checkOutTime?.startsWith("1") ||
+        checkOutTime?.startsWith("2") ||
+        checkOutTime?.startsWith("3") ||
+        checkOutTime?.startsWith("4");
 
-      if (isHalfDay) {
-        total += isWeekendDay ? prices.half_day_weekend : prices.half_day_weekday;
-      } else {
-        total += isWeekendDay ? prices.full_day_weekend : prices.full_day_weekday;
-      }
+      total += isHalfDay
+        ? isWeekendDay
+          ? prices.half_day_weekend
+          : prices.half_day_weekday
+        : isWeekendDay
+        ? prices.full_day_weekend
+        : prices.full_day_weekday;
     }
 
     curr.setDate(curr.getDate() + 1);
@@ -106,6 +133,7 @@ const calculateDynamicTotalPrice = (start, end, checkInTime, checkOutTime) => {
 
   return total;
 };
+
 
 
 const dynamicTotal = checkIn && checkOut
@@ -121,21 +149,22 @@ const nights = checkIn && checkOut
 const pricePerNight = nights > 0 ? dynamicTotal / nights : 0;
   const totalGuests = adults + children;
   const isGuestLimitExceeded = totalGuests > farm.maxGuests;
-  const isCheckInBeforeCheckOut = () => {
+
+
+const isCheckInBeforeCheckOut = () => {
   if (checkIn && checkOut && checkInTime && checkOutTime) {
-    const checkInDate = new Date(checkIn);
-    const checkOutDate = new Date(checkOut);
+    const checkInTime24 = convertTo24HourFormat(checkInTime);
+    const checkOutTime24 = convertTo24HourFormat(checkOutTime);
 
-    // If both check-in and check-out are the same day, compare their times
-    if (checkInDate.toLocaleDateString() === checkOutDate.toLocaleDateString()) {
-      const checkInTimeDate = new Date(`${checkInDate.toLocaleDateString()} ${checkInTime}`);
-      const checkOutTimeDate = new Date(`${checkOutDate.toLocaleDateString()} ${checkOutTime}`);
+    const checkInDateTime = new Date(`${format(checkIn, 'yyyy-MM-dd')}T${checkInTime24}`);
+    const checkOutDateTime = new Date(`${format(checkOut, 'yyyy-MM-dd')}T${checkOutTime24}`);
 
-      return checkInTimeDate < checkOutTimeDate; // Returns true if check-in is before check-out
-    }
+    return checkOutDateTime > checkInDateTime;
   }
-  return true; // Default to true (valid) if times are not set
+
+  return true;
 };
+
 
 const isBookingValid = checkIn && checkOut && isCheckInBeforeCheckOut() && (nights > 0 || checkIn.toLocaleDateString() === checkOut.toLocaleDateString()) && !isGuestLimitExceeded;
 
@@ -227,6 +256,27 @@ const extraGuests = totalGuests > farm.person_limit
 
 const extraGuestCharge = extraGuests * (farm.person_price_weekday || 0);
 
+const isHalfDayBooking = () => {
+  if (!checkIn || !checkOut || !checkInTime || !checkOutTime) return false;
+
+  const sameDay = checkIn.toDateString() === checkOut.toDateString();
+  if (!sameDay) return false;
+
+  const checkInDateTime = new Date(`${format(checkIn, 'yyyy-MM-dd')}T${convertTo24HourFormat(checkInTime)}`);
+  const checkOutDateTime = new Date(`${format(checkOut, 'yyyy-MM-dd')}T${convertTo24HourFormat(checkOutTime)}`);
+
+  const durationInMs = checkOutDateTime - checkInDateTime;
+  const durationInHours = durationInMs / (1000 * 60 * 60);
+
+  return durationInHours <= 12;
+};
+
+const getFullDayPrice = () => {
+  const isWeekendDay = isWeekend(checkIn || new Date());
+  return isWeekendDay
+    ? parseFloat(farm.full_day_price_weekend || 0)
+    : parseFloat(farm.full_day_price_weekday || 0);
+};
 
 
   return (
@@ -312,12 +362,19 @@ const extraGuestCharge = extraGuests * (farm.person_price_weekday || 0);
   <div className="bg-white rounded-lg p-4 border border-neutral-200 space-y-2">
     <div className="flex justify-between text-sm">
       <span>{checkIn.toLocaleDateString()} to {checkOut.toLocaleDateString()}</span>
-      <span>{formatPrice(finalPrice ?? dynamicTotal)}</span> {/* 👈 updated */}
+      <div className="text-right">
+        
+        <span className="font-medium text-green-600">
+          {formatPrice(finalPrice ?? dynamicTotal)}
+        </span>
+      </div>
     </div>
     <Separator />
     <div className="flex justify-between font-semibold">
       <span>Total</span>
-      <span>{formatPrice(finalPrice ?? dynamicTotal)}</span> {/* 👈 updated */}
+      <span className="text-green-600">
+        {formatPrice(finalPrice ?? dynamicTotal)}
+      </span>
     </div>
   </div>
 )}

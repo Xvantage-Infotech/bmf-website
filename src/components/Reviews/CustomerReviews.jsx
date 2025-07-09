@@ -11,7 +11,7 @@ const staticReviews = [
     comment:
       'Absolutely wonderful experience! The farmhouse was even better than the photos. Our family had an amazing time by the pool and the kids loved the outdoor space. Highly recommended!',
     avatar:
-      'https://images.unsplash.com/photo-1544005313-94ddf0286df2?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100',
+      '/img_1.jpg',
   },
   {
     id: 2,
@@ -21,7 +21,7 @@ const staticReviews = [
     comment:
       'Perfect venue for our corporate retreat. The facilities were top-notch and the peaceful environment helped our team bond really well. Will definitely book again!',
     avatar:
-      'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100',
+      '/img_2.jpg',
   },
   {
     id: 3,
@@ -31,7 +31,7 @@ const staticReviews = [
     comment:
       'Beautiful property with excellent amenities. The location was convenient and the host was very responsive. Great value for money and a memorable weekend getaway.',
     avatar:
-      'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100',
+      '/img_3.jpg',
   },
 ];
 

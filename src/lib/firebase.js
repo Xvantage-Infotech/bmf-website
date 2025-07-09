@@ -67,8 +67,6 @@
 import { signInWithPhoneNumber, RecaptchaVerifier } from "firebase/auth";
 import { auth } from "./firebaseConfig";
 
-import { signInWithPhoneNumber, RecaptchaVerifier } from "firebase/auth";
-import { auth } from "./firebaseConfig";
 
 let recaptchaVerifier; // avoid recreating on every call
 

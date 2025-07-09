@@ -163,7 +163,7 @@ import {
 } from 'firebase/auth';
 
 const firebaseConfig = {
-  apiKey: "6LdxB3UrAAAAAH6UyhcdutvdEO9ev3LdGFPczJsC",
+  apiKey: "AIzaSyBBovfmiBsalDoxQ-DNw6GISQEyPeJfBOs",
   authDomain: "book-my-farm-87452.firebaseapp.com",
   projectId: "book-my-farm-87452",
   storageBucket: "book-my-farm-87452.appspot.com",
@@ -171,7 +171,6 @@ const firebaseConfig = {
   appId: "1:40957217895:web:7c196b5a39d402f8bc58c2",
   measurementId: "G-BM86YHT7T8"
 };
-console.log("🚀 ~ firebaseConfig:", firebaseConfig)
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);

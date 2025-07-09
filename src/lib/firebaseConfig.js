@@ -163,7 +163,7 @@ import {
 } from 'firebase/auth';
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCLWllbelIfPj5owYzZBiXAK7gJcCrgLsE",
+  apiKey: "6LdxB3UrAAAAAH6UyhcdutvdEO9ev3LdGFPczJsC",
   authDomain: "book-my-farm-87452.firebaseapp.com",
   projectId: "book-my-farm-87452",
   storageBucket: "book-my-farm-87452.appspot.com",

@@ -94,6 +94,7 @@ export default function AuthModal({ isOpen, onClose }) {
             size: "invisible",
             callback: (response) => {
               console.log("reCAPTCHA solved:", response);
+              
             },
             "expired-callback": () => {
               console.warn("reCAPTCHA expired");
@@ -140,7 +141,11 @@ export default function AuthModal({ isOpen, onClose }) {
 
   const handleSendOtp = async (phoneNumber) => {
     try {
+    console.log("harsh here handlesendotp");
+
+
       const raw = phoneNumber.replace(/\D/g, "");
+      console.log("🚀 ~hasrh handleSendOtp ~ raw:", raw)
       if (!raw || raw.length !== 10) {
         throw new Error("Enter a valid 10-digit number");
       }
@@ -151,9 +156,11 @@ export default function AuthModal({ isOpen, onClose }) {
       if (!recaptchaRef.current || !isRecaptchaReady) {
         throw new Error("Security verification not ready. Please try again.");
       }
+console.log("harsh upper confirmation");
 
       // 🔥 STEP 1: Send OTP via Firebase only
       const confirmation = await sendOTP(raw, recaptchaRef.current);
+      console.log("🚀 ~harsh handleSendOtp ~ confirmation:", confirmation)
       setConfirmationResult(confirmation);
 
       setIsOtpSent(true);

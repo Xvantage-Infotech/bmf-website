@@ -185,8 +185,9 @@ const handleSendOtp = async (phoneNumber) => {
     setConfirmationResult(confirmation);
     setIsOtpSent(true);
   } catch (err) {
-    console.error("❌ Failed to send OTP:", err);
-    alert("OTP Error: " + err.message);
+  console.error("❌ Failed to send OTP:", err);
+  alert("OTP Error: " + (err?.message || "Failed to send OTP"));
+
   } finally {
     setLocalLoading(false);
   }

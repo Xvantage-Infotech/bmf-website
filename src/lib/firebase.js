@@ -76,13 +76,12 @@ export const sendOTP = async (phoneNumber) => {
       throw new Error("Invalid phone number format");
     }
 
-    // 🔥 Create new RecaptchaVerifier
     const recaptchaVerifier = new RecaptchaVerifier(
       "recaptcha-container",
       {
         size: "invisible",
         callback: (response) => {
-          console.log("reCAPTCHA solved:", response);
+          console.log("✅ reCAPTCHA solved:", response);
         },
       },
       auth
@@ -91,8 +90,15 @@ export const sendOTP = async (phoneNumber) => {
     const confirmation = await signInWithPhoneNumber(auth, formattedPhone, recaptchaVerifier);
     console.log("✅ OTP sent successfully");
     return confirmation;
+
   } catch (err) {
-    console.error("❌ Error sending OTP:", err);
-    throw new Error(err?.message || "Failed to send OTP");
+    console.error("❌ Error sending OTP:", {
+      code: err?.code,
+      message: err?.message,
+      stack: err?.stack,
+      name: err?.name,
+    });
+    throw err;
   }
 };
+

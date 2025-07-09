@@ -246,11 +246,11 @@ export default function SearchFilters({ onSearch, className = "" }) {
           <div className="pt-4">
             <Button
               onClick={handleSearch}
-              className="w-full h-16 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-white font-semibold text-lg rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02]"
+              className="w-full h-16 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-white font-semibold text-base sm:text-lg md:text-xl rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] whitespace-normal text-center"
               size="lg"
             >
-              <Search className="w-5 h-5 mr-3" />
-              Search Amazing Farmhouses
+              <Search className="w-5 h-5 mr-2 shrink-0" />
+              <span className="block w-full">Search Amazing Farmhouses</span>
             </Button>
           </div>
 

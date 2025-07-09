@@ -238,14 +238,14 @@ export default function Homes() {
               </Link>
             ))} */}
             {featuredFarms.map((farm) => {
-              const finalPrice = parseFloat(farm.final_price) || 0;  // This is the final price after the discount
-const discountPercent = parseFloat(farm.increase_percentage) || 0;  // This is the discount percentage
+              const finalPrice = parseFloat(farm.final_price) || 0; // This is the final price after the discount
+              const discountPercent = parseFloat(farm.increase_percentage) || 0; // This is the discount percentage
 
-// Calculate the original price before the discount was applied
-const originalPrice = finalPrice / (1 - (discountPercent / 100));
+              // Calculate the original price before the discount was applied
+              const originalPrice = finalPrice / (1 - discountPercent / 100);
 
-// Display the price after discount
-const price = finalPrice;
+              // Display the price after discount
+              const price = finalPrice;
               return (
                 <Link key={farm.id} href={`/farm/${farm.id}`}>
                   <div className="group relative overflow-hidden rounded-3xl h-96 cursor-pointer transform transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl">
@@ -390,13 +390,17 @@ const price = finalPrice;
                 <p className="text-sm text-gray-600">Simple dashboard</p>
               </div>
             </div>
-            <Button
-              size="lg"
-              className="bg-gradient-to-r from-primary to-emerald-600 text-white hover:from-primary/90 hover:to-emerald-600/90 px-8 py-6 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:scale-105"
-            >
-              List Your Farm Today
-              <ArrowRight className="w-5 h-5 ml-2" />
-            </Button>
+            <div className="flex justify-center">
+  <Button
+    size="lg"
+    className="bg-gradient-to-r from-primary to-emerald-600 text-white hover:from-primary/90 hover:to-emerald-600/90 px-4 sm:px-8 py-4 sm:py-6 text-sm sm:text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:scale-105 flex items-center gap-2 leading-snug text-center"
+    onClick={() => router.push('/owner/register')}
+  >
+    <span>List Your Farm Today</span>
+    <ArrowRight className="w-5 h-5 shrink-0" />
+  </Button>
+</div>
+
           </div>
         </div>
       </section>

@@ -24,10 +24,11 @@ import {
   getUserProfile,
   updateUserProfile,
 } from "@/services/Auth/auth.service";
-// import { useDialog } from "@/hooks/use-dialog";
+import { useDialog } from "@/hooks/use-dialog";
 
 export default function ProfileEditDialog({ isOpen, onClose }) {
   const { user, updateUser } = useAuth();
+  const { show } = useDialog();
 
   const [name, setName] = useState(user?.name || "");
   const [street, setStreet] = useState(user?.street || "");
@@ -36,7 +37,6 @@ export default function ProfileEditDialog({ isOpen, onClose }) {
   const [dob, setDob] = useState(
     user?.date_of_birth ? new Date(user.date_of_birth) : undefined
   );
-  // const { show } = useDialog();
 
   const [profile_image, setProfile_image] = useState(user?.profile_image);
   const [previewImage, setPreviewImage] = useState(user?.profileImage);
@@ -71,7 +71,10 @@ export default function ProfileEditDialog({ isOpen, onClose }) {
     e.preventDefault();
     const token = localStorage.getItem("accessToken");
     if (!token) {
-      alert("You must be logged in to update your profile.");
+      show({
+        title: "Login Required",
+        description: "You must be logged in to update your profile.",
+      });
 
       return;
     }
@@ -97,8 +100,10 @@ export default function ProfileEditDialog({ isOpen, onClose }) {
       onClose();
     } catch (err) {
       console.error("❌ Failed to update profile", err);
-      alert("Update failed. Please try again.");
-
+      show({
+        title: "Update Failed",
+        description: "Please try again.",
+      });
     }
   };
 

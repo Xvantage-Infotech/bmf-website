@@ -23,14 +23,13 @@ export const DialogProvider = ({ children }) => {
 
     setTimeout(() => {
       setState((prev) => ({ ...prev, open: false }));
-    }, 5000); // Auto close after 5s (was 3s in comment)
+    }, 5000); // Auto close after 5s
   };
 
   return (
     <DialogContext.Provider value={{ show }}>
       {children}
       <Dialog open={state.open}>
-        {/* UPDATE WIDTH BELOW */}
         <DialogContent className="max-w-xl w-[95vw] sm:w-full">
           <DialogHeader>
             <DialogTitle>{state.title}</DialogTitle>
@@ -42,4 +41,15 @@ export const DialogProvider = ({ children }) => {
   );
 };
 
-export const useDialog = () => useContext(DialogContext);
+export const useDialog = () => {
+  const context = useContext(DialogContext);
+
+  if (!context) {
+    if (process.env.NODE_ENV === "development") {
+      throw new Error("useDialog must be used within a DialogProvider");
+    }
+    return { show: () => {} };
+  }
+
+  return context;
+};

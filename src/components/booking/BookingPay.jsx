@@ -128,7 +128,7 @@ export default function BookingPay() {
       //     ? process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID_LOCAL
       //     : process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID_PRODUCTION;
 
-      const razorpayKey = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID_LOCAL;
+      const razorpayKey = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID_PRODUCTION;
 
       if (typeof window.Razorpay === "undefined") {
         show({

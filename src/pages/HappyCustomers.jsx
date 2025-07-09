@@ -13,7 +13,7 @@ const customerReviews = [
     location: 'Mumbai',
     rating: 5,
     comment: 'Absolutely wonderful experience! The farmhouse was even better than the photos. Our family had an amazing time by the pool and the kids loved the outdoor space. The host was incredibly responsive and helpful throughout our stay.',
-    avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100',
+    avatar: '/img_1.jpg',
     farmName: 'Green Valley Resort',
     stayDuration: '3 nights',
     verified: true
@@ -24,7 +24,7 @@ const customerReviews = [
     location: 'Surat',
     rating: 5,
     comment: 'Perfect venue for our corporate retreat. The facilities were top-notch and the peaceful environment helped our team bond really well. The conference room was well-equipped and the catering service was excellent.',
-    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100',
+    avatar: '/img_2.jpg',
     farmName: 'Heritage Villa',
     stayDuration: '2 nights',
     verified: true
@@ -35,7 +35,7 @@ const customerReviews = [
     location: 'Pune',
     rating: 4,
     comment: 'Beautiful property with excellent amenities. The location was convenient and the host was very responsive. Great value for money and a memorable weekend getaway. The pool area was particularly impressive.',
-    avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100',
+    avatar: '/img_3.jpg',
     farmName: 'Mountain Retreat',
     stayDuration: '2 nights',
     verified: true
@@ -46,7 +46,7 @@ const customerReviews = [
     location: 'Delhi',
     rating: 5,
     comment: 'An unforgettable family vacation! The kids had a blast in the swimming pool while we adults enjoyed the peaceful garden area. The kitchen was fully equipped, making it easy to prepare meals. Highly recommend for families!',
-    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100',
+    avatar: '/img_4.jpg',
     farmName: 'Royal Estate',
     stayDuration: '4 nights',
     verified: true
@@ -57,7 +57,7 @@ const customerReviews = [
     location: 'Bangalore',
     rating: 5,
     comment: 'Exceeded all expectations! The farmhouse was immaculate, the grounds were beautifully maintained, and the views were spectacular. Perfect for a romantic getaway. The host went above and beyond to ensure our comfort.',
-    avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100',
+    avatar: '/img_6.jpg',
     farmName: 'Eco Villa',
     stayDuration: '3 nights',
     verified: true
@@ -68,7 +68,7 @@ const customerReviews = [
     location: 'Ahmedabad',
     rating: 4,
     comment: 'Great property for large groups. We celebrated my birthday here with 15 friends and everyone had an amazing time. The barbecue area was perfect for our evening gatherings. Would definitely book again!',
-    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100',
+    avatar: '/img_5.jpg',
     farmName: 'Family Paradise',
     stayDuration: '2 nights',
     verified: true

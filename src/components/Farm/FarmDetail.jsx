@@ -188,7 +188,10 @@ export default function FarmDetail() {
                     <polygon points="12 17.27 18.18 21 15.54 13.97 21 9.24 14.81 8.63 12 2 9.19 8.63 3 9.24 8.46 13.97 5.82 21 12 17.27" />
                   </svg>
 
-                  {/* Rating */}
+                  {/* Rating with dynamically generated stars */}
+                  <div className="flex mr-2">{generateStars(rating)}</div>
+
+                  {/* Rating text */}
                   <span className="text-neutral-600">
                     {rating} ({farm.reviews_count} reviews)
                   </span>
@@ -253,7 +256,10 @@ export default function FarmDetail() {
                     <polygon points="12 17.27 18.18 21 15.54 13.97 21 9.24 14.81 8.63 12 2 9.19 8.63 3 9.24 8.46 13.97 5.82 21 12 17.27" />
                   </svg>
 
-                  {/* Rating */}
+                  {/* Rating with dynamically generated stars */}
+                  <div className="flex mr-2">{generateStars(rating)}</div>
+
+                  {/* Rating text */}
                   <span className="text-neutral-600">
                     {rating} ({farm.reviews_count} reviews)
                   </span>

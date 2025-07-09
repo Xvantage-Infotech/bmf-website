@@ -101,20 +101,43 @@
 
 import { getAuth, signInWithPhoneNumber } from "firebase/auth";
 
-const phoneNumber = getPhoneNumberFromUserInput();
-const appVerifier = window.recaptchaVerifier;
+// Function to send OTP
+export const sendOTP = async (phoneNumber, verifier) => {
+  try {
+    // Verify verifier is properly initialized
+    if (!verifier || typeof verifier.verify !== 'function') {
+      throw new Error('reCAPTCHA verifier not properly initialized');
+    }
 
-const auth = getAuth();
-signInWithPhoneNumber(auth, phoneNumber, appVerifier)
-    .then((confirmationResult) => {
-      // SMS sent. Prompt user to type the code from the message, then sign the
-      // user in with confirmationResult.confirm(code).
-      window.confirmationResult = confirmationResult;
-       console.log("🚀 ~ .then ~ confirmationResult:", confirmationResult)
-      // ...
-    }).catch((error) => {
-     console.log("🚀 ~ .then ~ error:", error)
-     
-      // Error; SMS not sent
-      // 
+    // Format phone number (for India: +91)
+    const formattedPhone = `+91${phoneNumber.replace(/\D/g, '')}`;
+
+    // Validate phone number format
+    if (!/^\+91\d{10}$/.test(formattedPhone)) {
+      throw new Error('Invalid phone number format');
+    }
+
+    console.log('harsh Sending OTP to:', formattedPhone);
+
+    // Get Firebase auth instance
+    const auth = getAuth();
+    
+    // Send OTP using Firebase authentication
+    const confirmationResult = await signInWithPhoneNumber(auth, formattedPhone, verifier);
+
+    // Successfully sent OTP
+    console.log('OTP sent successfully');
+    window.confirmationResult = confirmationResult; // Store the confirmationResult in global window object
+    
+    return confirmationResult;
+    
+  } catch (err) {
+    // Log error and rethrow it
+    console.error('harsh Error in sendOTP:', {
+      error: err,
+      message: err.message,
+      stack: err.stack
     });
+    throw new Error(err.message || 'Failed to send OTP');
+  }
+};

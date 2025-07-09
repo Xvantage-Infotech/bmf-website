@@ -141,7 +141,6 @@ export default function AuthModal({ isOpen, onClose }) {
 
   const handleSendOtp = async (phoneNumber) => {
     try {
-    console.log("harsh here handlesendotp");
 
 
       const raw = phoneNumber.replace(/\D/g, "");
@@ -156,11 +155,9 @@ export default function AuthModal({ isOpen, onClose }) {
       if (!recaptchaRef.current || !isRecaptchaReady) {
         throw new Error("Security verification not ready. Please try again.");
       }
-console.log("harsh upper confirmation");
 
       // 🔥 STEP 1: Send OTP via Firebase only
       const confirmation = await sendOTP(raw, recaptchaRef.current);
-      console.log("🚀 ~harsh handleSendOtp ~ confirmation:", confirmation)
       setConfirmationResult(confirmation);
 
       setIsOtpSent(true);
@@ -472,3 +469,6 @@ console.log("harsh upper confirmation");
     </Dialog>
   );
 }
+
+
+

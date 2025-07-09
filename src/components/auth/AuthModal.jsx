@@ -138,42 +138,60 @@ export default function AuthModal({ isOpen, onClose }) {
     };
   }, [isOpen]);
 
-  const handleSendOtp = async (phoneNumber) => {
-    try {
-      const raw = phoneNumber.replace(/\D/g, "");
-      if (!raw || raw.length !== 10) {
-        throw new Error("Enter a valid 10-digit number");
-      }
+  // const handleSendOtp = async (phoneNumber) => {
+  //   try {
+  //     const raw = phoneNumber.replace(/\D/g, "");
+  //     if (!raw || raw.length !== 10) {
+  //       throw new Error("Enter a valid 10-digit number");
+  //     }
 
-      setLocalLoading(true);
-      setFormattedPhone(`+91${raw}`);
+  //     setLocalLoading(true);
+  //     setFormattedPhone(`+91${raw}`);
 
-      if (!recaptchaRef.current || !isRecaptchaReady) {
-        throw new Error("Security verification not ready. Please try again.");
-      }
+  //     if (!recaptchaRef.current || !isRecaptchaReady) {
+  //       throw new Error("Security verification not ready. Please try again.");
+  //     }
 
-      // 🔥 STEP 1: Send OTP via Firebase only
-      const confirmation = await sendOTP(raw, recaptchaRef.current);
-      setConfirmationResult(confirmation);
+  //     // 🔥 STEP 1: Send OTP via Firebase only
+  //     const confirmation = await sendOTP(raw, recaptchaRef.current);
+  //     setConfirmationResult(confirmation);
 
-      setIsOtpSent(true);
-    } catch (err) {
-      console.error("❌ Failed to send OTP:", err);
+  //     setIsOtpSent(true);
+  //   } catch (err) {
+  //     console.error("❌ Failed to send OTP:", err);
 
-      let errorMessage = err.message;
-      if (err.code === "auth/too-many-requests") {
-        errorMessage = "Too many attempts. Please try again later.";
-      } else if (err.code === "auth/invalid-phone-number") {
-        errorMessage = "Invalid phone number format.";
-      } else if (err.code === "auth/captcha-check-failed") {
-        errorMessage = "Security verification failed. Please try again.";
-      }
+  //     let errorMessage = err.message;
+  //     if (err.code === "auth/too-many-requests") {
+  //       errorMessage = "Too many attempts. Please try again later.";
+  //     } else if (err.code === "auth/invalid-phone-number") {
+  //       errorMessage = "Invalid phone number format.";
+  //     } else if (err.code === "auth/captcha-check-failed") {
+  //       errorMessage = "Security verification failed. Please try again.";
+  //     }
 
-      alert("OTP Error: " + (errorMessage || "Failed to send OTP"));
-    } finally {
-      setLocalLoading(false);
-    }
-  };
+  //     alert("OTP Error: " + (errorMessage || "Failed to send OTP"));
+  //   } finally {
+  //     setLocalLoading(false);
+  //   }
+  // };
+
+
+const handleSendOtp = async (phoneNumber) => {
+  try {
+    setLocalLoading(true);
+    setFormattedPhone(`+91${phoneNumber.replace(/\D/g, '')}`);
+
+    const confirmation = await sendOTP(phoneNumber);
+    setConfirmationResult(confirmation);
+    setIsOtpSent(true);
+  } catch (err) {
+    console.error("❌ Failed to send OTP:", err);
+    alert("OTP Error: " + err.message);
+  } finally {
+    setLocalLoading(false);
+  }
+};
+
 
   const handleLogin = async (values) => {
     if (!values.otp || values.otp.length < 4) {

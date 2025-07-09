@@ -67,6 +67,11 @@
 import { signInWithPhoneNumber, RecaptchaVerifier } from "firebase/auth";
 import { auth } from "./firebaseConfig";
 
+import { signInWithPhoneNumber, RecaptchaVerifier } from "firebase/auth";
+import { auth } from "./firebaseConfig";
+
+let recaptchaVerifier; // avoid recreating on every call
+
 export const sendOTP = async (phoneNumber) => {
   try {
     const raw = phoneNumber.replace(/\D/g, '');
@@ -76,16 +81,24 @@ export const sendOTP = async (phoneNumber) => {
       throw new Error("Invalid phone number format");
     }
 
-    const recaptchaVerifier = new RecaptchaVerifier(
-      "recaptcha-container",
-      {
-        size: "invisible",
-        callback: (response) => {
-          console.log("✅ reCAPTCHA solved:", response);
+    // 🔒 Ensure auth is initialized
+    if (!auth) throw new Error("Firebase auth not initialized");
+
+    // 🧠 Only init once
+    if (!recaptchaVerifier) {
+      recaptchaVerifier = new RecaptchaVerifier(
+        "recaptcha-container",
+        {
+          size: "invisible",
+          callback: (response) => {
+            console.log("✅ reCAPTCHA solved:", response);
+          },
         },
-      },
-      auth
-    );
+        auth // ✅ pass `auth` as 3rd param, always
+      );
+
+      await recaptchaVerifier.render();
+    }
 
     const confirmation = await signInWithPhoneNumber(auth, formattedPhone, recaptchaVerifier);
     console.log("✅ OTP sent successfully");
@@ -96,9 +109,9 @@ export const sendOTP = async (phoneNumber) => {
       code: err?.code,
       message: err?.message,
       stack: err?.stack,
-      name: err?.name,
     });
     throw err;
   }
 };
+
 

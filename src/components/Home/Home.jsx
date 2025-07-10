@@ -23,6 +23,7 @@ import {
   Facebook,
   Instagram,
 } from "lucide-react";
+import PublicPageLayout from "../Layout/PublicPageLayout";
 
 export default function Homes() {
   const router = useRouter();
@@ -110,95 +111,96 @@ export default function Homes() {
   };
 
   return (
-    <div className="min-h-screen pb-20">
-      {/* Hero Section */}
-      <section className="relative min-h-[80vh] bg-gradient-to-br from-emerald-50 via-blue-50 to-purple-50 overflow-hidden">
-        {/* <section className="relative min-h-[80vh] bg-gradient-to-br from-[#f0fff4] via-[#f0faff] to-[#f6f0ff] overflow-hidden"> */}
-        {/* <section className="relative min-h-[80vh] bg-[#f0f8f4] bg-gradient-to-br from-[#f0fff4] via-[#f0faff] to-[#f6f0ff] overflow-hidden"> */}
+    <PublicPageLayout>
+      <div className="min-h-screen pb-20">
+        {/* Hero Section */}
+        <section className="relative min-h-[80vh] bg-gradient-to-br from-emerald-50 via-blue-50 to-purple-50 overflow-hidden">
+          {/* <section className="relative min-h-[80vh] bg-gradient-to-br from-[#f0fff4] via-[#f0faff] to-[#f6f0ff] overflow-hidden"> */}
+          {/* <section className="relative min-h-[80vh] bg-[#f0f8f4] bg-gradient-to-br from-[#f0fff4] via-[#f0faff] to-[#f6f0ff] overflow-hidden"> */}
 
-        <div className="absolute inset-0">
-          <div className="absolute top-10 left-10 w-20 h-20 bg-primary/10 rounded-full blur-xl animate-float"></div>
-          <div className="absolute top-40 right-20 w-32 h-32 bg-purple-300/20 rounded-full blur-xl animate-float-delayed"></div>
-          <div className="absolute bottom-20 left-1/4 w-16 h-16 bg-emerald-300/20 rounded-full blur-xl animate-float"></div>
-        </div>
+          <div className="absolute inset-0">
+            <div className="absolute top-10 left-10 w-20 h-20 bg-primary/10 rounded-full blur-xl animate-float"></div>
+            <div className="absolute top-40 right-20 w-32 h-32 bg-purple-300/20 rounded-full blur-xl animate-float-delayed"></div>
+            <div className="absolute bottom-20 left-1/4 w-16 h-16 bg-emerald-300/20 rounded-full blur-xl animate-float"></div>
+          </div>
 
-        <div className="max-w-7xl mx-auto container-padding section-padding relative z-10">
-          <div className="text-center mb-16 pt-12">
-            <div className="inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full mb-6 text-sm font-medium text-primary border border-primary/20">
-              <Shield className="w-4 h-4" />
-              Trusted by 10,000+ Happy Guests
-            </div>
-            <h1 className="text-5xl lg:text-7xl font-bold text-gray-900 mb-6 leading-tight">
-              Escape to Your Perfect
-              <span className="bg-gradient-to-r from-primary to-emerald-600 bg-clip-text text-transparent block">
-                Farmhouse
-              </span>
-            </h1>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8 leading-relaxed">
-              Discover handpicked farmhouses nestled in nature's embrace...
-            </p>
-            <div className="flex items-center justify-center gap-8 mb-12 text-sm text-gray-600">
-              <div className="flex items-center gap-2">
-                <Star className="w-4 h-4 text-yellow-500 fill-current" />
-                <span className="font-medium">4.8/5 Rating</span>
+          <div className="max-w-7xl mx-auto container-padding section-padding relative z-10">
+            <div className="text-center mb-16 pt-12">
+              <div className="inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full mb-6 text-sm font-medium text-primary border border-primary/20">
+                <Shield className="w-4 h-4" />
+                Trusted by 10,000+ Happy Guests
               </div>
-              <div className="flex items-center gap-2">
-                <Heart className="w-4 h-4 text-red-500 fill-current" />
-                <span className="font-medium">99% Love Rate</span>
+              <h1 className="text-5xl lg:text-7xl font-bold text-gray-900 mb-6 leading-tight">
+                Escape to Your Perfect
+                <span className="bg-gradient-to-r from-primary to-emerald-600 bg-clip-text text-transparent block">
+                  Farmhouse
+                </span>
+              </h1>
+              <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8 leading-relaxed">
+                Discover handpicked farmhouses nestled in nature's embrace...
+              </p>
+              <div className="flex items-center justify-center gap-8 mb-12 text-sm text-gray-600">
+                <div className="flex items-center gap-2">
+                  <Star className="w-4 h-4 text-yellow-500 fill-current" />
+                  <span className="font-medium">4.8/5 Rating</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Heart className="w-4 h-4 text-red-500 fill-current" />
+                  <span className="font-medium">99% Love Rate</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Shield className="w-4 h-4 text-green-500" />
+                  <span className="font-medium">100% Secure</span>
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <Shield className="w-4 h-4 text-green-500" />
-                <span className="font-medium">100% Secure</span>
+            </div>
+
+            <div className="max-w-5xl mx-auto">
+              <SearchFilters
+                onSearch={handleSearch}
+                className="animate-slide-up"
+              />
+            </div>
+
+            <div className="text-center mt-8">
+              <p className="text-sm text-gray-500 mb-3">Popular searches:</p>
+              <div className="flex flex-wrap items-center justify-center gap-3">
+                {[
+                  "Weekend Getaway",
+                  "Pool Villa",
+                  "Pet Friendly",
+                  "Near Mumbai",
+                  "Family Retreat",
+                ].map((tag) => (
+                  <button
+                    key={tag}
+                    className="px-4 py-2 bg-white/60 backdrop-blur-sm rounded-full text-sm text-gray-600 hover:bg-white hover:text-primary transition-all duration-200 border border-white/20 hover:border-primary/20"
+                  >
+                    {tag}
+                  </button>
+                ))}
               </div>
             </div>
           </div>
+        </section>
 
-          <div className="max-w-5xl mx-auto">
-            <SearchFilters
-              onSearch={handleSearch}
-              className="animate-slide-up"
-            />
-          </div>
-
-          <div className="text-center mt-8">
-            <p className="text-sm text-gray-500 mb-3">Popular searches:</p>
-            <div className="flex flex-wrap items-center justify-center gap-3">
-              {[
-                "Weekend Getaway",
-                "Pool Villa",
-                "Pet Friendly",
-                "Near Mumbai",
-                "Family Retreat",
-              ].map((tag) => (
-                <button
-                  key={tag}
-                  className="px-4 py-2 bg-white/60 backdrop-blur-sm rounded-full text-sm text-gray-600 hover:bg-white hover:text-primary transition-all duration-200 border border-white/20 hover:border-primary/20"
-                >
-                  {tag}
-                </button>
-              ))}
+        {/* Featured Properties */}
+        <section className="py-20 bg-white">
+          <div className="max-w-7xl mx-auto container-padding">
+            <div className="text-center mb-16">
+              <div className="inline-flex items-center gap-2 bg-primary/10 px-4 py-2 rounded-full mb-4 text-sm font-medium text-primary">
+                ⭐ Featured Properties
+              </div>
+              <h2 className="text-4xl font-bold text-gray-900 mb-4">
+                Most Loved Farmhouses
+              </h2>
+              <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+                Handpicked properties that our guests can't stop raving about
+              </p>
             </div>
-          </div>
-        </div>
-      </section>
 
-      {/* Featured Properties */}
-      <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto container-padding">
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 bg-primary/10 px-4 py-2 rounded-full mb-4 text-sm font-medium text-primary">
-              ⭐ Featured Properties
-            </div>
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              Most Loved Farmhouses
-            </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Handpicked properties that our guests can't stop raving about
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {/* {featuredFarms.map((farm) => (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {/* {featuredFarms.map((farm) => (
               <Link key={farm.id} href={`/farm/${farm.id}`}>
                 <div className="group relative overflow-hidden rounded-3xl h-96 cursor-pointer transform transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl">
                   <img 
@@ -237,175 +239,183 @@ export default function Homes() {
                 </div>
               </Link>
             ))} */}
-            {featuredFarms.map((farm) => {
-              const finalPrice = parseFloat(farm.final_price) || 0; // This is the final price after the discount
-              const discountPercent = parseFloat(farm.increase_percentage) || 0; // This is the discount percentage
+              {featuredFarms.map((farm) => {
+                const finalPrice = parseFloat(farm.final_price) || 0; // This is the final price after the discount
+                const discountPercent =
+                  parseFloat(farm.increase_percentage) || 0; // This is the discount percentage
 
-              // Calculate the original price before the discount was applied
-              const originalPrice = finalPrice / (1 - discountPercent / 100);
+                // Calculate the original price before the discount was applied
+                const originalPrice = finalPrice / (1 - discountPercent / 100);
 
-              // Display the price after discount
-              const price = finalPrice;
-              return (
-                <Link key={farm.id} href={`/farm/${farm.id}`}>
-                  <div className="group relative overflow-hidden rounded-3xl h-96 cursor-pointer transform transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl">
-                    <img
-                      src={farm.images[0]}
-                      alt={farm.name}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
-                    <button className="absolute top-4 right-4 w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-all">
-                      <Heart className="w-5 h-5" />
-                    </button>
-                    <div className="absolute bottom-6 left-6 right-6 text-white">
-                      <div className="flex items-center gap-2 mb-2">
-                        <div className="flex items-center gap-1">
-                          <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                          <span className="text-sm font-medium">4.8</span>
+                // Display the price after discount
+                const price = finalPrice;
+                return (
+                  <Link key={farm.id} href={`/farm/${farm.id}`}>
+                    <div className="group relative overflow-hidden rounded-3xl h-96 cursor-pointer transform transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl">
+                      <img
+                        src={farm.images[0]}
+                        alt={farm.name}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+                      <button className="absolute top-4 right-4 w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-all">
+                        <Heart className="w-5 h-5" />
+                      </button>
+                      <div className="absolute bottom-6 left-6 right-6 text-white">
+                        <div className="flex items-center gap-2 mb-2">
+                          <div className="flex items-center gap-1">
+                            <Star className="w-4 h-4 text-yellow-400 fill-current" />
+                            <span className="text-sm font-medium">4.8</span>
+                          </div>
+                          <span className="text-xs bg-white/20 px-2 py-1 rounded-full backdrop-blur-sm">
+                            Premium
+                          </span>
                         </div>
-                        <span className="text-xs bg-white/20 px-2 py-1 rounded-full backdrop-blur-sm">
-                          Premium
-                        </span>
-                      </div>
-                      <h3 className="text-xl font-bold mb-1 group-hover:text-white transition-colors">
-                        {farm.name}
-                      </h3>
-                      <p className="text-sm opacity-90 mb-3">{farm.location}</p>
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <span className="text-xl text-primary line-through">
-                              {formatPrice(originalPrice)}
-                            </span>
-                            <span className="text-2xl font-bold">
-                              {formatPrice(farm.pricePerNight)}
+                        <h3 className="text-xl font-bold mb-1 group-hover:text-white transition-colors">
+                          {farm.name}
+                        </h3>
+                        <p className="text-sm opacity-90 mb-3">
+                          {farm.location}
+                        </p>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-xl text-primary line-through">
+                                {formatPrice(originalPrice)}
+                              </span>
+                              <span className="text-2xl font-bold">
+                                {formatPrice(farm.pricePerNight)}
+                              </span>
+                            </div>
+                            <span className="text-sm opacity-75">/night</span>
+                          </div>
+                          <div className="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full">
+                            <span className="text-xs font-medium">
+                              View Details
                             </span>
                           </div>
-                          <span className="text-sm opacity-75">/night</span>
-                        </div>
-                        <div className="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full">
-                          <span className="text-xs font-medium">
-                            View Details
-                          </span>
                         </div>
                       </div>
                     </div>
-                  </div>
-                </Link>
-              );
-            })}
+                  </Link>
+                );
+              })}
+            </div>
+
+            <div className="text-center mt-12">
+              <Button
+                size="lg"
+                variant="outline"
+                className="border-2 hover:bg-primary hover:text-white transition-all"
+              >
+                View All Properties
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </Button>
+            </div>
           </div>
+        </section>
 
-          <div className="text-center mt-12">
-            <Button
-              size="lg"
-              variant="outline"
-              className="border-2 hover:bg-primary hover:text-white transition-all"
-            >
-              View All Properties
-              <ArrowRight className="w-4 h-4 ml-2" />
-            </Button>
+        {/* Categories and Listings */}
+        <section className="py-20 bg-gradient-to-br from-gray-50 to-gray-100">
+          <div className="max-w-7xl mx-auto container-padding">
+            <div className="text-center mb-12">
+              <h2 className="text-4xl font-bold text-gray-900 mb-4">
+                Browse by Property Type
+              </h2>
+              <p className="text-lg text-gray-600">
+                Find the perfect accommodation for your getaway
+              </p>
+            </div>
+            <PropertyCategoryTabs
+              selectedCategory={selectedCategory}
+              onCategoryChange={setSelectedCategory}
+            />
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Categories and Listings */}
-      <section className="py-20 bg-gradient-to-br from-gray-50 to-gray-100">
-        <div className="max-w-7xl mx-auto container-padding">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              Browse by Property Type
-            </h2>
-            <p className="text-lg text-gray-600">
-              Find the perfect accommodation for your getaway
-            </p>
-          </div>
-          <PropertyCategoryTabs
-            selectedCategory={selectedCategory}
-            onCategoryChange={setSelectedCategory}
-          />
-        </div>
-      </section>
+        <CategoryTabs
+          selectedCity={selectedCity}
+          onCityChange={handleCityChange}
+        />
 
-      <CategoryTabs
-        selectedCity={selectedCity}
-        onCityChange={handleCityChange}
-      />
-
-      {/* <FarmList
+        {/* <FarmList
         selectedCity={selectedCity !== 'all' ? selectedCity : undefined}
         selectedCategory={selectedCategory !== 'all' ? selectedCategory : undefined}
         searchQuery={searchFilters?.location || ''}
       /> */}
-      <FarmList
-        selectedCity={selectedCity} // Make sure to pass these if they're available
-        selectedCategory={selectedCategory}
-        searchFilters={{
-          ...(searchFilters || {}),
-          category_id:
-            selectedCategory !== "all" ? Number(selectedCategory) : "",
-          city_id:
-            selectedCity !== "all" ? CITY_IDS[selectedCity.toLowerCase()] : "",
-        }}
-        farms={isSearchMode ? farms : null}
-      />
+        <FarmList
+          selectedCity={selectedCity} // Make sure to pass these if they're available
+          selectedCategory={selectedCategory}
+          searchFilters={{
+            ...(searchFilters || {}),
+            category_id:
+              selectedCategory !== "all" ? Number(selectedCategory) : "",
+            city_id:
+              selectedCity !== "all"
+                ? CITY_IDS[selectedCity.toLowerCase()]
+                : "",
+          }}
+          farms={isSearchMode ? farms : null}
+        />
 
-      <VideoGallery />
-      <CustomerReviews />
+        <VideoGallery />
+        <CustomerReviews />
 
-      {/* Call to Action */}
-      <section className="py-20 bg-gradient-to-br from-primary/10 via-primary/5 to-emerald-50 relative overflow-hidden">
-        <div className="absolute top-10 left-10 w-32 h-32 bg-primary/10 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-10 right-10 w-40 h-40 bg-emerald-300/20 rounded-full blur-3xl"></div>
-        <div className="max-w-4xl mx-auto text-center container-padding relative z-10">
-          <div className="bg-white/60 backdrop-blur-sm rounded-3xl p-12 border border-white/20 shadow-xl">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              Ready to List Your Property?
-            </h2>
-            <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
-              Join thousands of property owners who are earning extra income by
-              hosting guests...
-            </p>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              <div className="text-center">
-                <div className="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <span className="text-2xl">💰</span>
+        {/* Call to Action */}
+        <section className="py-20 bg-gradient-to-br from-primary/10 via-primary/5 to-emerald-50 relative overflow-hidden">
+          <div className="absolute top-10 left-10 w-32 h-32 bg-primary/10 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-10 right-10 w-40 h-40 bg-emerald-300/20 rounded-full blur-3xl"></div>
+          <div className="max-w-4xl mx-auto text-center container-padding relative z-10">
+            <div className="bg-white/60 backdrop-blur-sm rounded-3xl p-12 border border-white/20 shadow-xl">
+              <h2 className="text-4xl font-bold text-gray-900 mb-4">
+                Ready to List Your Property?
+              </h2>
+              <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
+                Join thousands of property owners who are earning extra income
+                by hosting guests...
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div className="text-center">
+                  <div className="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <span className="text-2xl">💰</span>
+                  </div>
+                  <h4 className="font-semibold text-gray-900">Extra Income</h4>
+                  <p className="text-sm text-gray-600">Earn up to ₹50K/month</p>
                 </div>
-                <h4 className="font-semibold text-gray-900">Extra Income</h4>
-                <p className="text-sm text-gray-600">Earn up to ₹50K/month</p>
+                <div className="text-center">
+                  <div className="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <span className="text-2xl">🛡️</span>
+                  </div>
+                  <h4 className="font-semibold text-gray-900">
+                    Secure Platform
+                  </h4>
+                  <p className="text-sm text-gray-600">100% safe & secure</p>
+                </div>
+                <div className="text-center">
+                  <div className="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <span className="text-2xl">📱</span>
+                  </div>
+                  <h4 className="font-semibold text-gray-900">
+                    Easy Management
+                  </h4>
+                  <p className="text-sm text-gray-600">Simple dashboard</p>
+                </div>
               </div>
-              <div className="text-center">
-                <div className="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <span className="text-2xl">🛡️</span>
-                </div>
-                <h4 className="font-semibold text-gray-900">Secure Platform</h4>
-                <p className="text-sm text-gray-600">100% safe & secure</p>
-              </div>
-              <div className="text-center">
-                <div className="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <span className="text-2xl">📱</span>
-                </div>
-                <h4 className="font-semibold text-gray-900">Easy Management</h4>
-                <p className="text-sm text-gray-600">Simple dashboard</p>
+              <div className="flex justify-center">
+                <Button
+                  size="lg"
+                  className="bg-gradient-to-r from-primary to-emerald-600 text-white hover:from-primary/90 hover:to-emerald-600/90 px-4 sm:px-8 py-4 sm:py-6 text-sm sm:text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:scale-105 flex items-center gap-2 leading-snug text-center"
+                  onClick={() => router.push("/owner/register")}
+                >
+                  <span>List Your Farm Today</span>
+                  <ArrowRight className="w-5 h-5 shrink-0" />
+                </Button>
               </div>
             </div>
-            <div className="flex justify-center">
-  <Button
-    size="lg"
-    className="bg-gradient-to-r from-primary to-emerald-600 text-white hover:from-primary/90 hover:to-emerald-600/90 px-4 sm:px-8 py-4 sm:py-6 text-sm sm:text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:scale-105 flex items-center gap-2 leading-snug text-center"
-    onClick={() => router.push('/owner/register')}
-  >
-    <span>List Your Farm Today</span>
-    <ArrowRight className="w-5 h-5 shrink-0" />
-  </Button>
-</div>
-
           </div>
-        </div>
-      </section>
-      <div
-        className="
+        </section>
+        <div
+          className="
         fixed
         bottom-20 sm:bottom-6
         right-4 sm:right-6
@@ -413,10 +423,10 @@ export default function Homes() {
         flex flex-col items-end gap-3
         transition-all
       "
-      >
-        {/* Action Buttons */}
-        <div
-          className={`
+        >
+          {/* Action Buttons */}
+          <div
+            className={`
           flex flex-col items-end gap-3
           transition-all duration-300 ease-in-out
           ${
@@ -425,13 +435,13 @@ export default function Homes() {
               : "opacity-0 translate-y-4 pointer-events-none"
           }
         `}
-        >
-          {/* Instagram */}
-          <a
-            href="https://instagram.com/book_my_farms"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="
+          >
+            {/* Instagram */}
+            <a
+              href="https://instagram.com/book_my_farms"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="
             w-12 h-12 sm:w-14 sm:h-14
             bg-gradient-to-br from-pink-500 to-yellow-500
             hover:opacity-90
@@ -439,37 +449,37 @@ export default function Homes() {
             flex items-center justify-center
             transition-all
           "
-            aria-label="Instagram"
-          >
-            <Instagram className="w-6 h-6 sm:w-7 sm:h-7" />
-          </a>
+              aria-label="Instagram"
+            >
+              <Instagram className="w-6 h-6 sm:w-7 sm:h-7" />
+            </a>
 
-          {/* WhatsApp */}
-          <a
-            href="https://wa.me/919277778778"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="
+            {/* WhatsApp */}
+            <a
+              href="https://wa.me/919277778778"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="
             w-12 h-12 sm:w-14 sm:h-14
             bg-green-500 hover:bg-green-600
             text-white rounded-full shadow-lg
             flex items-center justify-center
             transition-all
           "
-            aria-label="Chat on WhatsApp"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 32 32"
-              fill="currentColor"
-              className="w-6 h-6 sm:w-7 sm:h-7"
+              aria-label="Chat on WhatsApp"
             >
-              <path d="M16.004 2.986C8.82 2.986 3 8.735 3 15.884c0 2.55.753 5.017 2.157 7.151L3 29l6.14-2.09a13.71 13.71 0 006.865 1.75h.002c7.183 0 13.003-5.748 13.003-12.898.001-7.149-5.82-12.876-13.006-12.876zm0 23.564a11.26 11.26 0 01-5.765-1.595l-.414-.246-3.648 1.24 1.208-3.555-.269-.406a10.235 10.235 0 01-1.632-5.62c0-5.715 4.675-10.367 10.373-10.367 5.697 0 10.335 4.652 10.335 10.367.002 5.715-4.637 10.182-10.188 10.182zm5.632-7.653c-.308-.155-1.82-.896-2.1-.997-.281-.1-.485-.155-.688.156-.203.309-.79.996-.968 1.201-.178.204-.357.229-.664.077-.308-.155-1.297-.479-2.47-1.528-.912-.812-1.528-1.816-1.707-2.125-.178-.308-.019-.475.135-.63.139-.138.308-.357.46-.536.154-.179.203-.309.308-.513.102-.204.051-.383-.025-.537-.077-.155-.688-1.66-.942-2.273-.248-.597-.502-.514-.688-.523l-.587-.01c-.204 0-.536.077-.817.383-.281.308-1.072 1.045-1.072 2.547s1.097 2.951 1.249 3.156c.154.204 2.157 3.293 5.227 4.62.731.316 1.3.504 1.744.644.733.234 1.4.2 1.927.122.588-.087 1.82-.743 2.077-1.46.256-.716.256-1.33.179-1.46-.077-.128-.281-.204-.587-.357z" />
-            </svg>
-          </a>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 32 32"
+                fill="currentColor"
+                className="w-6 h-6 sm:w-7 sm:h-7"
+              >
+                <path d="M16.004 2.986C8.82 2.986 3 8.735 3 15.884c0 2.55.753 5.017 2.157 7.151L3 29l6.14-2.09a13.71 13.71 0 006.865 1.75h.002c7.183 0 13.003-5.748 13.003-12.898.001-7.149-5.82-12.876-13.006-12.876zm0 23.564a11.26 11.26 0 01-5.765-1.595l-.414-.246-3.648 1.24 1.208-3.555-.269-.406a10.235 10.235 0 01-1.632-5.62c0-5.715 4.675-10.367 10.373-10.367 5.697 0 10.335 4.652 10.335 10.367.002 5.715-4.637 10.182-10.188 10.182zm5.632-7.653c-.308-.155-1.82-.896-2.1-.997-.281-.1-.485-.155-.688.156-.203.309-.79.996-.968 1.201-.178.204-.357.229-.664.077-.308-.155-1.297-.479-2.47-1.528-.912-.812-1.528-1.816-1.707-2.125-.178-.308-.019-.475.135-.63.139-.138.308-.357.46-.536.154-.179.203-.309.308-.513.102-.204.051-.383-.025-.537-.077-.155-.688-1.66-.942-2.273-.248-.597-.502-.514-.688-.523l-.587-.01c-.204 0-.536.077-.817.383-.281.308-1.072 1.045-1.072 2.547s1.097 2.951 1.249 3.156c.154.204 2.157 3.293 5.227 4.62.731.316 1.3.504 1.744.644.733.234 1.4.2 1.927.122.588-.087 1.82-.743 2.077-1.46.256-.716.256-1.33.179-1.46-.077-.128-.281-.204-.587-.357z" />
+              </svg>
+            </a>
 
-          {/* Download App */}
-          {/* <a
+            {/* Download App */}
+            {/* <a
             href="https://play.google.com/store/apps/details?id=com.app.bookmyfarm&hl=en_IN"
             target="_blank"
             rel="noopener noreferrer"
@@ -484,27 +494,28 @@ export default function Homes() {
           >
             <Download className="w-6 h-6 sm:w-7 sm:h-7 text-white/70" />
           </a> */}
-        </div>
+          </div>
 
-        {/* Toggle Button */}
-        <button
-          onClick={() => setOpen(!open)}
-          className="
+          {/* Toggle Button */}
+          <button
+            onClick={() => setOpen(!open)}
+            className="
           w-12 h-12 sm:w-14 sm:h-14
           bg-neutral-700 hover:bg-neutral-800
           text-white rounded-full shadow-lg
           flex items-center justify-center
           transition-all
         "
-          aria-label="Toggle Menu"
-        >
-          {open ? (
-            <MoreVertical className="w-6 h-6 sm:w-7 sm:h-7 transition-transform duration-200" />
-          ) : (
-            <MoreHorizontal className="w-6 h-6 sm:w-7 sm:h-7 transition-transform duration-200" />
-          )}
-        </button>
+            aria-label="Toggle Menu"
+          >
+            {open ? (
+              <MoreVertical className="w-6 h-6 sm:w-7 sm:h-7 transition-transform duration-200" />
+            ) : (
+              <MoreHorizontal className="w-6 h-6 sm:w-7 sm:h-7 transition-transform duration-200" />
+            )}
+          </button>
+        </div>
       </div>
-    </div>
+    </PublicPageLayout>
   );
 }

@@ -1,15 +1,17 @@
-
-
 // ImprovedDatePicker.jsx
-'use client';
-import { useEffect, useState } from 'react';
-import { Calendar } from '@/components/ui/calendar';
-import { Button } from '@/components/ui/button';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent } from '@/components/ui/card';
-import { CalendarDays, Clock, ArrowRight } from 'lucide-react';
-import { formatDate, calculateNights, cn } from '@/lib/utils';
+"use client";
+import { useEffect, useState } from "react";
+import { Calendar } from "@/components/ui/calendar";
+import { Button } from "@/components/ui/button";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent } from "@/components/ui/card";
+import { CalendarDays, Clock, ArrowRight } from "lucide-react";
+import { formatDate, calculateNights, cn } from "@/lib/utils";
 
 export default function ImprovedDatePicker({
   checkIn,
@@ -22,61 +24,56 @@ export default function ImprovedDatePicker({
   onCheckOutTimeChange,
   checkInOptions = [],
   checkOutOptions = [],
-  className = ''
+  className = "",
 }) {
   const [isCheckInOpen, setIsCheckInOpen] = useState(false);
   const [isCheckOutOpen, setIsCheckOutOpen] = useState(false);
 
   const getCurrentTime12Hr = () => {
-  const now = new Date();
-  const hours = now.getHours();
-  const minutes = now.getMinutes().toString().padStart(2, '0');
-  const ampm = hours >= 12 ? 'PM' : 'AM';
-  const hour12 = hours % 12 === 0 ? 12 : hours % 12;
-  return `${hour12}:${minutes} ${ampm}`;
-};
+    const now = new Date();
+    const hours = now.getHours();
+    const minutes = now.getMinutes().toString().padStart(2, "0");
+    const ampm = hours >= 12 ? "PM" : "AM";
+    const hour12 = hours % 12 === 0 ? 12 : hours % 12;
+    return `${hour12}:${minutes} ${ampm}`;
+  };
 
+  useEffect(() => {
+    const today = new Date();
 
-useEffect(() => {
-  const today = new Date();
-  
-  // Set checkIn to today if not already set
-  if (!checkIn) {
-    onCheckInChange?.(today);
-  }
+    // Set checkIn to today if not already set
+    if (!checkIn) {
+      onCheckInChange?.(today);
+    }
 
-  // Set checkOut to today initially if not already set
-  if (!checkOut) {
-    onCheckOutChange?.(today);
-  }
+    // Set checkOut to today initially if not already set
+    if (!checkOut) {
+      onCheckOutChange?.(today);
+    }
 
-  // Default check-in time
-  if (!checkInTime) {
-    const fallback = formattedCheckInOptions[0] || getCurrentTime12Hr();
-    onCheckInTimeChange?.(fallback);
-  }
+    // Default check-in time
+    if (!checkInTime) {
+      const fallback = formattedCheckInOptions[0] || getCurrentTime12Hr();
+      onCheckInTimeChange?.(fallback);
+    }
 
-  // Default check-out time
-  if (!checkOutTime) {
-    const fallback = formattedCheckOutOptions[0] || getCurrentTime12Hr();
-    onCheckOutTimeChange?.(fallback);
-  }
-}, []);
+    // Default check-out time
+    if (!checkOutTime) {
+      const fallback = formattedCheckOutOptions[0] || getCurrentTime12Hr();
+      onCheckOutTimeChange?.(fallback);
+    }
+  }, []);
 
+  const convert24To12Hour = (timeStr) => {
+    const [hour, minute] = timeStr.split(":");
+    const h = parseInt(hour, 10);
+    const ampm = h >= 12 ? "PM" : "AM";
+    const hour12 = h % 12 === 0 ? 12 : h % 12;
+    return `${hour12}:${minute} ${ampm}`;
+  };
 
-
-const convert24To12Hour = (timeStr) => {
-  const [hour, minute] = timeStr.split(":");
-  const h = parseInt(hour, 10);
-  const ampm = h >= 12 ? "PM" : "AM";
-  const hour12 = h % 12 === 0 ? 12 : h % 12;
-  return `${hour12}:${minute} ${ampm}`;
-};
-
-const formattedCheckInOptions = checkInOptions.map(convert24To12Hour);
-const formattedCheckOutOptions = checkOutOptions.map(convert24To12Hour);
-
-
+  const formattedCheckInOptions = checkInOptions.map(convert24To12Hour);
+  const formattedCheckOutOptions = checkOutOptions.map(convert24To12Hour);
 
   const today = new Date();
   const tomorrow = new Date(today);
@@ -84,26 +81,28 @@ const formattedCheckOutOptions = checkOutOptions.map(convert24To12Hour);
 
   const nights = checkIn && checkOut ? calculateNights(checkIn, checkOut) : 0;
 
-const handleCheckInSelect = (date) => {
-  onCheckInChange?.(date);
-  setIsCheckInOpen(false);  // Close the calendar popup after selecting the date
+  const handleCheckInSelect = (date) => {
+    if (!date) return;
 
-  // If no checkInTime is selected, set default from available options
-  if (!checkInTime && formattedCheckInOptions.length) {
-    onCheckInTimeChange?.(formattedCheckInOptions[0]);
-  }
+    onCheckInChange?.(date);
+    setIsCheckInOpen(false);
 
-  // If the selected check-in date is greater than or equal to checkOut, reset checkOut
-  if (date && checkOut && checkOut <= date) {
-    onCheckOutChange?.(undefined);
-  }
+    // Set default check-in time
+    if (!checkInTime && formattedCheckInOptions.length) {
+      onCheckInTimeChange?.(formattedCheckInOptions[0]);
+    }
 
-  // If a check-in date is selected but checkOut is still not set, open check-out date picker
-  if (date && !checkOut) {
-    setTimeout(() => setIsCheckOutOpen(true), 200);
-  }
-};
+    // Handle invalid checkOut
+    if (checkOut && checkOut <= date) {
+      onCheckOutChange(undefined);
+      setTimeout(() => setIsCheckOutOpen(true), 200); // auto prompt for new checkout
+    }
 
+    // If no checkOut at all, auto open it
+    if (!checkOut) {
+      setTimeout(() => setIsCheckOutOpen(true), 200);
+    }
+  };
 
   const handleCheckOutSelect = (date) => {
     onCheckOutChange?.(date);
@@ -111,17 +110,15 @@ const handleCheckInSelect = (date) => {
   };
 
   if (!checkOutTime && formattedCheckOutOptions.length) {
-  onCheckOutTimeChange?.(formattedCheckOutOptions[0]);
-}
-
-
-const getMinCheckOutDate = () => {
-  if (checkIn) {
-    return checkIn; // Allow check-out to be the same day as check-in
+    onCheckOutTimeChange?.(formattedCheckOutOptions[0]);
   }
-  return tomorrow; // Default to tomorrow if checkIn is not set
-};
 
+  const getMinCheckOutDate = () => {
+    if (checkIn) {
+      return checkIn; // Allow check-out to be the same day as check-in
+    }
+    return tomorrow; // Default to tomorrow if checkIn is not set
+  };
 
   return (
     <div className={cn("space-y-4", className)}>
@@ -145,10 +142,10 @@ const getMinCheckOutDate = () => {
                   >
                     <div className="flex flex-col items-start">
                       <span className="text-xs text-neutral-500">
-                        {checkIn ? 'Selected' : 'Select date'}
+                        {checkIn ? "Selected" : "Select date"}
                       </span>
                       <span className="font-medium">
-                        {checkIn ? formatDate(checkIn) : 'Add date'}
+                        {checkIn ? formatDate(checkIn) : "Add date"}
                       </span>
                     </div>
                   </Button>
@@ -158,28 +155,32 @@ const getMinCheckOutDate = () => {
                     mode="single"
                     selected={checkIn}
                     onSelect={handleCheckInSelect}
-                    disabled={(date) => date < today}
+                    disabled={(date) =>
+                      date.setHours(0, 0, 0, 0) <
+                      new Date().setHours(0, 0, 0, 0)
+                    }
                     initialFocus
                     className="rounded-lg border"
                   />
                 </PopoverContent>
               </Popover>
               {checkIn && (
-               <div className="mt-2">
-  <Label className="text-xs text-neutral-500">Check-in Time</Label>
-  <select
-    className="w-full mt-1 p-2 border rounded text-sm"
-    value={checkInTime}
-    onChange={(e) => onCheckInTimeChange?.(e.target.value)}
-  >
-    {formattedCheckInOptions.map((time) => (
-  <option key={time} value={time}>
-    {time}
-  </option>
-))}
-
-  </select>
-</div>
+                <div className="mt-2">
+                  <Label className="text-xs text-neutral-500">
+                    Check-in Time
+                  </Label>
+                  <select
+                    className="w-full mt-1 p-2 border rounded text-sm"
+                    value={checkInTime}
+                    onChange={(e) => onCheckInTimeChange?.(e.target.value)}
+                  >
+                    {formattedCheckInOptions.map((time) => (
+                      <option key={time} value={time}>
+                        {time}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               )}
             </div>
 
@@ -202,10 +203,14 @@ const getMinCheckOutDate = () => {
                   >
                     <div className="flex flex-col items-start">
                       <span className="text-xs text-neutral-500">
-                        {checkOut ? 'Selected' : checkIn ? 'Select date' : 'Check-out'}
+                        {checkOut
+                          ? "Selected"
+                          : checkIn
+                          ? "Select date"
+                          : "Check-out"}
                       </span>
                       <span className="font-medium">
-                        {checkOut ? formatDate(checkOut) : 'Add date'}
+                        {checkOut ? formatDate(checkOut) : "Add date"}
                       </span>
                     </div>
                   </Button>
@@ -223,64 +228,44 @@ const getMinCheckOutDate = () => {
               </Popover>
               {checkOut && (
                 <div className="mt-2">
-                  <Label className="text-xs text-neutral-500">Check-out Time</Label>
+                  <Label className="text-xs text-neutral-500">
+                    Check-out Time
+                  </Label>
                   <select
                     className="w-full mt-1 p-2 border rounded text-sm"
                     value={checkOutTime}
                     onChange={(e) => onCheckOutTimeChange?.(e.target.value)}
                   >
-    {formattedCheckOutOptions.map((time) => (
-  <option key={time} value={time}>
-    {time}
-  </option>
-))}
-
+                    {formattedCheckOutOptions.map((time) => (
+                      <option key={time} value={time}>
+                        {time}
+                      </option>
+                    ))}
                   </select>
                 </div>
               )}
             </div>
           </div>
 
-          {/* {checkIn && checkOut && nights > 0 && (
+          {checkIn && checkOut && nights > 0 && (
             <div className="mt-4 p-3 bg-gradient-to-r from-primary/10 to-primary/5 rounded-lg border border-primary/20">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
                 <div className="flex items-center gap-1">
                   <ArrowRight className="w-4 h-4 text-primary" />
                   <span className="text-sm font-medium text-neutral-700">
-                    Duration: {nights} night{nights !== 1 ? 's' : ''}
+                    Duration: {nights} night{nights !== 1 ? "s" : ""}
                   </span>
                 </div>
-                <div className="text-right whitespace-nowrap">
-  <span className="text-xs text-neutral-500">
-    {formatDate(checkIn)} → {formatDate(checkOut)}
-  </span>
-</div>
-
+                <div className="text-sm text-neutral-500 sm:text-right">
+                  <span className="text-xs whitespace-nowrap">
+                    {formatDate(checkIn)} → {formatDate(checkOut)}
+                  </span>
+                </div>
               </div>
             </div>
-          )} */}
-          {checkIn && checkOut && nights > 0 && (
-  <div className="mt-4 p-3 bg-gradient-to-r from-primary/10 to-primary/5 rounded-lg border border-primary/20">
-    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
-      <div className="flex items-center gap-1">
-        <ArrowRight className="w-4 h-4 text-primary" />
-        <span className="text-sm font-medium text-neutral-700">
-          Duration: {nights} night{nights !== 1 ? 's' : ''}
-        </span>
-      </div>
-      <div className="text-sm text-neutral-500 sm:text-right">
-        <span className="text-xs whitespace-nowrap">
-          {formatDate(checkIn)} → {formatDate(checkOut)}
-        </span>
-      </div>
-    </div>
-  </div>
-)}
-
+          )}
         </CardContent>
       </Card>
-
-   
     </div>
   );
 }

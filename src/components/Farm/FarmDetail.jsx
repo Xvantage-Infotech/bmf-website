@@ -80,6 +80,11 @@ export default function FarmDetail() {
       swiperRef.current.swiper.autoplay.start();
     }
   };
+  
+ useEffect(() => {
+  window.scrollTo(0, 0); // Instant jump to top, no animation
+}, []);
+
 
   useEffect(() => {
     if (!farmId) return;
@@ -122,6 +127,7 @@ export default function FarmDetail() {
         <img
           src="/bmflogofoot.svg"
           alt="Book My Farm Logo"
+          loading="eager"
           style={{ width: "350px", height: "350px" }}
           className="mb-4"
         />
@@ -338,12 +344,12 @@ export default function FarmDetail() {
               </div>
 
               {/* Tabs */}
-              <Tabs defaultValue="policy">
+              <Tabs defaultValue="amenities">
                 <div className="overflow-x-auto scrollbar-hide -mx-4 px-4">
                   <TabsList className="flex w-max space-x-2">
-                    <TabsTrigger value="policy">House Policy</TabsTrigger>
-                    <TabsTrigger value="description">Description</TabsTrigger>
                     <TabsTrigger value="amenities">Amenities</TabsTrigger>
+                    <TabsTrigger value="description">Description</TabsTrigger>
+                    <TabsTrigger value="policy">House Policy</TabsTrigger>
                     <TabsTrigger value="location">Location</TabsTrigger>
                     <TabsTrigger value="CancelPolicy">
                       Cancellation Policy

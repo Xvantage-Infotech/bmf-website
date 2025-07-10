@@ -1,6 +1,7 @@
 'use client';
 
 import { config } from '@/config/config';
+import { getAccessToken } from '@/hooks/cookies';
 import axios from 'axios';
 import Cookies from 'js-cookie';
 
@@ -12,7 +13,7 @@ const api = axios.create({
 // Request Interceptor
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token');
+    const token = getAccessToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }

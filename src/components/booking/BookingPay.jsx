@@ -13,6 +13,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { addBooking } from "@/services/Booking/booking.service";
 import { FARM_IMAGE_BASE_URL } from "@/lib/utils";
 import { useDialog } from "@/hooks/use-dialog";
+import { getAccessToken } from "@/hooks/cookies";
 
 export default function BookingPay() {
   const [showPolicy, setShowPolicy] = useState(false);
@@ -30,6 +31,11 @@ export default function BookingPay() {
       setLoading(false); // Set loading to false when the page is ready
     }, 1000); // Adjust this timeout to the actual loading time if needed
   }, []);
+
+  useEffect(() => {
+  window.scrollTo(0, 0); // Instant jump to top, no animation
+}, []);
+
 
   function convertTo24Hour(timeStr) {
     if (!timeStr || timeStr.toLowerCase() === "undefined") return null;
@@ -96,7 +102,7 @@ export default function BookingPay() {
       return;
     }
 
-    const accessToken = localStorage.getItem("accessToken");
+    const accessToken = getAccessToken();
     if (!accessToken) {
       show({
         title: "Login Required",

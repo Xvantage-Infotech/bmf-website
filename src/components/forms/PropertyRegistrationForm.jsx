@@ -25,6 +25,7 @@ import {
   fetchPropertyCategories,
   fetchRulesAndPolicies,
 } from "@/services/Farm/farm.service";
+import { getAccessToken } from "@/hooks/cookies";
 
 // ✅ Move this above the default export or in a separate file
 const InputField = ({
@@ -220,7 +221,7 @@ export default function PropertyRegistrationForm() {
   useEffect(() => {
     const fetchRules = async () => {
       try {
-        const token = localStorage.getItem("accessToken");
+        const token = getAccessToken();
         const res = await fetchRulesAndPolicies(token);
 
         setRulesData({

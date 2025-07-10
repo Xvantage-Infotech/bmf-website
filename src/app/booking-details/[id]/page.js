@@ -6,6 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import { MapPin } from "lucide-react";
 import { FARM_IMAGE_BASE_URL } from "@/lib/utils";
 import { useDialog } from "@/hooks/use-dialog";
+import { getAccessToken } from "@/hooks/cookies";
 
 export default function BookingDetailsPage() {
   const { id } = useParams();
@@ -16,7 +17,7 @@ export default function BookingDetailsPage() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const token = localStorage.getItem("accessToken");
+     const token = getAccessToken();
       if (!token) return;
 
       const res = await getBookingDetails(id, token);
@@ -46,7 +47,7 @@ export default function BookingDetailsPage() {
       : "bg-red-100 text-red-600";
 
   const handleCancelBooking = async () => {
-    const token = localStorage.getItem("accessToken");
+    const token = getAccessToken();
     if (!token) return;
 
     try {

@@ -113,11 +113,12 @@ export default function Footer() {
                 <li key={location.href}>
                   <Link
                     href={location.href}
+                    onClick={(e) => e.preventDefault()}
                     className="hover:text-white transition"
                   >
                     {location.label}
                   </Link>
-                </li>
+                </li> 
               ))}
             </ul>
           </div>
@@ -184,7 +185,7 @@ export default function Footer() {
                   className="h-10 hover:scale-105 transition-transform"
                 />
               </a>
-              <a href="#" target="" rel="noopener noreferrer">
+              <a href="https://apps.apple.com/in/app/bookmyfarm-book-farmhouse/id6747479573" target="_blank" rel="noopener noreferrer">
                 <img
                   src="/appstore-img.svg"
                   alt="App Store"

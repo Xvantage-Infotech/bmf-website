@@ -23,7 +23,7 @@ export const DialogProvider = ({ children }) => {
 
     setTimeout(() => {
       setState((prev) => ({ ...prev, open: false }));
-    }, 5000); // Auto close after 5s
+    }, 3000); // Auto close after 5s
   };
 
   return (

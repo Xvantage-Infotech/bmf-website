@@ -250,6 +250,7 @@ import { getBookingList } from "@/services/Booking/booking.service";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
 import { FARM_IMAGE_BASE_URL } from "@/lib/utils";
+import { getAccessToken } from "@/hooks/cookies";
 
 export default function BookingConfirmation() {
   const [bookings, setBookings] = useState([]);
@@ -265,7 +266,7 @@ export default function BookingConfirmation() {
   ];
 
   const fetchBookings = async (status) => {
-    const token = localStorage.getItem("accessToken");
+    const token = getAccessToken();
     if (!token) return;
 
     setLoading(true);

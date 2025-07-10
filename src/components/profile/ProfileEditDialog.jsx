@@ -25,6 +25,7 @@ import {
   updateUserProfile,
 } from "@/services/Auth/auth.service";
 import { useDialog } from "@/hooks/use-dialog";
+import { getAccessToken, setAccessToken } from "@/hooks/cookies";
 
 export default function ProfileEditDialog({ isOpen, onClose }) {
   const { user, updateUser } = useAuth();
@@ -62,6 +63,10 @@ export default function ProfileEditDialog({ isOpen, onClose }) {
   }, [isOpen, user]);
   console.log("🧪 user.dob from API:", user?.dob);
 
+useEffect(() => {
+  window.scrollTo(0, 0); // Instant jump to top, no animation
+}, []);
+
   const isValidDate = (d) => {
     const parsed = new Date(d);
     return parsed instanceof Date && !isNaN(parsed);
@@ -69,7 +74,7 @@ export default function ProfileEditDialog({ isOpen, onClose }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const token = localStorage.getItem("accessToken");
+    const token = getAccessToken();
     if (!token) {
       show({
         title: "Login Required",
@@ -92,7 +97,7 @@ export default function ProfileEditDialog({ isOpen, onClose }) {
     try {
       const res = await updateUserProfile(payload, token);
       const newToken = res?.data?.token;
-      if (newToken) localStorage.setItem("accessToken", newToken);
+      if (newToken) setAccessToken(newToken);
 
       // refetch user
       const userRes = await getUserProfile(newToken || token);

@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import MyPropertyCard from "@/components/MyPropertyCard/MyPropertyCard";
 import { getPropertyList } from "@/services/Listfarm/listfarm.service";
 import { Button } from "@/components/ui/button";
+import { getAccessToken } from "@/hooks/cookies";
 
 export default function MyPropertyPage() {
   const [properties, setProperties] = useState([]);
@@ -11,7 +12,7 @@ export default function MyPropertyPage() {
 
   useEffect(() => {
     const fetchProperties = async () => {
-      const token = localStorage.getItem("accessToken");
+      const token = getAccessToken();
       if (!token) return;
 
       try {

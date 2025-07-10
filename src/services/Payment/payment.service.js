@@ -1,7 +1,8 @@
 import { api } from '@/axiosApi';
+import { getAccessToken } from '@/hooks/cookies';
 
 export const createRazorpayOrder = async ({ farmId, amount }) => {
-  const accessToken = localStorage.getItem('accessToken'); // or use your auth context if needed
+  const accessToken = getAccessToken();// or use your auth context if needed
 
   const response = await api.post(
     '/api/create_order',
@@ -22,7 +23,7 @@ export const createRazorpayOrder = async ({ farmId, amount }) => {
 
 
 export const verifyPaymentSignature = async ({ payment_id, order_id, signature }) => {
-  const accessToken = localStorage.getItem('accessToken');
+  const accessToken = getAccessToken();
 
   const response = await api.post(
     '/api/verify_signature',
@@ -38,7 +39,7 @@ export const verifyPaymentSignature = async ({ payment_id, order_id, signature }
 };
 
 export const updatePaymentStatus = async ({ order_id, status }) => {
-  const accessToken = localStorage.getItem('accessToken');
+  const accessToken = getAccessToken();
 
   const response = await api.post(
     '/api/payment_status',

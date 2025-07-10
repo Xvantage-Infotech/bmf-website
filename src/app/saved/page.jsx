@@ -5,11 +5,14 @@ import ClientOnly from "@/components/Clientonly/ClientOnly";
 import FarmCard from "@/components/FarmCard/FarmCard";
 import { useAuth } from "@/contexts/AuthContext";
 import { fetchWishlist } from "@/services/Wishlist/wishlist.service";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 export default function SavedFarms() {
   const { user } = useAuth();
   const [wishlist, setWishlist] = useState([]);
   const [loading, setLoading] = useState(true);
+  const isAuthenticated = !!user?.token;
 
   useEffect(() => {
     const loadWishlist = async () => {
@@ -27,6 +30,27 @@ export default function SavedFarms() {
 
     loadWishlist();
   }, [user]);
+
+  useEffect(() => {
+    window.scrollTo(0, 0); // Instant jump to top, no animation
+  }, []);
+
+  if (!isAuthenticated) {
+    return (
+      <ClientOnly>
+        <div className="max-w-md mx-auto py-10 px-4 text-center">
+          <h2 className="text-xl font-bold mb-4">
+            Please log in to view your saved farms
+          </h2>
+          <Link href="/">
+            <Button className="bg-primary text-white hover:bg-primary/90">
+              Go to Home
+            </Button>
+          </Link>
+        </div>
+      </ClientOnly>
+    );
+  }
 
   return (
     <ClientOnly>

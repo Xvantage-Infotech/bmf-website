@@ -80,6 +80,11 @@ export default function FarmDetail() {
       swiperRef.current.swiper.autoplay.start();
     }
   };
+  
+ useEffect(() => {
+  window.scrollTo(0, 0); // Instant jump to top, no animation
+}, []);
+
 
   useEffect(() => {
     if (!farmId) return;
@@ -122,6 +127,7 @@ export default function FarmDetail() {
         <img
           src="/bmflogofoot.svg"
           alt="Book My Farm Logo"
+          loading="eager"
           style={{ width: "350px", height: "350px" }}
           className="mb-4"
         />

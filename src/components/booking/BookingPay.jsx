@@ -31,6 +31,11 @@ export default function BookingPay() {
     }, 1000); // Adjust this timeout to the actual loading time if needed
   }, []);
 
+  useEffect(() => {
+  window.scrollTo(0, 0); // Instant jump to top, no animation
+}, []);
+
+
   function convertTo24Hour(timeStr) {
     if (!timeStr || timeStr.toLowerCase() === "undefined") return null;
 

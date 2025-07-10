@@ -28,6 +28,11 @@ export default function SavedFarms() {
     loadWishlist();
   }, [user]);
 
+  useEffect(() => {
+  window.scrollTo(0, 0); // Instant jump to top, no animation
+}, []);
+
+
   return (
     <ClientOnly>
       {loading ? (

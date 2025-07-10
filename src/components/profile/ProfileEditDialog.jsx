@@ -61,6 +61,10 @@ export default function ProfileEditDialog({ isOpen, onClose }) {
     }
   }, [isOpen, user]);
   console.log("🧪 user.dob from API:", user?.dob);
+  
+useEffect(() => {
+  window.scrollTo(0, 0); // Instant jump to top, no animation
+}, []);
 
   const isValidDate = (d) => {
     const parsed = new Date(d);

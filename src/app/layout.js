@@ -9,7 +9,8 @@
 // }
 
 import "../../styles/globals.css";
-
+import { suppressConsoleLogsInProd } from "@/lib/utils";
+suppressConsoleLogsInProd(); 
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/contexts/AuthContext";

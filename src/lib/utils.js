@@ -174,3 +174,14 @@ export const MY_PROPERTY_IMAGE_BASE_URL = "https://api.bookmyfarm.net";
 
 export const AMENITY_ICON_BASE_URL = "https://api.bookmyfarm.net/assets/images/amenity-icons";
 export const USER_PROFILE_IMAGE_BASE_URL = "https://api.bookmyfarm.net/assets/images/user_profiles";
+
+
+export function suppressConsoleLogsInProd() {
+  if (process.env.NODE_ENV === "production") {
+    console.log = () => {};
+    console.warn = () => {};
+    console.error = () => {};
+    console.info = () => {};
+    console.debug = () => {};
+  }
+}

@@ -7,6 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { fetchWishlist } from "@/services/Wishlist/wishlist.service";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import PublicPageLayout from "@/components/Layout/PublicPageLayout";
 
 export default function SavedFarms() {
   const { user } = useAuth();
@@ -53,6 +54,7 @@ export default function SavedFarms() {
   }
 
   return (
+    <PublicPageLayout>
     <ClientOnly>
       {loading ? (
         <div className="min-h-screen flex flex-col justify-center items-center bg-white">
@@ -97,5 +99,6 @@ export default function SavedFarms() {
         </div>
       )}
     </ClientOnly>
+    </PublicPageLayout>
   );
 }

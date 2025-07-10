@@ -250,6 +250,7 @@ import { getBookingList } from "@/services/Booking/booking.service";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
 import { FARM_IMAGE_BASE_URL } from "@/lib/utils";
+import PublicPageLayout from "./Layout/PublicPageLayout";
 
 export default function BookingConfirmation() {
   const [bookings, setBookings] = useState([]);
@@ -327,6 +328,7 @@ export default function BookingConfirmation() {
   };
 
   return (
+    <PublicPageLayout>
     <div className="min-h-screen bg-neutral-50">
       {loading ? (
         <div className="min-h-screen flex flex-col justify-center items-center bg-white">
@@ -476,5 +478,6 @@ export default function BookingConfirmation() {
         </section>
       )}
     </div>
+    </PublicPageLayout>
   );
 }

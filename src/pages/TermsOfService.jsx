@@ -1,7 +1,10 @@
 "use client";
 
+import PublicPageLayout from "@/components/Layout/PublicPageLayout";
+
 export default function TermsOfService() {
   return (
+    <PublicPageLayout>
     <div className="min-h-screen bg-white">
       <section className="section-padding">
         <div className="max-w-4xl mx-auto container-padding">
@@ -66,5 +69,6 @@ export default function TermsOfService() {
         </div>
       </section>
     </div>
+    </PublicPageLayout>
   );
 }

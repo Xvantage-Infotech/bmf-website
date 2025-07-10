@@ -24,6 +24,31 @@ export const metadata = {
   description: "Book farms seamlessly",
 };
 
+// export default function RootLayout({ children }) {
+//   return (
+//     <html lang="en">
+//       <body className="min-h-screen flex flex-col">
+//         <ClientOnly>
+//           <AuthProvider>
+//             <TooltipProvider>
+//               <DialogProvider>
+//                 {" "}
+//                 {/* ✅ Wrap everything */}
+//                 <Toaster />
+//                 <Header />
+//                 <main className="flex-1">{children}</main>
+//                 <Footer />
+//                 <MobileBottomNav />
+//               </DialogProvider>
+//             </TooltipProvider>
+//           </AuthProvider>
+//         </ClientOnly>
+//       </body>
+//     </html>
+//   );
+// }
+
+
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
@@ -32,13 +57,10 @@ export default function RootLayout({ children }) {
           <AuthProvider>
             <TooltipProvider>
               <DialogProvider>
-                {" "}
-                {/* ✅ Wrap everything */}
                 <Toaster />
                 <Header />
+                {/* main content now fully owns footer/mobile-nav logic */}
                 <main className="flex-1">{children}</main>
-                <Footer />
-                <MobileBottomNav />
               </DialogProvider>
             </TooltipProvider>
           </AuthProvider>

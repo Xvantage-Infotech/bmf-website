@@ -14,6 +14,7 @@ import { addBooking } from "@/services/Booking/booking.service";
 import { FARM_IMAGE_BASE_URL } from "@/lib/utils";
 import { useDialog } from "@/hooks/use-dialog";
 import { getAccessToken } from "@/hooks/cookies";
+import PublicPageLayout from "../Layout/PublicPageLayout";
 
 export default function BookingPay() {
   const [showPolicy, setShowPolicy] = useState(false);
@@ -272,7 +273,7 @@ export default function BookingPay() {
   const imageUrl = `${FARM_IMAGE_BASE_URL}/${image}`;
 
   return (
-    <>
+    <PublicPageLayout>
       {loading ? (
         <div className="min-h-screen flex flex-col justify-center items-center bg-white">
           <img
@@ -397,6 +398,6 @@ export default function BookingPay() {
           </button>
         </div>
       )}
-    </>
+    </PublicPageLayout>
   );
 }

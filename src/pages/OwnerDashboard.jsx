@@ -221,7 +221,7 @@ function AddFarmForm({ onClose }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     // TODO: Implement form submission
-    console.log('Form submitted:', formData);
+    // console.log('Form submitted:', formData);
     onClose();
   };
 

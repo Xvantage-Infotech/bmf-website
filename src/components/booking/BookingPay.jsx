@@ -89,7 +89,7 @@ export default function BookingPay() {
       ? discountedPrice / (1 - increasePercentage / 100) // Reverse the percentage decrease to find the original price
       : discountedPrice; // If no discount, original price is the same as the final price
 
-  console.log(`Original Price: ₹${originalPrice.toLocaleString("en-IN")}`);
+  // console.log(`Original Price: ₹${originalPrice.toLocaleString("en-IN")}`);
 
   const router = useRouter();
 
@@ -118,7 +118,7 @@ export default function BookingPay() {
         farmId: String(farmId),
         amount: discountedPrice,
       });
-      console.log("Order Response:", data);
+      // console.log("Order Response:", data);
 
       if (status !== 1 || !data.order_id) {
         show({
@@ -180,7 +180,7 @@ export default function BookingPay() {
                 total_price: String(discountedPrice),
               });
 
-              console.log("🚀 ~ handler: ~ bookingResponse:", bookingResponse);
+              // console.log("🚀 ~ handler: ~ bookingResponse:", bookingResponse);
 
               if (bookingResponse.status === 1) {
                 const bookingId = bookingResponse.data?.id;
@@ -230,7 +230,7 @@ export default function BookingPay() {
                 order_id: data.order_id,
                 status: "Cancel",
               });
-              console.log("Payment cancelled");
+              // console.log("Payment cancelled");
             } catch (err) {
               console.error("Cancel status error:", err);
             }
@@ -257,9 +257,9 @@ export default function BookingPay() {
 
       rzp.open();
 
-      console.log("🚀 ~ handlePayNow ~ options.prefill:", options.prefill);
-      console.log("Using Razorpay key:", razorpayKey);
-      console.log("🚀 ~ handlePayNow ~ options.order_id:", options.order_id);
+      // console.log("🚀 ~ handlePayNow ~ options.prefill:", options.prefill);
+      // console.log("Using Razorpay key:", razorpayKey);
+      // console.log("🚀 ~ handlePayNow ~ options.order_id:", options.order_id);
     } catch (error) {
       console.error("Payment error:", error.response?.data || error);
       show({

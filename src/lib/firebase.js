@@ -14,10 +14,10 @@ export const sendOTP = async (phoneNumber, verifier) => {
       throw new Error('Invalid phone number format');
     }
 
-    console.log('Sending OTP to:', formattedPhone);
+    // console.log('Sending OTP to:', formattedPhone);
     const confirmation = await signInWithPhoneNumber(auth, formattedPhone, verifier);
     
-    console.log('OTP sent successfully');
+    // console.log('OTP sent successfully');
     return confirmation;
     
   } catch (err) {

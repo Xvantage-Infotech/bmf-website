@@ -96,7 +96,7 @@ export default function AuthModal({ isOpen, onClose }) {
           {
             size: "invisible",
             callback: (response) => {
-              console.log("reCAPTCHA solved:", response);
+              // console.log("reCAPTCHA solved:", response);
               
             },
             "expired-callback": () => {
@@ -147,7 +147,7 @@ export default function AuthModal({ isOpen, onClose }) {
 
 
       const raw = phoneNumber.replace(/\D/g, "");
-      console.log("🚀 ~hasrh handleSendOtp ~ raw:", raw)
+      // console.log("🚀 ~hasrh handleSendOtp ~ raw:", raw)
       if (!raw || raw.length !== 10) {
         throw new Error("Enter a valid 10-digit number");
       }
@@ -220,7 +220,7 @@ export default function AuthModal({ isOpen, onClose }) {
           // Add more user fields if needed
         });
 
-        console.log("✅ Backend token saved and user updated");
+        // console.log("✅ Backend token saved and user updated");
         router.push('/profile');
       } else {
         console.warn("❌ Token not received from backend");
@@ -254,9 +254,9 @@ export default function AuthModal({ isOpen, onClose }) {
       // 🔥 STEP 2: Also verify with your backend
       try {
         await authAPI.verifyOTP(formattedPhone, values.otp);
-        console.log("Backend OTP verification successful");
+        // console.log("Backend OTP verification successful");
       } catch (backendError) {
-        console.warn("Backend OTP verification failed:", backendError);
+        // console.warn("Backend OTP verification failed:", backendError);
       }
 
       // 🔥 STEP 3: Create user account

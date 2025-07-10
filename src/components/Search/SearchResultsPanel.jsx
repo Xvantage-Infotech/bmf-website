@@ -54,7 +54,7 @@ export default function SearchResultsPanel({ searchFilters, selectedCity, select
 
   const handleBookingCancel = () => {
     setIsBookingModalOpen(false);
-    console.log('Booking cancelled');
+    // console.log('Booking cancelled');
   };
 
   return (

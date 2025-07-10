@@ -124,7 +124,7 @@ export default function ImprovedDatePicker({
     <div className={cn("space-y-4", className)}>
       <Card className="border-2 border-neutral-100 hover:border-primary/30 transition-colors">
         <CardContent className="p-4">
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 min-[376px]:grid-cols-2 gap-3">
             <div className="space-y-2">
               <Label className="text-sm font-medium text-neutral-700 flex items-center gap-2">
                 <CalendarDays className="w-4 h-4 text-primary" />
@@ -249,15 +249,15 @@ export default function ImprovedDatePicker({
 
           {checkIn && checkOut && nights > 0 && (
             <div className="mt-4 p-3 bg-gradient-to-r from-primary/10 to-primary/5 rounded-lg border border-primary/20">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-1">
                 <div className="flex items-center gap-1">
                   <ArrowRight className="w-4 h-4 text-primary" />
                   <span className="text-sm font-medium text-neutral-700">
                     Duration: {nights} night{nights !== 1 ? "s" : ""}
                   </span>
                 </div>
-                <div className="text-sm text-neutral-500 sm:text-right">
-                  <span className="text-xs whitespace-nowrap">
+                <div className="text-sm text-neutral-500 sm:text-right text-left break-words">
+                  <span className="text-xs block sm:inline">
                     {formatDate(checkIn)} → {formatDate(checkOut)}
                   </span>
                 </div>

@@ -294,6 +294,20 @@ export default function BookingForm({ farm, className = "" }) {
       : parseFloat(farm.full_day_price_weekday || 0);
   };
 
+  const handleWhatsAppClick = () => {
+    if (!farm) return;
+
+    const name = farm.farm_alias_name || farm.name;
+    const message = `Hello, I am interested to book this Property: ${name} - https://bookmyfarm.in/farm/${farm.id}`;
+
+    const encodedMessage = encodeURIComponent(message).replace(/\+/g, "%20");
+
+    const url = `https://wa.me/919277778778?text=${encodedMessage}`;
+
+    // Some mobile browsers block new tab if not directly triggered by user event
+    window.open(url, "_blank");
+  };
+
   return (
     // <div className={`sticky top-8 ${className}`}>
     <div className={`sticky top-8 w-full max-w-md ${className}`}>
@@ -436,14 +450,13 @@ export default function BookingForm({ farm, className = "" }) {
               onClick={() => window.open("tel:+919277778778", "_self")}
             >
               <Phone className="w-4 h-4 mr-3" />
-              Call us: +91 9277778778
+              <span className="hide-call-label">Call us: </span>+91 9277778778
             </Button>
+
             <Button
               variant="outline"
               className="w-full justify-start"
-              onClick={() =>
-                window.open("https://wa.me/919277778778", "_blank")
-              }
+              onClick={handleWhatsAppClick}
             >
               <MessageCircle className="w-4 h-4 mr-3" />
               WhatsApp Support

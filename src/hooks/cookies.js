@@ -12,6 +12,11 @@ export const setAccessToken = (token) => {
     sameSite: "Lax",
     secure: process.env.NODE_ENV === "production",
   });
+
+    if (process.env.NODE_ENV !== "production") {
+    console.log("✅ Access token set:", token);
+  }
+
 };
 
 export const setFirebaseToken = (token) => {
@@ -19,6 +24,9 @@ export const setFirebaseToken = (token) => {
     sameSite: "Lax",
     secure: process.env.NODE_ENV === "production",
   });
+  if (process.env.NODE_ENV !== "production") {
+    console.log("📲 Firebase token set:", token);
+  }
 };
 
 

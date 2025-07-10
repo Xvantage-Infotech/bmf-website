@@ -344,12 +344,12 @@ export default function FarmDetail() {
               </div>
 
               {/* Tabs */}
-              <Tabs defaultValue="amenities">
+              <Tabs defaultValue="policy">
                 <div className="overflow-x-auto scrollbar-hide -mx-4 px-4">
                   <TabsList className="flex w-max space-x-2">
-                    <TabsTrigger value="amenities">Amenities</TabsTrigger>
-                    <TabsTrigger value="description">Description</TabsTrigger>
                     <TabsTrigger value="policy">House Policy</TabsTrigger>
+                    <TabsTrigger value="description">Description</TabsTrigger>
+                    <TabsTrigger value="amenities">Amenities</TabsTrigger>
                     <TabsTrigger value="location">Location</TabsTrigger>
                     <TabsTrigger value="CancelPolicy">
                       Cancellation Policy
@@ -395,14 +395,10 @@ export default function FarmDetail() {
                   {farm.description ? (
                     <ol className="list-decimal list-inside text-neutral-700 space-y-1">
                       {farm.description
-                        .split(/\r?\n/)
-                        .map((line) => line.trim())
-                        .filter((line) => line.length > 0)
+                        .split("\n")
+                        .filter((line) => line.trim())
                         .map((point, index) => {
-                          // Remove leading bullets, numbering, or dashes
-                          const cleaned = point
-                            .replace(/^(\d+[\.\)]|\•|\-)\s*/, "")
-                            .trim();
+                          const cleaned = point.replace(/^\d+\.\s*/, "");
                           return <li key={index}>{cleaned}</li>;
                         })}
                     </ol>

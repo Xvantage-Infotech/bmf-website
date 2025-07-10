@@ -13,6 +13,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { addBooking } from "@/services/Booking/booking.service";
 import { FARM_IMAGE_BASE_URL } from "@/lib/utils";
 import { useDialog } from "@/hooks/use-dialog";
+import { getAccessToken } from "@/hooks/cookies";
 
 export default function BookingPay() {
   const [showPolicy, setShowPolicy] = useState(false);
@@ -101,7 +102,7 @@ export default function BookingPay() {
       return;
     }
 
-    const accessToken = localStorage.getItem("accessToken");
+    const accessToken = getAccessToken();
     if (!accessToken) {
       show({
         title: "Login Required",

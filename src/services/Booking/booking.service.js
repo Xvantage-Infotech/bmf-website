@@ -1,4 +1,5 @@
 import { api } from "@/axiosApi";
+import { getAccessToken } from "@/hooks/cookies";
 
 export const addBooking = async ({
   farm_id,
@@ -10,7 +11,7 @@ export const addBooking = async ({
   no_of_guest,
   total_price,
 }) => {
-  const accessToken = localStorage.getItem('accessToken');
+  const accessToken = getAccessToken();
 
   const response = await api.post(
     '/api/add_booking',
@@ -36,7 +37,7 @@ export const addBooking = async ({
 
 
 export const getBookingList = async ({ status, page = '1', perPage = '10' }) => {
-  const token = localStorage.getItem('accessToken'); // 🔐 Get token
+ const token = getAccessToken(); // 🔐 Get token
 
   try {
     const response = await api.post(
@@ -64,7 +65,7 @@ export const getBookingList = async ({ status, page = '1', perPage = '10' }) => 
 
 
 export const getBookingDetails = async (bookingId) => {
-  const token = localStorage.getItem('accessToken'); 
+  const token = getAccessToken();
   try {
     const response = await api.post(
       '/api/booking_details',
@@ -86,7 +87,7 @@ export const getBookingDetails = async (bookingId) => {
 
 
 export const cancelBooking = async (bookingId) => {
-   const token = localStorage.getItem('accessToken'); 
+   const token = getAccessToken();
   try {
     const response = await api.post(
       '/api/cancel_booking', 

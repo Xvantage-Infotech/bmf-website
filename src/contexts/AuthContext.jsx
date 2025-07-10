@@ -4,6 +4,8 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth } from "@/lib/firebaseConfig"; // ✅ use dynamic fetch
 import { getUserProfile } from "@/services/Auth/auth.service";
+import { getAccessToken, setFirebaseToken } from "@/hooks/cookies";
+import Cookies from "js-cookie";
 
 const AuthContext = createContext(null);
 
@@ -17,7 +19,7 @@ export const AuthProvider = ({ children }) => {
 
 
 useEffect(() => {
-  const token = localStorage.getItem("accessToken");
+  const token = getAccessToken();
 
   if (!token) {
     setAuthInitialized(true);
@@ -32,7 +34,7 @@ useEffect(() => {
       setUser({ ...fullUser, token }); // ✅ Update with DB response
     } catch (err) {
       console.error("❌ Failed to fetch user from DB:", err);
-      localStorage.removeItem("accessToken");
+      Cookies.remove("access_token");
       setUser(null);
     } finally {
       setAuthInitialized(true);
@@ -44,7 +46,8 @@ useEffect(() => {
   const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
     if (firebaseUser) {
       const firebaseToken = await firebaseUser.getIdToken();
-      localStorage.setItem("firebaseToken", firebaseToken);
+      
+setFirebaseToken(firebaseToken);
 
       setUser((prev) => ({
         ...prev,
@@ -82,7 +85,7 @@ const updateUser = (updatedData) => {
     const result = await confirmationResult.confirm(otp);
     const token = await result.user.getIdToken();
 
-    localStorage.setItem("firebaseToken", token);
+      setFirebaseToken(token);
     setUser((prev) => ({ ...prev, firebaseToken: token }));
     setError(null);
   } catch (err) {
@@ -116,7 +119,7 @@ const logout = async () => {
     console.error("Error signing out from Firebase:", err);
   }
 
-  localStorage.removeItem("accessToken");
+  Cookies.remove("access_token");
   setUser(null);
 };
 

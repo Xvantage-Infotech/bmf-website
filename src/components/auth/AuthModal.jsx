@@ -23,6 +23,7 @@ import { authAPI } from "@/lib/api"; // Import your API
 import { loginOrRegisterUser } from "@/services/Auth/auth.service";
 import { useDialog } from "@/hooks/use-dialog";
 import { useRouter } from "next/navigation";
+import { setAccessToken } from "@/hooks/cookies";
 
 export default function AuthModal({ isOpen, onClose }) {
   const [activeTab, setActiveTab] = useState("login");
@@ -206,7 +207,7 @@ export default function AuthModal({ isOpen, onClose }) {
         const backendToken = result.data.token;
 
         // ✅ Save backend token in localStorage (for future API calls)
-        localStorage.setItem("accessToken", backendToken);
+        setAccessToken(backendToken);
 
         // ✅ Optional: store in user context for access inside app
         updateUser({

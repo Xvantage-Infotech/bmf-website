@@ -20,6 +20,7 @@ import { checkBookingAvailability } from "@/services/Farm/farm.service";
 import { useRouter } from "next/navigation";
 import { formatDate } from "date-fns";
 import { format } from "date-fns";
+import { getAccessToken } from "@/hooks/cookies";
 
 export default function BookingForm({ farm, className = "" }) {
   const [checkIn, setCheckIn] = useState();
@@ -198,7 +199,7 @@ export default function BookingForm({ farm, className = "" }) {
 
     if (!checkIn || !checkOut || isGuestLimitExceeded) return;
 
-    const token = localStorage.getItem("accessToken");
+    const token = getAccessToken();
     if (!token) return;
 
     const formatDate = (date) => {

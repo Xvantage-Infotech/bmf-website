@@ -113,11 +113,12 @@ export default function Footer() {
                 <li key={location.href}>
                   <Link
                     href={location.href}
+                    onClick={(e) => e.preventDefault()}
                     className="hover:text-white transition"
                   >
                     {location.label}
                   </Link>
-                </li>
+                </li> 
               ))}
             </ul>
           </div>

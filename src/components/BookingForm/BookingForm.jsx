@@ -1,15 +1,9 @@
 // BookingForm.jsx
 "use client";
+
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Phone, MessageCircle } from "lucide-react";
 import { formatPrice, calculateTotalPrice, calculateNights } from "@/lib/utils";
@@ -18,7 +12,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import AuthModal from "../auth/AuthModal";
 import { checkBookingAvailability } from "@/services/Farm/farm.service";
 import { useRouter } from "next/navigation";
-import { formatDate } from "date-fns";
 import { format } from "date-fns";
 import { getAccessToken } from "@/hooks/cookies";
 
@@ -36,6 +29,9 @@ export default function BookingForm({ farm, className = "" }) {
 
   const [isBooked, setIsBooked] = useState(false);
   const [bookingError, setBookingError] = useState("");
+
+  const [agreed, setAgreed] = useState(false);
+  const [expanded, setExpanded] = useState(false);
 
   const { user } = useAuth();
   const isLoggedIn = !!user?.token;
@@ -433,12 +429,60 @@ export default function BookingForm({ farm, className = "" }) {
             </div>
           )}
 
+          {/* Agreement Checkbox with Toggleable Rules View */}
+          <div className="mb-4">
+            <div className="flex items-start space-x-2">
+              <input
+                type="checkbox"
+                checked={agreed}
+                onChange={(e) => setAgreed(e.target.checked)}
+                className="form-checkbox mt-1 text-green-600"
+              />
+              <span className="text-sm">
+                Agree to the{" "}
+                <button
+                  className="underline text-green-600 hover:text-green-700"
+                  onClick={() => setExpanded(!expanded)}
+                  type="button"
+                >
+                  important rules
+                </button>
+              </span>
+            </div>
+
+            {expanded && farm?.farm_rules && (
+              <div className="mt-2 p-3 border rounded-lg bg-gray-50 text-sm text-gray-700 space-y-4 max-h-[300px] overflow-auto">
+                <div>
+                  <h4 className="font-semibold mb-2 text-gray-800">
+                    Allowed Rules
+                  </h4>
+                  <ul className="list-disc list-inside space-y-1">
+                    {farm.farm_rules.allow_rule_names?.map((rule, i) => (
+                      <li key={`allow-${i}`}>{rule}</li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div>
+                  <h4 className="font-semibold mt-4 mb-2 text-gray-800">
+                    Not Allowed Rules
+                  </h4>
+                  <ul className="list-disc list-inside space-y-1 text-red-600">
+                    {farm.farm_rules.not_allow_rule_names?.map((rule, i) => (
+                      <li key={`not-allow-${i}`}>{rule}</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            )}
+          </div>
+
           {/* Booking Button */}
           <Button
             onClick={
               hasCheckedAvailability ? handleConfirmBooking : handleBooking
             }
-            disabled={!isBookingValid || isBooked}
+            disabled={!isBookingValid || isBooked || !agreed}
             className="w-full bg-primary text-white hover:bg-primary/90 disabled:opacity-50"
             size="lg"
           >

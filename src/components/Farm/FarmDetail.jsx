@@ -34,6 +34,9 @@ export default function FarmDetail() {
 
   const farmImages = farm?.farm_images || [];
 
+  const totalBedrooms =
+    farm?.rooms?.filter((room) => room.is_room == 1).length || 0;
+
   // Fetch farm data
   useEffect(() => {
     const loadFarm = async () => {
@@ -49,8 +52,8 @@ export default function FarmDetail() {
 
     loadFarm();
   }, [farmId]);
-  
-   useEffect(() => {
+
+  useEffect(() => {
     if (!farmId) return;
 
     const loadFarm = async () => {
@@ -105,8 +108,6 @@ export default function FarmDetail() {
   useEffect(() => {
     window.scrollTo(0, 0); // Instant jump to top, no animation
   }, []);
-
-
 
   if (loading)
     return (
@@ -195,24 +196,26 @@ export default function FarmDetail() {
                 {/* Right side - price and discount */}
                 <div className="text-right">
                   {(() => {
-                       const finalPrice = parseFloat(farm.final_price) || 0; // This is the final price after the discount
-            const discountPercent = parseFloat(farm.increase_percentage) || 0; // This is the discount percentage
+                    const finalPrice = parseFloat(farm.final_price) || 0; // This is the final price after the discount
+                    const discountPercent =
+                      parseFloat(farm.increase_percentage) || 0; // This is the discount percentage
 
-            // Calculate the original price before the discount was applied
-            const originalPrice = finalPrice / (1 - discountPercent / 100);
+                    // Calculate the original price before the discount was applied
+                    const originalPrice =
+                      finalPrice / (1 - discountPercent / 100);
 
-            // Function to round to the nearest 50 and return an integer
-           // Round to nearest 100 instead of 50
-const roundToNearest100 = (price) => {
-  return Math.round(price / 100) * 100;
-};
+                    // Function to round to the nearest 50 and return an integer
+                    // Round to nearest 100 instead of 50
+                    const roundToNearest100 = (price) => {
+                      return Math.round(price / 100) * 100;
+                    };
 
+                    // Display the price after discount
+                    const price = roundToNearest100(finalPrice);
 
-            // Display the price after discount
-            const price = roundToNearest100(finalPrice);
-
-            // Display the original price after discount
-            const originalPriceRounded = roundToNearest100(originalPrice);
+                    // Display the original price after discount
+                    const originalPriceRounded =
+                      roundToNearest100(originalPrice);
 
                     return (
                       <div>
@@ -221,15 +224,13 @@ const roundToNearest100 = (price) => {
                           {/* For Mobile View: Stack original and current price */}
                           <div className="flex flex-col items-end md:flex-row md:gap-3">
                             {discountPercent > 0 && (
-                             <span className="text-xl line-through text-neutral-800 font-semibold md:block mb-1 md:mb-0">
- ₹{originalPriceRounded.toLocaleString("en-IN")}
-</span>
-
+                              <span className="text-xl line-through text-neutral-800 font-semibold md:block mb-1 md:mb-0">
+                                ₹{originalPriceRounded.toLocaleString("en-IN")}
+                              </span>
                             )}
-                           <span className="text-xl md:text-3xl font-bold text-primary">
-   ₹{price.toLocaleString("en-IN")}
-</span>
-
+                            <span className="text-xl md:text-3xl font-bold text-primary">
+                              ₹{price.toLocaleString("en-IN")}
+                            </span>
                           </div>
 
                           {/* Discount badge - consistent size */}
@@ -280,17 +281,26 @@ const roundToNearest100 = (price) => {
               {/* Badges section */}
               <div className="flex flex-wrap gap-4">
                 <Badge variant="secondary">
-                  <Bed className="w-4 h-4 mr-1" /> {farm.bedrooms} Bedroom
+                  <Bed className="w-4 h-4 mr-1" />
+                  {totalBedrooms} Bedroom{totalBedrooms !== 1 ? "s" : ""}
                 </Badge>
+
                 <Badge variant="secondary">
-                  <Users className="w-4 h-4 mr-1" /> {farm.person_limit} Guests
+                  <Users className="w-4 h-4 mr-1" />
+                  {farm.day_time_person_limit} Guests (Day Capacity)
                 </Badge>
+
+                <Badge variant="secondary">
+                  <Users className="w-4 h-4 mr-1" />
+                  {farm.night_time_person_limit} Guests (Night Capacity)
+                </Badge>
+
                 <Badge variant="secondary">{farm.category?.name}</Badge>
                 <Badge
                   variant="outline"
                   className="text-primary border-primary"
                 >
-                  {farm.city?.name}, {farm.state}
+                  {farm.city?.name}
                 </Badge>
               </div>
             </div>
@@ -299,22 +309,74 @@ const roundToNearest100 = (price) => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 p-8">
               {/* Left */}
               <div className="lg:col-span-2">
+                {/* ✅ Mobile Image Slider (Visible below md) */}
                 <div
                   onMouseEnter={stopAutoScroll}
                   onMouseLeave={startAutoScroll}
-                  className="relative overflow-hidden mb-8"
+                  className="relative overflow-hidden mb-8 block md:hidden"
                 >
                   <div className="relative flex items-center">
                     <Swiper
                       ref={swiperRef}
-                      modules={[Autoplay]} // Only keep Autoplay module
+                      modules={[Autoplay]}
+                      loop={true}
+                      spaceBetween={16}
+                      slidesPerView={1}
+                      centeredSlides={false}
+                      speed={1500} 
+                      onSlideChange={handleSlideChange}
+                      autoplay={{
+                        delay: 1500, // stay duration
+                        disableOnInteraction: false,
+                        pauseOnMouseEnter: true,
+                      }}
+                      className="w-full"
+                    >
+                      {farmImages.length > 0 ? (
+                        farmImages.map((img, index) => (
+                          <SwiperSlide key={img.id}>
+                            <div className="w-full h-[250px] sm:h-[320px] md:h-[400px] rounded-2xl overflow-hidden shadow-md">
+                              <img
+                                src={`${FARM_IMAGE_BASE_URL}/${img.image}`}
+                                alt={`Farm image ${index + 1}`}
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                          </SwiperSlide>
+                        ))
+                      ) : (
+                        <SwiperSlide>
+                          <div className="w-full h-[250px] sm:h-[320px] md:h-[400px] rounded-2xl overflow-hidden shadow-md">
+                            <img
+                              src="/placeholder.jpg"
+                              alt="Placeholder Image"
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        </SwiperSlide>
+                      )}
+                    </Swiper>
+                  </div>
+                </div>
+
+                {/* ✅ Desktop Image Slider (Visible from md and up) */}
+                <div
+                  onMouseEnter={stopAutoScroll}
+                  onMouseLeave={startAutoScroll}
+                  className="relative overflow-hidden mb-8 hidden md:block"
+                >
+                  <div className="relative flex items-center">
+                    <Swiper
+                      ref={swiperRef}
+                      modules={[Autoplay]}
                       loop={true}
                       spaceBetween={20}
                       slidesPerView={1.6}
                       centeredSlides={true}
+                      speed={1500} 
                       onSlideChange={handleSlideChange}
                       autoplay={{
-                        delay: 3000,
+                        delay: 1500, // stay duration
                         disableOnInteraction: false,
                         pauseOnMouseEnter: true,
                       }}
@@ -351,12 +413,12 @@ const roundToNearest100 = (price) => {
                 </div>
 
                 {/* Tabs */}
-                <Tabs defaultValue="amenities">
+                <Tabs defaultValue="policy">
                   <div className="overflow-x-auto scrollbar-hide -mx-4 px-4">
                     <TabsList className="flex w-max space-x-2">
+                      <TabsTrigger value="policy">House Policy</TabsTrigger>
                       <TabsTrigger value="amenities">Amenities</TabsTrigger>
                       <TabsTrigger value="description">Description</TabsTrigger>
-                      <TabsTrigger value="policy">House Policy</TabsTrigger>
                       <TabsTrigger value="location">Location</TabsTrigger>
                       <TabsTrigger value="CancelPolicy">
                         Cancellation Policy
@@ -443,8 +505,7 @@ const roundToNearest100 = (price) => {
                     ))}
                   </TabsContent>
 
-
-  <TabsContent value="location">
+                  <TabsContent value="location">
                     {farm.latitude && farm.longitude ? (
                       <div className="relative w-full h-64 md:h-96 rounded-lg overflow-hidden">
                         <iframe
@@ -469,7 +530,6 @@ const roundToNearest100 = (price) => {
                       </p>
                     )}
                   </TabsContent>
-
                 </Tabs>
               </div>
 

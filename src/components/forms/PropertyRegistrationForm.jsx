@@ -79,7 +79,10 @@ const InputField = ({
   );
 };
 
-export default function PropertyRegistrationForm() {
+export default function PropertyRegistrationForm({
+  authModalOpen,
+  setAuthModalOpen,
+}) {
   const { user } = useAuth();
   const { show } = useDialog();
   const refs = useRef({});
@@ -95,12 +98,11 @@ export default function PropertyRegistrationForm() {
     }
 
     if (!user?.token) {
-      show({
-        title: "Login Required",
-        description: "Please log in to register your property.",
-      });
-
       console.error("❌ No token found for user");
+
+      // 👇 Trigger Auth Modal
+      setAuthModalOpen?.(true);
+
       return;
     }
 

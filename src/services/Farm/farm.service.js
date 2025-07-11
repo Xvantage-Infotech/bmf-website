@@ -15,7 +15,7 @@ export const fetchFarms = async (filters = {}) => {
       farm_id: "",
       sort_by: "",
       page: "1",
-      per_page: "50",
+      per_page: "100",
       ...filters,
     };
 

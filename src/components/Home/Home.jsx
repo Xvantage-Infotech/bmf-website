@@ -42,6 +42,13 @@ export default function Homes() {
 
   const selectedCity = searchParams.get("city") || "all";
 
+  const scrollToFarmList = () => {
+    const section = document.getElementById("farm-list");
+    if (section) {
+      section.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
   const handleCityChange = (city) => {
     const params = new URLSearchParams(searchParams);
     if (city === "all") {
@@ -304,6 +311,7 @@ export default function Homes() {
 
             <div className="text-center mt-12">
               <Button
+                onClick={scrollToFarmList}
                 size="lg"
                 variant="outline"
                 className="border-2 hover:bg-primary hover:text-white transition-all"
@@ -343,20 +351,22 @@ export default function Homes() {
         selectedCategory={selectedCategory !== 'all' ? selectedCategory : undefined}
         searchQuery={searchFilters?.location || ''}
       /> */}
-        <FarmList
-          selectedCity={selectedCity} // Make sure to pass these if they're available
-          selectedCategory={selectedCategory}
-          searchFilters={{
-            ...(searchFilters || {}),
-            category_id:
-              selectedCategory !== "all" ? Number(selectedCategory) : "",
-            city_id:
-              selectedCity !== "all"
-                ? CITY_IDS[selectedCity.toLowerCase()]
-                : "",
-          }}
-          farms={isSearchMode ? farms : null}
-        />
+        <div id="farm-list">
+          <FarmList
+            selectedCity={selectedCity} // Make sure to pass these if they're available
+            selectedCategory={selectedCategory}
+            searchFilters={{
+              ...(searchFilters || {}),
+              category_id:
+                selectedCategory !== "all" ? Number(selectedCategory) : "",
+              city_id:
+                selectedCity !== "all"
+                  ? CITY_IDS[selectedCity.toLowerCase()]
+                  : "",
+            }}
+            farms={isSearchMode ? farms : null}
+          />
+        </div>
 
         <VideoGallery />
         <CustomerReviews />

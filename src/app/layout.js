@@ -120,8 +120,7 @@ export default function RootLayout({ children }) {
                 <Toaster />
                 <Header />
                 <main className="flex-1">{children}</main>
-                <Footer />
-                <MobileBottomNav />
+               
               </DialogProvider>
             </TooltipProvider>
           </AuthProvider>

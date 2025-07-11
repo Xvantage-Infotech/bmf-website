@@ -2,8 +2,12 @@
 
 import PropertyRegistrationForm from "@/components/forms/PropertyRegistrationForm";
 import PublicPageLayout from "./Layout/PublicPageLayout";
+import AuthModal from "@/components/auth/AuthModal";
+import { useState } from "react";
 
 export default function PropertyRegistration() {
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+
   return (
     <PublicPageLayout>
       <div className="min-h-screen bg-neutral-50">
@@ -69,7 +73,14 @@ export default function PropertyRegistration() {
               </p>
             </div>
 
-            <PropertyRegistrationForm />
+            <PropertyRegistrationForm
+              authModalOpen={authModalOpen}
+              setAuthModalOpen={setAuthModalOpen}
+            />
+            <AuthModal
+              isOpen={authModalOpen}
+              onClose={() => setAuthModalOpen(false)}
+            />
           </div>
         </section>
 

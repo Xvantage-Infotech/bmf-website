@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 // import { Link, useLocation } from 'wouter';
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -20,6 +20,33 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useRouter } from "next/navigation";
 import { Heart, Home } from "lucide-react";
+import { getPropertyList } from "@/services/Listfarm/listfarm.service";
+import { getBookingList } from "@/services/Booking/booking.service";
+
+export const checkUserHasProperties = async (token) => {
+  try {
+    const properties = await getPropertyList(token);
+    return properties?.length > 0;
+  } catch (err) {
+    console.error("Failed to fetch property list:", err);
+    return false;
+  }
+};
+
+export const checkUserHasBookings = async (token) => {
+  try {
+    const res = await getBookingList({
+      status: 1,
+      page: "1",
+      perPage: "1",
+      token,
+    });
+    return res?.status === 1 && res?.data?.length > 0;
+  } catch (err) {
+    console.error("Failed to fetch booking list:", err);
+    return false;
+  }
+};
 
 export default function Header() {
   const pathname = usePathname();
@@ -28,10 +55,29 @@ export default function Header() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const { isMobile } = useResponsive();
   const { user, isAuthenticated, logout, authInitialized } = useAuth();
+  const [hasProperties, setHasProperties] = useState(false);
+  const [hasBookings, setHasBookings] = useState(false);
+
   const router = useRouter();
 
   // if (!authInitialized) return null; // or a skeleton if you want
   const isLoggedIn = !!user?.token;
+
+  useEffect(() => {
+    const runChecks = async () => {
+      if (!user?.token) return;
+
+      const [hasProps, hasBooks] = await Promise.all([
+        checkUserHasProperties(user.token),
+        checkUserHasBookings(user.token),
+      ]);
+
+      setHasProperties(hasProps);
+      setHasBookings(hasBooks);
+    };
+
+    runChecks();
+  }, [user?.token]);
 
   const navigationItems = [
     { href: "/", label: "Farms" },
@@ -69,15 +115,16 @@ export default function Header() {
           key={item.href}
           href={item.href}
           className={`
-            ${mobile ? "block py-3 text-base" : "inline-block"}
-            text-neutral-600 hover:text-primary transition-colors
-            ${pathname === item.href ? "text-primary font-medium" : ""}
-          `}
+          ${mobile ? "block py-3 text-base" : "inline-block"}
+          text-neutral-600 hover:text-primary transition-colors
+          ${pathname === item.href ? "text-primary font-medium" : ""}
+        `}
           onClick={() => mobile && setIsMenuOpen(false)}
         >
           {item.label}
         </Link>
       ))}
+
       {mobile &&
         (isAuthenticated ? (
           <div className="mt-4 pt-4 border-t border-neutral-200">
@@ -93,6 +140,7 @@ export default function Header() {
               </Avatar>
               <span className="text-sm font-medium">{user?.name}</span>
             </div>
+
             <div className="space-y-2">
               <Button
                 variant="outline"
@@ -105,6 +153,7 @@ export default function Header() {
                 <User className="mr-2 h-4 w-4" />
                 <span>Profile</span>
               </Button>
+
               <Button
                 variant="outline"
                 className="w-full justify-start"
@@ -117,43 +166,46 @@ export default function Header() {
                 <span>Edit Profile</span>
               </Button>
 
-               <Button
+              {hasProperties && (
+                <Button
+                  variant="outline"
+                  className="w-full justify-start"
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    router.push("/myproperty");
+                  }}
+                >
+                  <Home className="mr-2 h-4 w-4" />
+                  <span>My Property</span>
+                </Button>
+              )}
+
+              {hasBookings && (
+                <Button
+                  variant="outline"
+                  className="w-full justify-start"
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    router.push("/booking-confirmation");
+                  }}
+                >
+                  <User className="mr-2 h-4 w-4" />
+                  <span>My Bookings</span>
+                </Button>
+              )}
+
+              <Button
                 variant="outline"
                 className="w-full justify-start"
-                onClick={() => {
+                onClick={async () => {
+                  await logout();
                   setIsMenuOpen(false);
-                  router.push("/myproperty");
+                  router.push("/");
                 }}
               >
-                <Home className="mr-2 h-4 w-4" />
-                <span>My Property</span>
+                <LogOut className="mr-2 h-4 w-4" />
+                <span>Logout</span>
               </Button>
-
-               <Button
-                variant="outline"
-                className="w-full justify-start"
-                onClick={() => {
-                  setIsMenuOpen(false);
-                  router.push("/booking-confirmation");
-                }}
-              >
-                <User className="mr-2 h-4 w-4" />
-                <span>My Bookings</span>
-              </Button>
-              
-             <Button
-              variant="outline"
-              className="w-full justify-start"
-              onClick={async () => {
-                await logout();
-                setIsMenuOpen(false);
-                router.push("/"); // ✅ Redirect after logout
-              }}
-            >
-              <LogOut className="mr-2 h-4 w-4" />
-              <span>LogOut</span>
-            </Button>
-
             </div>
           </div>
         ) : (
@@ -208,30 +260,33 @@ export default function Header() {
                       Wishlist
                     </DropdownMenuItem>
 
-                    <DropdownMenuItem
-                      onClick={() => router.push("/myproperty")}
-                    >
-                      <Home className="mr-2 h-4 w-4" />
-                      My Property
-                    </DropdownMenuItem>
+                    {hasProperties && (
+                      <DropdownMenuItem
+                        onClick={() => router.push("/myproperty")}
+                      >
+                        <Home className="mr-2 h-4 w-4" />
+                        My Property
+                      </DropdownMenuItem>
+                    )}
+
+                    {hasBookings && (
+                      <DropdownMenuItem
+                        onClick={() => router.push("/booking-confirmation")}
+                      >
+                        <User className="mr-2 h-4 w-4" />
+                        My Bookings
+                      </DropdownMenuItem>
+                    )}
 
                     <DropdownMenuItem
-                      onClick={() => router.push("/booking-confirmation")}
+                      onClick={async () => {
+                        await logout();
+                        router.push("/"); // ✅ Redirect after logout
+                      }}
                     >
-                      <User className="mr-2 h-4 w-4" />
-                      My Bookings
+                      <LogOut className="mr-2 h-4 w-4" />
+                      Logout
                     </DropdownMenuItem>
-
-                  <DropdownMenuItem
-                    onClick={async () => {
-                      await logout();
-                      router.push("/"); // ✅ Redirect after logout
-                    }}
-                  >
-                    <LogOut className="mr-2 h-4 w-4" />
-                    Logout
-                  </DropdownMenuItem>
-
                   </DropdownMenuContent>
                 </DropdownMenu>
               ) : (

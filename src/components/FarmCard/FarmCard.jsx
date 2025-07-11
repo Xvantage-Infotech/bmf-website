@@ -188,7 +188,7 @@ export default function FarmCard({
           <div className="flex items-center justify-between text-sm text-neutral-600 mb-3">
             <span className="flex items-center">
               <Bed className="w-4 h-4 mr-1" />
-              {farm.bedrooms} Bedroom{farm.bedrooms !== 1 ? "s" : ""}
+              {farm.rooms_count} Bedroom{farm.rooms_count !== 1 ? "s" : ""}
             </span>
             <span className="flex items-center">
               <Users className="w-4 h-4 mr-1" />

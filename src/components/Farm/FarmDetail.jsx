@@ -135,7 +135,7 @@ export default function FarmDetail() {
     if (!farm) return;
 
     const name = farm.farm_alias_name || farm.name;
-    const message = `Hello, I am interested to book this Property: ${name} - https://bookmyfarm.in/farm/${farm.id}`;
+    const message = `Hello, I am interested to book this Property: ${name} - https://bookmyfarm.net/farm/${farm.id}`;
 
     const encodedMessage = encodeURIComponent(message).replace(/\+/g, "%20");
 

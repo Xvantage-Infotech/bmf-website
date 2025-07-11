@@ -58,6 +58,17 @@ export default function AuthModal({ isOpen, onClose }) {
   const [recaptchaError, setRecaptchaError] = useState(null);
 
   useEffect(() => {
+    if (!isOpen) {
+      // Reset forms when modal closes
+      loginForm.reset();
+      signupForm.reset();
+      setIsOtpSent(false);
+      setRecaptchaError(null);
+      setFormattedPhone("");
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
     if (!isOpen) return;
 
     const initializeRecaptcha = async () => {
@@ -120,6 +131,21 @@ export default function AuthModal({ isOpen, onClose }) {
         setRecaptchaError(null);
       } catch (err) {
         console.error("reCAPTCHA initialization failed:", err);
+
+        // If recaptcha has already been rendered in this element
+        if (err.message?.includes("already been rendered")) {
+          // Optional: show message briefly before reload
+          setRecaptchaError(
+            "Security verification failed. Refreshing the page..."
+          );
+
+          // Wait 1 second then refresh
+          setTimeout(() => {
+            window.location.reload();
+          }, 1000);
+          return;
+        }
+
         setRecaptchaError(
           "Security verification failed. Please refresh the page."
         );
@@ -144,8 +170,6 @@ export default function AuthModal({ isOpen, onClose }) {
 
   const handleSendOtp = async (phoneNumber) => {
     try {
-
-
       const raw = phoneNumber.replace(/\D/g, "");
       // console.log("🚀 ~hasrh handleSendOtp ~ raw:", raw)
       if (!raw || raw.length !== 10) {
@@ -167,25 +191,39 @@ export default function AuthModal({ isOpen, onClose }) {
     } catch (err) {
       console.error("❌ Failed to send OTP:", err);
 
+      const errorCode = err.code || err.message || "";
+      const shouldReload = [
+        "recaptcha has already been rendered",
+        "auth/internal-error",
+        "auth/internal-error-encountered",
+        "auth/too-many-requests",
+      ].some((code) => errorCode.includes(code));
+
       let errorMessage = err.message;
-      if (err.code === "auth/too-many-requests") {
-        errorMessage = "Too many attempts. Please try again later.";
-      } else if (err.code === "auth/invalid-phone-number") {
+
+      if (errorCode.includes("auth/invalid-phone-number")) {
         errorMessage = "Invalid phone number format.";
-      } else if (err.code === "auth/captcha-check-failed") {
+      } else if (errorCode.includes("auth/captcha-check-failed")) {
         errorMessage = "Security verification failed. Please try again.";
+      } else if (errorCode.includes("auth/too-many-requests")) {
+        errorMessage = "Too many attempts. Refreshing the page...";
       }
 
       show({
         title: "OTP Error",
         description: errorMessage || "Failed to send OTP",
       });
+
+      if (shouldReload) {
+        console.log("🔁 Reloading page due to:", errorCode);
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
+      }
     } finally {
       setLocalLoading(false);
     }
   };
-
-
 
   const handleLogin = async (values) => {
     if (!values.otp || values.otp.length < 4) {
@@ -312,7 +350,11 @@ export default function AuthModal({ isOpen, onClose }) {
           <TabsContent value="login" className="space-y-4 py-4">
             <Form {...loginForm}>
               <form
-                onSubmit={loginForm.handleSubmit(handleLogin)}
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (!isOtpSent) return; // Prevent accidental form submission before OTP is sent
+                  loginForm.handleSubmit(handleLogin)(e);
+                }}
                 className="space-y-4"
               >
                 <div className="space-y-2">
@@ -326,6 +368,7 @@ export default function AuthModal({ isOpen, onClose }) {
                       type="tel"
                       placeholder="Mobile Number"
                       className="rounded-l-none"
+                      disabled={isOtpSent}
                       {...loginForm.register("mobileNumber")}
                     />
                   </div>
@@ -473,6 +516,3 @@ export default function AuthModal({ isOpen, onClose }) {
     </Dialog>
   );
 }
-
-
-

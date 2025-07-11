@@ -50,6 +50,9 @@ import ClientOnly from "@/components/Clientonly/ClientOnly";
 export const metadata = {
   title: "BookMyFarm",
   description: "Book farms seamlessly",
+  icons: {
+    icon: '/favicon.ico',
+  },
 };
 
 

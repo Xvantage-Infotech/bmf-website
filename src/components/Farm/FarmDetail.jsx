@@ -202,15 +202,17 @@ export default function FarmDetail() {
             const originalPrice = finalPrice / (1 - discountPercent / 100);
 
             // Function to round to the nearest 50 and return an integer
-            const roundToNearest50 = (price) => {
-              return Math.round(price / 50) * 50;
-            };
+           // Round to nearest 100 instead of 50
+const roundToNearest100 = (price) => {
+  return Math.round(price / 100) * 100;
+};
+
 
             // Display the price after discount
-            const price = roundToNearest50(finalPrice);
+            const price = roundToNearest100(finalPrice);
 
             // Display the original price after discount
-            const originalPriceRounded = roundToNearest50(originalPrice);
+            const originalPriceRounded = roundToNearest100(originalPrice);
 
                     return (
                       <div>
@@ -219,13 +221,15 @@ export default function FarmDetail() {
                           {/* For Mobile View: Stack original and current price */}
                           <div className="flex flex-col items-end md:flex-row md:gap-3">
                             {discountPercent > 0 && (
-                              <span className="text-xl line-through text-neutral-800 font-semibold md:block mb-1 md:mb-0">
-                                ₹{originalPrice.toLocaleString("en-IN")}
-                              </span>
+                             <span className="text-xl line-through text-neutral-800 font-semibold md:block mb-1 md:mb-0">
+ ₹{originalPriceRounded.toLocaleString("en-IN")}
+</span>
+
                             )}
-                            <span className="text-xl md:text-3xl font-bold text-primary">
-                              ₹{price.toLocaleString("en-IN")}
-                            </span>
+                           <span className="text-xl md:text-3xl font-bold text-primary">
+   ₹{price.toLocaleString("en-IN")}
+</span>
+
                           </div>
 
                           {/* Discount badge - consistent size */}

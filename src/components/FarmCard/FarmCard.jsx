@@ -249,7 +249,7 @@ export default function FarmCard({
                     </span>
                   )}
                   <span className="text-lg font-bold text-black">
-                    {formatPrice(price)}
+                    {formatPrice(finalPrice)}
                   </span>
                 </div>
 

@@ -229,7 +229,7 @@ export default function FarmDetail() {
                               </span>
                             )}
                             <span className="text-xl md:text-3xl font-bold text-primary">
-                              ₹{price.toLocaleString("en-IN")}
+                              ₹{finalPrice.toLocaleString("en-IN")}
                             </span>
                           </div>
 

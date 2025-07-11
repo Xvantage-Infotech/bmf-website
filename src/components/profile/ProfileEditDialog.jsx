@@ -61,7 +61,7 @@ export default function ProfileEditDialog({ isOpen, onClose }) {
       setPreviewImage(user.profile_image);
     }
   }, [isOpen, user]);
-  console.log("🧪 user.dob from API:", user?.dob);
+  // console.log("🧪 user.dob from API:", user?.dob);
 
 useEffect(() => {
   window.scrollTo(0, 0); // Instant jump to top, no animation

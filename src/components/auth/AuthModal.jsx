@@ -58,6 +58,17 @@ export default function AuthModal({ isOpen, onClose }) {
   const [recaptchaError, setRecaptchaError] = useState(null);
 
   useEffect(() => {
+    if (!isOpen) {
+      // Reset forms when modal closes
+      loginForm.reset();
+      signupForm.reset();
+      setIsOtpSent(false);
+      setRecaptchaError(null);
+      setFormattedPhone("");
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
     if (!isOpen) return;
 
     const initializeRecaptcha = async () => {
@@ -119,6 +130,21 @@ export default function AuthModal({ isOpen, onClose }) {
         setRecaptchaError(null);
       } catch (err) {
         console.error("reCAPTCHA initialization failed:", err);
+
+        // If recaptcha has already been rendered in this element
+        if (err.message?.includes("already been rendered")) {
+          // Optional: show message briefly before reload
+          setRecaptchaError(
+            "Security verification failed. Refreshing the page..."
+          );
+
+          // Wait 1 second then refresh
+          setTimeout(() => {
+            window.location.reload();
+          }, 1000);
+          return;
+        }
+
         setRecaptchaError(
           "Security verification failed. Please refresh the page."
         );
@@ -164,19 +190,35 @@ export default function AuthModal({ isOpen, onClose }) {
     } catch (err) {
       console.error("❌ Failed to send OTP:", err);
 
+      const errorCode = err.code || err.message || "";
+      const shouldReload = [
+        "recaptcha has already been rendered",
+        "auth/internal-error",
+        "auth/internal-error-encountered",
+        "auth/too-many-requests",
+      ].some((code) => errorCode.includes(code));
+
       let errorMessage = err.message;
-      if (err.code === "auth/too-many-requests") {
-        errorMessage = "Too many attempts. Please try again later.";
-      } else if (err.code === "auth/invalid-phone-number") {
+
+      if (errorCode.includes("auth/invalid-phone-number")) {
         errorMessage = "Invalid phone number format.";
-      } else if (err.code === "auth/captcha-check-failed") {
+      } else if (errorCode.includes("auth/captcha-check-failed")) {
         errorMessage = "Security verification failed. Please try again.";
+      } else if (errorCode.includes("auth/too-many-requests")) {
+        errorMessage = "Too many attempts. Refreshing the page...";
       }
 
       show({
         title: "OTP Error",
         description: errorMessage || "Failed to send OTP",
       });
+
+      if (shouldReload) {
+        console.log("🔁 Reloading page due to:", errorCode);
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
+      }
     } finally {
       setLocalLoading(false);
     }

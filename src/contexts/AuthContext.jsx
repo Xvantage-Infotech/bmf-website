@@ -16,87 +16,80 @@ export const AuthProvider = ({ children }) => {
   const [error, setError] = useState(null);
   const [authInitialized, setAuthInitialized] = useState(false);
 
+  useEffect(() => {
+    const token = getAccessToken();
 
-
-useEffect(() => {
-  const token = getAccessToken();
-
-  if (!token) {
-    setAuthInitialized(true);
-    return;
-  }
-
-  const fetchUser = async () => {
-    try {
-      const res = await getUserProfile(token);
-      const fullUser = res?.data;
-
-      setUser({ ...fullUser, token }); // ✅ Update with DB response
-    } catch (err) {
-      console.error("❌ Failed to fetch user from DB:", err);
-      Cookies.remove("access_token");
-      setUser(null);
-    } finally {
+    if (!token) {
       setAuthInitialized(true);
+      return;
     }
+
+    const fetchUser = async () => {
+      try {
+        const res = await getUserProfile(token);
+        const fullUser = res?.data;
+
+        setUser({ ...fullUser, token }); // ✅ Update with DB response
+      } catch (err) {
+        console.error("❌ Failed to fetch user from DB:", err);
+        Cookies.remove("access_token");
+        setUser(null);
+      } finally {
+        setAuthInitialized(true);
+      }
+    };
+
+    fetchUser();
+
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        const firebaseToken = await firebaseUser.getIdToken();
+
+        setFirebaseToken(firebaseToken);
+
+        setUser((prev) => ({
+          ...prev,
+          firebaseToken,
+        }));
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  const updateUser = (updatedData) => {
+    setUser((prev) => ({
+      ...prev,
+      ...updatedData,
+    }));
   };
-
-  fetchUser();
-
-  const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-    if (firebaseUser) {
-      const firebaseToken = await firebaseUser.getIdToken();
-      
-setFirebaseToken(firebaseToken);
-
-      setUser((prev) => ({
-        ...prev,
-        firebaseToken,
-      }));
-    }
-  });
-
-  return () => unsubscribe();
-}, []);
-
-
-const updateUser = (updatedData) => {
-  setUser((prev) => ({
-    ...prev,
-    ...updatedData,
-  }));
-};
-
-
-
 
   // ✅ Clear auth error
   const clearError = () => setError(null);
 
   // ✅ OTP verification logic
- const verifyOtpAndLogin = async (otp) => {
-  if (!confirmationResult) {
-    setError("No OTP confirmation session found");
-    return;
-  }
+  const verifyOtpAndLogin = async (otp) => {
+    if (!confirmationResult) {
+      setError("No OTP confirmation session found");
+      return;
+    }
 
-  setLoading(true);
-  try {
-    const result = await confirmationResult.confirm(otp);
-    const token = await result.user.getIdToken();
+    setLoading(true);
+    try {
+      const result = await confirmationResult.confirm(otp);
+      const token = await result.user.getIdToken();
 
       setFirebaseToken(token);
-    setUser((prev) => ({ ...prev, firebaseToken: token }));
-    setError(null);
-  } catch (err) {
-    console.error("❌ OTP verification failed:", err);
-    setError("Invalid OTP. Please try again.");
-    throw err;
-  } finally {
-    setLoading(false);
-  }
-};
-
+      setUser((prev) => ({ ...prev, firebaseToken: token }));
+      setError(null);
+    } catch (err) {
+      console.error("❌ OTP verification failed:", err);
+      setError("Invalid OTP. Please try again.");
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // ✅ Optional: Send user data to backend after signup
   const signup = async ({ name, mobileNumber }) => {
@@ -111,23 +104,25 @@ const updateUser = (updatedData) => {
     }
   };
 
-  
-const logout = async () => {
-  try {
-    await signOut(auth); // ✅ Kill Firebase session
-  } catch (err) {
-    console.error("Error signing out from Firebase:", err);
-  }
+  const logout = async () => {
+    try {
+      await signOut(auth); // ✅ Kill Firebase session
+    } catch (err) {
+      console.error("Error signing out from Firebase:", err);
+    }
 
-  Cookies.remove("access_token");
-  setUser(null);
-};
+    Cookies.remove("access_token");
+    setUser(null);
+
+    // 🔄 Refresh the page to clear all client state
+    window.location.reload();
+  };
 
   return (
     <AuthContext.Provider
       value={{
         user,
-          isAuthenticated: !!user,
+        isAuthenticated: !!user,
         confirmationResult,
         setConfirmationResult,
         error,
@@ -137,8 +132,8 @@ const logout = async () => {
         loading,
         verifyOtpAndLogin,
         signup,
-         logout,
-         updateUser
+        logout,
+        updateUser,
       }}
     >
       {children}

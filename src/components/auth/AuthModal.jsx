@@ -97,7 +97,6 @@ export default function AuthModal({ isOpen, onClose }) {
             size: "invisible",
             callback: (response) => {
               console.log("reCAPTCHA solved:", response);
-              
             },
             "expired-callback": () => {
               console.warn("reCAPTCHA expired");
@@ -144,10 +143,8 @@ export default function AuthModal({ isOpen, onClose }) {
 
   const handleSendOtp = async (phoneNumber) => {
     try {
-
-
       const raw = phoneNumber.replace(/\D/g, "");
-      console.log("🚀 ~hasrh handleSendOtp ~ raw:", raw)
+      console.log("🚀 ~hasrh handleSendOtp ~ raw:", raw);
       if (!raw || raw.length !== 10) {
         throw new Error("Enter a valid 10-digit number");
       }
@@ -185,8 +182,6 @@ export default function AuthModal({ isOpen, onClose }) {
     }
   };
 
-
-
   const handleLogin = async (values) => {
     if (!values.otp || values.otp.length < 4) {
       show({
@@ -221,7 +216,7 @@ export default function AuthModal({ isOpen, onClose }) {
         });
 
         console.log("✅ Backend token saved and user updated");
-        router.push('/profile');
+        router.push("/profile");
       } else {
         console.warn("❌ Token not received from backend");
       }
@@ -312,7 +307,11 @@ export default function AuthModal({ isOpen, onClose }) {
           <TabsContent value="login" className="space-y-4 py-4">
             <Form {...loginForm}>
               <form
-                onSubmit={loginForm.handleSubmit(handleLogin)}
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (!isOtpSent) return; // Prevent accidental form submission before OTP is sent
+                  loginForm.handleSubmit(handleLogin)(e);
+                }}
                 className="space-y-4"
               >
                 <div className="space-y-2">
@@ -326,6 +325,7 @@ export default function AuthModal({ isOpen, onClose }) {
                       type="tel"
                       placeholder="Mobile Number"
                       className="rounded-l-none"
+                      disabled={isOtpSent}
                       {...loginForm.register("mobileNumber")}
                     />
                   </div>
@@ -473,6 +473,3 @@ export default function AuthModal({ isOpen, onClose }) {
     </Dialog>
   );
 }
-
-
-

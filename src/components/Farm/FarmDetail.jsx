@@ -34,6 +34,9 @@ export default function FarmDetail() {
 
   const farmImages = farm?.farm_images || [];
 
+  const totalBedrooms =
+    farm?.rooms?.filter((room) => room.is_room == 1).length || 0;
+
   // Fetch farm data
   useEffect(() => {
     const loadFarm = async () => {
@@ -278,11 +281,20 @@ export default function FarmDetail() {
               {/* Badges section */}
               <div className="flex flex-wrap gap-4">
                 <Badge variant="secondary">
-                  <Bed className="w-4 h-4 mr-1" /> {farm.bedrooms} Bedroom
+                  <Bed className="w-4 h-4 mr-1" />
+                  {totalBedrooms} Bedroom{totalBedrooms !== 1 ? "s" : ""}
                 </Badge>
+
                 <Badge variant="secondary">
-                  <Users className="w-4 h-4 mr-1" /> {farm.person_limit} Guests
+                  <Users className="w-4 h-4 mr-1" />
+                  {farm.day_time_person_limit} Guests (Day Capacity)
                 </Badge>
+
+                <Badge variant="secondary">
+                  <Users className="w-4 h-4 mr-1" />
+                  {farm.night_time_person_limit} Guests (Night Capacity)
+                </Badge>
+
                 <Badge variant="secondary">{farm.category?.name}</Badge>
                 <Badge
                   variant="outline"
@@ -349,12 +361,12 @@ export default function FarmDetail() {
                 </div>
 
                 {/* Tabs */}
-                <Tabs defaultValue="amenities">
+                <Tabs defaultValue="policy">
                   <div className="overflow-x-auto scrollbar-hide -mx-4 px-4">
                     <TabsList className="flex w-max space-x-2">
+                      <TabsTrigger value="policy">House Policy</TabsTrigger>
                       <TabsTrigger value="amenities">Amenities</TabsTrigger>
                       <TabsTrigger value="description">Description</TabsTrigger>
-                      <TabsTrigger value="policy">House Policy</TabsTrigger>
                       <TabsTrigger value="location">Location</TabsTrigger>
                       <TabsTrigger value="CancelPolicy">
                         Cancellation Policy

@@ -309,22 +309,74 @@ export default function FarmDetail() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 p-8">
               {/* Left */}
               <div className="lg:col-span-2">
+                {/* ✅ Mobile Image Slider (Visible below md) */}
                 <div
                   onMouseEnter={stopAutoScroll}
                   onMouseLeave={startAutoScroll}
-                  className="relative overflow-hidden mb-8"
+                  className="relative overflow-hidden mb-8 block md:hidden"
                 >
                   <div className="relative flex items-center">
                     <Swiper
                       ref={swiperRef}
-                      modules={[Autoplay]} // Only keep Autoplay module
+                      modules={[Autoplay]}
+                      loop={true}
+                      spaceBetween={16}
+                      slidesPerView={1}
+                      centeredSlides={false}
+                      speed={1500} 
+                      onSlideChange={handleSlideChange}
+                      autoplay={{
+                        delay: 1500, // stay duration
+                        disableOnInteraction: false,
+                        pauseOnMouseEnter: true,
+                      }}
+                      className="w-full"
+                    >
+                      {farmImages.length > 0 ? (
+                        farmImages.map((img, index) => (
+                          <SwiperSlide key={img.id}>
+                            <div className="w-full h-[250px] sm:h-[320px] md:h-[400px] rounded-2xl overflow-hidden shadow-md">
+                              <img
+                                src={`${FARM_IMAGE_BASE_URL}/${img.image}`}
+                                alt={`Farm image ${index + 1}`}
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                          </SwiperSlide>
+                        ))
+                      ) : (
+                        <SwiperSlide>
+                          <div className="w-full h-[250px] sm:h-[320px] md:h-[400px] rounded-2xl overflow-hidden shadow-md">
+                            <img
+                              src="/placeholder.jpg"
+                              alt="Placeholder Image"
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        </SwiperSlide>
+                      )}
+                    </Swiper>
+                  </div>
+                </div>
+
+                {/* ✅ Desktop Image Slider (Visible from md and up) */}
+                <div
+                  onMouseEnter={stopAutoScroll}
+                  onMouseLeave={startAutoScroll}
+                  className="relative overflow-hidden mb-8 hidden md:block"
+                >
+                  <div className="relative flex items-center">
+                    <Swiper
+                      ref={swiperRef}
+                      modules={[Autoplay]}
                       loop={true}
                       spaceBetween={20}
                       slidesPerView={1.6}
                       centeredSlides={true}
+                      speed={1500} 
                       onSlideChange={handleSlideChange}
                       autoplay={{
-                        delay: 3000,
+                        delay: 1500, // stay duration
                         disableOnInteraction: false,
                         pauseOnMouseEnter: true,
                       }}

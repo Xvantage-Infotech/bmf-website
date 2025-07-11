@@ -206,6 +206,9 @@ export default function BookingForm({ farm, className = "" }) {
       return date.toLocaleDateString("en-CA"); // YYYY-MM-DD
     };
 
+
+
+
     const payload = {
       farm_id: String(farm.id),
       start_date: formatDate(checkIn),
@@ -218,6 +221,15 @@ export default function BookingForm({ farm, className = "" }) {
     try {
       const res = await checkBookingAvailability(payload, token);
       setHasCheckedAvailability(true);
+
+     if (typeof window !== "undefined" && typeof fbq === "function") {
+    fbq("trackCustom", "CheckAvailability", {
+      name: user?.name || "Guest",
+      phone: user?.phone || "N/A",
+      farmName: farm.name,
+      farmId: farm.id.toString(),
+    });
+  }
 
       if (res?.status === 0) {
         setIsBooked(false);
@@ -233,6 +245,7 @@ export default function BookingForm({ farm, className = "" }) {
       setBookingError(err.message || "Error checking availability.");
     }
   };
+
   const increasePercentage = farm.increase_percentage || 0; // 👈 if 20%
   const discountedPrice = finalPrice; // already comes from availability check
 
@@ -241,6 +254,16 @@ export default function BookingForm({ farm, className = "" }) {
       console.warn("Missing booking data");
       return;
     }
+
+    if (typeof window !== "undefined" && typeof fbq === "function") {
+  fbq("track", "Lead", {
+    name: user?.name || "Guest",
+    phone: user?.phone || "N/A",
+    farmName: farm.name,
+    farmId: farm.id.toString(),
+  });
+}
+
 
     router.push(
       "/booking-pay?" +

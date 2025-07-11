@@ -38,6 +38,40 @@ export default function BookingPay() {
 }, []);
 
 
+useEffect(() => {
+  if (
+    process.env.NODE_ENV === 'production' &&
+    typeof window !== 'undefined' &&
+    typeof fbq === 'function'
+  ) {
+    const farmId = searchParams.get('farmId');
+    const farmName = searchParams.get('farmName');
+    const name = searchParams.get('name');
+    const guest = searchParams.get('guest');
+    const checkIn = searchParams.get('checkIn');
+    const checkOut = searchParams.get('checkOut');
+    const price = searchParams.get('price');
+    const areaCity = searchParams.get('areaCity');
+    const rating = searchParams.get('rating');
+
+    fbq('track', 'Lead', {
+      content_name: farmName,
+      content_ids: [farmId],
+      content_type: 'product',
+      value: parseFloat(price || '0'),
+      currency: 'INR',
+      name: name || 'Guest',
+      guests: guest,
+      checkIn,
+      checkOut,
+      areaCity,
+      rating,
+    });
+  }
+}, [searchParams]);
+
+
+
   function convertTo24Hour(timeStr) {
     if (!timeStr || timeStr.toLowerCase() === "undefined") return null;
 

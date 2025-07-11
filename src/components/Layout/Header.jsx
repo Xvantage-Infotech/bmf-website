@@ -21,6 +21,32 @@ import {
 import { useRouter } from "next/navigation";
 import { Heart, Home } from "lucide-react";
 import { getPropertyList } from "@/services/Listfarm/listfarm.service";
+import { getBookingList } from "@/services/Booking/booking.service";
+
+export const checkUserHasProperties = async (token) => {
+  try {
+    const properties = await getPropertyList(token);
+    return properties?.length > 0;
+  } catch (err) {
+    console.error("Failed to fetch property list:", err);
+    return false;
+  }
+};
+
+export const checkUserHasBookings = async (token) => {
+  try {
+    const res = await getBookingList({
+      status: 1,
+      page: "1",
+      perPage: "1",
+      token,
+    });
+    return res?.status === 1 && res?.data?.length > 0;
+  } catch (err) {
+    console.error("Failed to fetch booking list:", err);
+    return false;
+  }
+};
 
 export default function Header() {
   const pathname = usePathname();
@@ -30,6 +56,7 @@ export default function Header() {
   const { isMobile } = useResponsive();
   const { user, isAuthenticated, logout, authInitialized } = useAuth();
   const [hasProperties, setHasProperties] = useState(false);
+  const [hasBookings, setHasBookings] = useState(false);
 
   const router = useRouter();
 
@@ -37,20 +64,19 @@ export default function Header() {
   const isLoggedIn = !!user?.token;
 
   useEffect(() => {
-    const fetchUserProperties = async () => {
+    const runChecks = async () => {
       if (!user?.token) return;
 
-      try {
-        const properties = await getPropertyList(user.token);
-        if (properties?.length > 0) {
-          setHasProperties(true);
-        }
-      } catch (err) {
-        console.error("Failed to fetch property list:", err);
-      }
+      const [hasProps, hasBooks] = await Promise.all([
+        checkUserHasProperties(user.token),
+        checkUserHasBookings(user.token),
+      ]);
+
+      setHasProperties(hasProps);
+      setHasBookings(hasBooks);
     };
 
-    fetchUserProperties();
+    runChecks();
   }, [user?.token]);
 
   const navigationItems = [
@@ -154,17 +180,19 @@ export default function Header() {
                 </Button>
               )}
 
-              <Button
-                variant="outline"
-                className="w-full justify-start"
-                onClick={() => {
-                  setIsMenuOpen(false);
-                  router.push("/booking-confirmation");
-                }}
-              >
-                <User className="mr-2 h-4 w-4" />
-                <span>My Bookings</span>
-              </Button>
+              {hasBookings && (
+                <Button
+                  variant="outline"
+                  className="w-full justify-start"
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    router.push("/booking-confirmation");
+                  }}
+                >
+                  <User className="mr-2 h-4 w-4" />
+                  <span>My Bookings</span>
+                </Button>
+              )}
 
               <Button
                 variant="outline"
@@ -241,12 +269,14 @@ export default function Header() {
                       </DropdownMenuItem>
                     )}
 
-                    <DropdownMenuItem
-                      onClick={() => router.push("/booking-confirmation")}
-                    >
-                      <User className="mr-2 h-4 w-4" />
-                      My Bookings
-                    </DropdownMenuItem>
+                    {hasBookings && (
+                      <DropdownMenuItem
+                        onClick={() => router.push("/booking-confirmation")}
+                      >
+                        <User className="mr-2 h-4 w-4" />
+                        My Bookings
+                      </DropdownMenuItem>
+                    )}
 
                     <DropdownMenuItem
                       onClick={async () => {

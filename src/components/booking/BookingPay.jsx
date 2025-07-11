@@ -37,12 +37,11 @@ export default function BookingPay() {
   window.scrollTo(0, 0); // Instant jump to top, no animation
 }, []);
 
-
 useEffect(() => {
   if (
     process.env.NODE_ENV === 'production' &&
     typeof window !== 'undefined' &&
-    typeof fbq === 'function'
+    typeof window.fbq === 'function'
   ) {
     const farmId = searchParams.get('farmId');
     const farmName = searchParams.get('farmName');
@@ -53,22 +52,27 @@ useEffect(() => {
     const price = searchParams.get('price');
     const areaCity = searchParams.get('areaCity');
     const rating = searchParams.get('rating');
+    const phone = user?.phone_number;
+    const email = user?.email;
 
-    fbq('track', 'Lead', {
+    window.fbq('track', 'Lead', {
       content_name: farmName,
       content_ids: [farmId],
       content_type: 'product',
       value: parseFloat(price || '0'),
       currency: 'INR',
-      name: name || 'Guest',
       guests: guest,
       checkIn,
       checkOut,
       areaCity,
       rating,
+      booking_name: name,
+      phone_number: phone,
+      email,
     });
   }
-}, [searchParams]);
+  // use .toString() for reliable dependency re-run
+}, [searchParams.toString(), user?.email, user?.phone_number]);
 
 
 

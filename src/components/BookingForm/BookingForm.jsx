@@ -202,9 +202,6 @@ export default function BookingForm({ farm, className = "" }) {
       return date.toLocaleDateString("en-CA"); // YYYY-MM-DD
     };
 
-
-
-
     const payload = {
       farm_id: String(farm.id),
       start_date: formatDate(checkIn),
@@ -218,14 +215,14 @@ export default function BookingForm({ farm, className = "" }) {
       const res = await checkBookingAvailability(payload, token);
       setHasCheckedAvailability(true);
 
-     if (typeof window !== "undefined" && typeof fbq === "function") {
-    fbq("trackCustom", "CheckAvailability", {
-      name: user?.name || "Guest",
-      phone: user?.phone || "N/A",
-      farmName: farm.name,
-      farmId: farm.id.toString(),
-    });
-  }
+      if (typeof window !== "undefined" && typeof fbq === "function") {
+        fbq("trackCustom", "CheckAvailability", {
+          name: user?.name || "Guest",
+          phone: user?.phone || "N/A",
+          farmName: farm.name,
+          farmId: farm.id.toString(),
+        });
+      }
 
       if (res?.status === 0) {
         setIsBooked(false);
@@ -252,14 +249,13 @@ export default function BookingForm({ farm, className = "" }) {
     }
 
     if (typeof window !== "undefined" && typeof fbq === "function") {
-  fbq("track", "Lead", {
-    name: user?.name || "Guest",
-    phone: user?.phone || "N/A",
-    farmName: farm.name,
-    farmId: farm.id.toString(),
-  });
-}
-
+      fbq("track", "Lead", {
+        name: user?.name || "Guest",
+        phone: user?.phone || "N/A",
+        farmName: farm.name,
+        farmId: farm.id.toString(),
+      });
+    }
 
     router.push(
       "/booking-pay?" +
@@ -325,6 +321,32 @@ export default function BookingForm({ farm, className = "" }) {
     const url = `https://wa.me/919277778778?text=${encodedMessage}`;
 
     // Some mobile browsers block new tab if not directly triggered by user event
+    window.open(url, "_blank");
+  };
+
+  const handleWhatsAppManualBooking = () => {
+    if (!farm) return;
+
+    const name = farm.farm_alias_name || farm.name;
+    const checkInDate = checkIn
+      ? format(new Date(checkIn), "yyyy-MM-dd")
+      : "N/A";
+    const checkOutDate = checkOut
+      ? format(new Date(checkOut), "yyyy-MM-dd")
+      : "N/A";
+    const guests = adults + children;
+
+    const message =
+      `Hello, I'm interested in booking the following property:\n\n` +
+      `🏡 Name: ${name}\n📍 Link: https://bookmyfarm.net/farm/${farm.id}\n` +
+      `📅 Dates: ${checkInDate} to ${checkOutDate}\n🕒 Time: ${
+        checkInTime || "N/A"
+      } to ${checkOutTime || "N/A"}\n` +
+      `👥 Guests: ${guests}`;
+
+    const encodedMessage = encodeURIComponent(message);
+    const url = `https://wa.me/919277778778?text=${encodedMessage}`;
+
     window.open(url, "_blank");
   };
 
@@ -429,83 +451,100 @@ export default function BookingForm({ farm, className = "" }) {
             </div>
           )}
 
-          {/* Agreement Checkbox with Toggleable Rules View */}
-          <div className="mb-4">
-            <div className="flex items-start space-x-2">
-              <input
-                type="checkbox"
-                checked={agreed}
-                onChange={(e) => setAgreed(e.target.checked)}
-                className="form-checkbox mt-1 text-green-600"
-              />
-              <span className="text-sm">
-                Agree to the{" "}
-                <button
-                  className="underline text-green-600 hover:text-green-700"
-                  onClick={() => setExpanded(!expanded)}
-                  type="button"
-                >
-                  important rules
-                </button>
-              </span>
-            </div>
-
-            {expanded && farm?.farm_rules && (
-              <div className="mt-2 p-3 border rounded-lg bg-gray-50 text-sm text-gray-700 space-y-4 max-h-[300px] overflow-auto">
-                <div>
-                  <h4 className="font-semibold mb-2 text-gray-800">
-                    Allowed Rules
-                  </h4>
-                  <ul className="list-disc list-inside space-y-1">
-                    {farm.farm_rules.allow_rule_names?.map((rule, i) => (
-                      <li key={`allow-${i}`}>{rule}</li>
-                    ))}
-                  </ul>
+          {farm.is_enable === 1 ? (
+            <>
+              {/* Agreement Checkbox with Toggleable Rules View */}
+              <div className="mb-4">
+                <div className="flex items-start space-x-2">
+                  <input
+                    type="checkbox"
+                    checked={agreed}
+                    onChange={(e) => setAgreed(e.target.checked)}
+                    className="form-checkbox mt-1 text-green-600"
+                  />
+                  <span className="text-sm">
+                    Agree to the{" "}
+                    <button
+                      className="underline text-green-600 hover:text-green-700"
+                      onClick={() => setExpanded(!expanded)}
+                      type="button"
+                    >
+                      important rules
+                    </button>
+                  </span>
                 </div>
 
-                <div>
-                  <h4 className="font-semibold mt-4 mb-2 text-gray-800">
-                    Not Allowed Rules
-                  </h4>
-                  <ul className="list-disc list-inside space-y-1 text-red-600">
-                    {farm.farm_rules.not_allow_rule_names?.map((rule, i) => (
-                      <li key={`not-allow-${i}`}>{rule}</li>
-                    ))}
-                  </ul>
-                </div>
+                {expanded && farm?.farm_rules && (
+                  <div className="mt-2 p-3 border rounded-lg bg-gray-50 text-sm text-gray-700 space-y-4 max-h-[300px] overflow-auto">
+                    <div>
+                      <h4 className="font-semibold mb-2 text-gray-800">
+                        Allowed Rules
+                      </h4>
+                      <ul className="list-disc list-inside space-y-1">
+                        {farm.farm_rules.allow_rule_names?.map((rule, i) => (
+                          <li key={`allow-${i}`}>{rule}</li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div>
+                      <h4 className="font-semibold mt-4 mb-2 text-gray-800">
+                        Not Allowed Rules
+                      </h4>
+                      <ul className="list-disc list-inside space-y-1 text-red-600">
+                        {farm.farm_rules.not_allow_rule_names?.map(
+                          (rule, i) => (
+                            <li key={`not-allow-${i}`}>{rule}</li>
+                          )
+                        )}
+                      </ul>
+                    </div>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
 
-          {/* Booking Button */}
-          <Button
-            onClick={
-              hasCheckedAvailability ? handleConfirmBooking : handleBooking
-            }
-            disabled={!isBookingValid || isBooked || !agreed}
-            className="w-full bg-primary text-white hover:bg-primary/90 disabled:opacity-50"
-            size="lg"
-          >
-            {!checkIn || !checkOut
-              ? "Select Dates"
-              : isGuestLimitExceeded
-              ? "Too Many Guests"
-              : isBooked
-              ? "Booked"
-              : hasCheckedAvailability
-              ? "Book Now"
-              : "Check Availability"}
-          </Button>
+              {/* Booking Button */}
+              <Button
+                onClick={
+                  hasCheckedAvailability ? handleConfirmBooking : handleBooking
+                }
+                disabled={!isBookingValid || isBooked || !agreed}
+                className="w-full bg-primary text-white hover:bg-primary/90 disabled:opacity-50"
+                size="lg"
+              >
+                {!checkIn || !checkOut
+                  ? "Select Dates"
+                  : isGuestLimitExceeded
+                  ? "Too Many Guests"
+                  : isBooked
+                  ? "Booked"
+                  : hasCheckedAvailability
+                  ? "Book Now"
+                  : "Check Availability"}
+              </Button>
 
-          {bookingError && (
-            <p className="text-sm text-red-600 text-center mt-2">
-              {bookingError}
-            </p>
+              {bookingError && (
+                <p className="text-sm text-red-600 text-center mt-2">
+                  {bookingError}
+                </p>
+              )}
+
+              <p className="text-xs text-neutral-600 text-center">
+                You won't be charged yet
+              </p>
+            </>
+          ) : (
+            <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 text-sm rounded-lg p-4">
+              Booking for this property is currently handled manually.{" "}
+              <button
+                onClick={handleWhatsAppManualBooking}
+                className="underline font-medium text-green-600 hover:text-green-700 ml-1"
+              >
+                Contact us on WhatsApp
+              </button>{" "}
+              to make your reservation.
+            </div>
           )}
-
-          <p className="text-xs text-neutral-600 text-center">
-            You won't be charged yet
-          </p>
         </div>
 
         {/* Contact Options */}

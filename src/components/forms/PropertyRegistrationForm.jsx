@@ -302,8 +302,8 @@ export default function PropertyRegistrationForm({
   const [checkInOpen, setCheckInOpen] = useState(false);
   const [checkOutOpen, setCheckOutOpen] = useState(false);
   const [categories, setCategories] = useState([]);
-  const [cityOptions, setCityOptions] = useState([]);
-  const [areaOptions, setAreaOptions] = useState([]);
+  // const [cityOptions, setCityOptions] = useState([]);
+  // const [areaOptions, setAreaOptions] = useState([]);
 
   useEffect(() => {
     fetchPropertyCategories()
@@ -313,20 +313,20 @@ export default function PropertyRegistrationForm({
       });
   }, []);
 
-  useEffect(() => {
-    const loadLocationOptions = async () => {
-      try {
-        const cities = await fetchCities();
-        const areas = await fetchAreas();
-        setCityOptions(cities);
-        setAreaOptions(areas);
-      } catch (err) {
-        console.error("Failed to load city/area options", err);
-      }
-    };
+  // useEffect(() => {
+  //   const loadLocationOptions = async () => {
+  //     try {
+  //       const cities = await fetchCities();
+  //       const areas = await fetchAreas();
+  //       setCityOptions(cities);
+  //       setAreaOptions(areas);
+  //     } catch (err) {
+  //       console.error("Failed to load city/area options", err);
+  //     }
+  //   };
 
-    loadLocationOptions();
-  }, []);
+  //   loadLocationOptions();
+  // }, []);
 
   // const validateField = (name, value) => {
   //   switch (name) {
@@ -456,7 +456,17 @@ export default function PropertyRegistrationForm({
     return "";
   };
 
+  const checkAuthAndPrompt = () => {
+    if (!user?.token) {
+      setAuthModalOpen?.(true);
+      return false;
+    }
+    return true;
+  };
+
   const handleInputChange = (name, value) => {
+    if (!checkAuthAndPrompt()) return;
+
     setFormData((prev) => ({ ...prev, [name]: value }));
 
     // Clear error when user starts typing
@@ -753,71 +763,31 @@ export default function PropertyRegistrationForm({
           />
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* City Dropdown */}
-            <div
-              className="space-y-2"
-              ref={(el) => (refs.current["city"] = el)}
-            >
-              <Label className="flex items-center gap-1">
-                City <span className="text-red-500">*</span>
-              </Label>
-              <Select
-                value={formData.city}
-                onValueChange={(value) => handleInputChange("city", value)}
-              >
-                <SelectTrigger className={errors.city ? "border-red-500" : ""}>
-                  <SelectValue placeholder="Select a city" />
-                </SelectTrigger>
-                <SelectContent>
-                  {cityOptions.map((city) => (
-                    <SelectItem key={city.id} value={String(city.id)}>
-                      {city.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {errors.city && (
-                <p className="text-sm text-red-500 flex items-center gap-1">
-                  <AlertCircle className="w-4 h-4" />
-                  {errors.city}
-                </p>
-              )}
-            </div>
+            <InputField
+              name="city"
+              label="City"
+              required
+              placeholder="Enter city name"
+              refs={refs}
+              formData={formData}
+              errors={errors}
+              handleInputChange={handleInputChange}
+              validateField={validateField}
+              setErrors={setErrors}
+            />
 
-            {/* Nearby Area Dropdown */}
-            <div
-              className="space-y-2"
-              ref={(el) => (refs.current["near_by_area"] = el)}
-            >
-              <Label className="flex items-center gap-1">
-                Nearby Area <span className="text-red-500">*</span>
-              </Label>
-              <Select
-                value={formData.near_by_area}
-                onValueChange={(value) =>
-                  handleInputChange("near_by_area", value)
-                }
-              >
-                <SelectTrigger
-                  className={errors.near_by_area ? "border-red-500" : ""}
-                >
-                  <SelectValue placeholder="Select nearby area" />
-                </SelectTrigger>
-                <SelectContent>
-                  {areaOptions.map((area) => (
-                    <SelectItem key={area.id} value={String(area.id)}>
-                      {area.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {errors.near_by_area && (
-                <p className="text-sm text-red-500 flex items-center gap-1">
-                  <AlertCircle className="w-4 h-4" />
-                  {errors.near_by_area}
-                </p>
-              )}
-            </div>
+            <InputField
+              name="near_by_area"
+              label="Nearby Area"
+              required
+              placeholder="Enter nearby area"
+              refs={refs}
+              formData={formData}
+              errors={errors}
+              handleInputChange={handleInputChange}
+              validateField={validateField}
+              setErrors={setErrors}
+            />
           </div>
 
           <div
@@ -922,6 +892,14 @@ export default function PropertyRegistrationForm({
                 className="hidden"
                 ref={governmentIdRef}
                 onChange={(e) => {
+                  if (!user?.token) {
+                    setAuthModalOpen?.(true);
+                    if (governmentIdRef.current) {
+                      governmentIdRef.current.value = "";
+                    }
+                    return;
+                  }
+
                   const file = e.target.files[0];
                   setFormData((prev) => ({
                     ...prev,
@@ -1007,13 +985,22 @@ export default function PropertyRegistrationForm({
                 multiple
                 ref={bankDetailsRef}
                 className="hidden"
-                onChange={(e) =>
+                onChange={(e) => {
+                  if (!user?.token) {
+                    setAuthModalOpen?.(true);
+                    // Reset the input so same file can be picked again after login
+                    if (governmentIdRef.current) {
+                      governmentIdRef.current.value = "";
+                    }
+                    return;
+                  }
+
                   handleMultiFileUpload(
                     "bank_details_check_photo",
                     e.target.files,
                     "image"
-                  )
-                }
+                  );
+                }}
               />
               <label
                 htmlFor="bank_details_check_photo"
@@ -1081,12 +1068,21 @@ export default function PropertyRegistrationForm({
                 accept="image/*,.pdf"
                 className="hidden"
                 ref={propertyAgreementRef} // ✅ added ref
-                onChange={(e) =>
+                onChange={(e) => {
+                  if (!user?.token) {
+                    setAuthModalOpen?.(true);
+                    // Reset the input so same file can be picked again after login
+                    if (governmentIdRef.current) {
+                      governmentIdRef.current.value = "";
+                    }
+                    return;
+                  }
+
                   setFormData((prev) => ({
                     ...prev,
                     property_agreement: e.target.files[0],
-                  }))
-                }
+                  }));
+                }}
               />
               <label htmlFor="property_agreement" className="cursor-pointer">
                 <Upload className="w-8 h-8 text-neutral-400 mx-auto mb-2" />
@@ -1451,6 +1447,10 @@ export default function PropertyRegistrationForm({
                       className="flex items-center gap-2 px-2 py-1 hover:bg-gray-100 cursor-pointer"
                       onClick={(e) => {
                         e.stopPropagation();
+                        if (!user?.token) {
+                          setAuthModalOpen?.(true);
+                          return;
+                        }
                         handleMultiSelect("check_in_time", time);
                       }}
                     >
@@ -1504,6 +1504,10 @@ export default function PropertyRegistrationForm({
                       className="flex items-center gap-2 px-2 py-1 hover:bg-gray-100 cursor-pointer"
                       onClick={(e) => {
                         e.stopPropagation();
+                        if (!user?.token) {
+                          setAuthModalOpen?.(true);
+                          return;
+                        }
                         handleMultiSelect("check_out_time", time);
                       }}
                     >
@@ -1579,13 +1583,25 @@ export default function PropertyRegistrationForm({
             className="space-y-2"
             ref={(el) => (refs.current["photos"] = el)}
           >
-            <Label className="flex items-center gap-1">
-              Upload Property Photos <span className="text-red-500">*</span>
-              <span className="text-xs text-neutral-500 ml-2">
-                (up to 10 images/videos, max 10 MB each)
-              </span>
-            </Label>
+            {/* Small 16:9 preview box BEFORE label */}
+            <div className="flex items-center gap-4">
+              <div className="w-40 aspect-video bg-gray-100 border border-dashed border-gray-300 rounded-lg flex items-center justify-center text-center text-xs text-gray-500">
+                16:9 Image
+                <br />
+                e.g. 1600×900
+              </div>
 
+              <div>
+                <Label className="flex items-center gap-1">
+                  Upload Property Photos <span className="text-red-500">*</span>
+                </Label>
+                <p className="text-xs text-neutral-500 mt-1">
+                  (up to 10 images/videos, max 10 MB each)
+                </p>
+              </div>
+            </div>
+
+            {/* Upload Input Box */}
             <div className="border-2 border-dashed border-neutral-300 rounded-lg p-6 text-center">
               <input
                 type="file"
@@ -1606,11 +1622,29 @@ export default function PropertyRegistrationForm({
               </label>
             </div>
 
+            {/* 16:9 Placeholder when no files */}
+            {/* {formData.photos.length === 0 && (
+              <div className="mt-4">
+                <div className="aspect-video bg-gray-100 border border-dashed border-gray-300 rounded-lg flex items-center justify-center">
+                  <div className="text-center px-4">
+                    <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                    <p className="text-sm text-gray-600">
+                      Recommended Image Size
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      Aspect Ratio: 16:9 (e.g., 1600x900)
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )} */}
+
+            {/* Preview Uploaded Files */}
             {formData.photos.length > 0 && (
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
                 {formData.photos.map((file, index) => (
                   <div key={index} className="relative">
-                    <div className="aspect-square bg-neutral-100 rounded-lg flex items-center justify-center relative overflow-hidden">
+                    <div className="aspect-video bg-neutral-100 rounded-lg flex items-center justify-center relative overflow-hidden">
                       {file.type.startsWith("image/") ? (
                         <img
                           src={URL.createObjectURL(file)}
@@ -1641,6 +1675,7 @@ export default function PropertyRegistrationForm({
               </div>
             )}
 
+            {/* Validation error */}
             {errors.photos && (
               <p className="text-sm text-red-500 flex items-center gap-1">
                 <AlertCircle className="w-4 h-4" />

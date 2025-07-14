@@ -166,7 +166,7 @@ export default function Footer() {
         </div>
 
         {/* Download Section */}
-        <div className="border-t border-neutral-800 pt-8 mt-4">
+        {/* <div className="border-t border-neutral-800 pt-8 mt-4">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
             <p className="text-neutral-300 text-sm md:text-base">
               Download{" "}
@@ -194,7 +194,7 @@ export default function Footer() {
               </a>
             </div>
           </div>
-        </div>
+        </div> */}
       </div>
     </footer>
   );

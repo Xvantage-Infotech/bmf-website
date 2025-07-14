@@ -323,7 +323,7 @@ export default function FarmDetail() {
                       spaceBetween={16}
                       slidesPerView={1}
                       centeredSlides={false}
-                      speed={1500} 
+                      speed={1500}
                       onSlideChange={handleSlideChange}
                       autoplay={{
                         delay: 1500, // stay duration
@@ -373,10 +373,10 @@ export default function FarmDetail() {
                       spaceBetween={20}
                       slidesPerView={1.6}
                       centeredSlides={true}
-                      speed={1500} 
+                      speed={1500}
                       onSlideChange={handleSlideChange}
                       autoplay={{
-                        delay: 1500, // stay duration
+                        delay: 1500,
                         disableOnInteraction: false,
                         pauseOnMouseEnter: true,
                       }}
@@ -388,7 +388,7 @@ export default function FarmDetail() {
                             key={img.id}
                             className="flex-shrink-0 w-[60%]"
                           >
-                            <div className="transition-transform duration-300">
+                            <div className="w-full h-[400px] transition-transform duration-300">
                               <img
                                 src={`${FARM_IMAGE_BASE_URL}/${img.image}`}
                                 alt={`Farm image ${index + 1}`}
@@ -399,7 +399,7 @@ export default function FarmDetail() {
                         ))
                       ) : (
                         <SwiperSlide className="flex-shrink-0 w-[60%]">
-                          <div className="transition-transform duration-300">
+                          <div className="w-full h-[400px] transition-transform duration-300">
                             <img
                               src="/placeholder.jpg"
                               alt="Placeholder Image"

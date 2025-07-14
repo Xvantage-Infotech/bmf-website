@@ -1576,28 +1576,31 @@ export default function PropertyRegistrationForm({
       {/* Photo Upload */}
       <Card>
         <CardHeader>
-          <CardTitle>Property Photos & Videos</CardTitle>
+          <CardTitle>Property Photos</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
           <div
             className="space-y-2"
             ref={(el) => (refs.current["photos"] = el)}
           >
-            {/* Small 16:9 preview box BEFORE label */}
+            {/* Upload label + sample image side-by-side */}
             <div className="flex items-center gap-4">
-              <div className="w-40 aspect-video bg-gray-100 border border-dashed border-gray-300 rounded-lg flex items-center justify-center text-center text-xs text-gray-500">
-                16:9 Image
-                <br />
-                e.g. 1600×900
-              </div>
-
               <div>
                 <Label className="flex items-center gap-1">
                   Upload Property Photos <span className="text-red-500">*</span>
                 </Label>
                 <p className="text-xs text-neutral-500 mt-1">
-                  (up to 10 images/videos, max 10 MB each)
+                  (up to 10 images, max 10 MB each)
                 </p>
+              </div>
+
+              {/* Example image preview */}
+              <div className="w-40 aspect-video bg-gray-100 border border-dashed border-gray-300 rounded-lg overflow-hidden">
+                <img
+                  src="/RotateYourPhone.png"
+                  alt="16:9 Example"
+                  className="w-full h-full object-cover"
+                />
               </div>
             </div>
 
@@ -1607,37 +1610,20 @@ export default function PropertyRegistrationForm({
                 type="file"
                 id="photos"
                 multiple
-                accept="image/*,video/*"
+                accept="image/*"
                 onChange={(e) => handleFileUpload(e.target.files)}
                 className="hidden"
               />
               <label htmlFor="photos" className="cursor-pointer">
                 <Upload className="w-8 h-8 text-neutral-400 mx-auto mb-2" />
                 <p className="text-neutral-600">
-                  Click to upload photos and videos
+                  Click to upload property photos
                 </p>
                 <p className="text-xs text-neutral-500 mt-1">
-                  PNG, JPG, MP4 up to 10MB each
+                  PNG, JPG up to 10MB each
                 </p>
               </label>
             </div>
-
-            {/* 16:9 Placeholder when no files */}
-            {/* {formData.photos.length === 0 && (
-              <div className="mt-4">
-                <div className="aspect-video bg-gray-100 border border-dashed border-gray-300 rounded-lg flex items-center justify-center">
-                  <div className="text-center px-4">
-                    <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                    <p className="text-sm text-gray-600">
-                      Recommended Image Size
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      Aspect Ratio: 16:9 (e.g., 1600x900)
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )} */}
 
             {/* Preview Uploaded Files */}
             {formData.photos.length > 0 && (
@@ -1645,20 +1631,11 @@ export default function PropertyRegistrationForm({
                 {formData.photos.map((file, index) => (
                   <div key={index} className="relative">
                     <div className="aspect-video bg-neutral-100 rounded-lg flex items-center justify-center relative overflow-hidden">
-                      {file.type.startsWith("image/") ? (
-                        <img
-                          src={URL.createObjectURL(file)}
-                          alt={`Property ${index + 1}`}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="flex flex-col items-center">
-                          <Upload className="w-8 h-8 text-neutral-400" />
-                          <span className="text-xs text-neutral-500 mt-1">
-                            Video
-                          </span>
-                        </div>
-                      )}
+                      <img
+                        src={URL.createObjectURL(file)}
+                        alt={`Property ${index + 1}`}
+                        className="w-full h-full object-cover"
+                      />
                       <button
                         type="button"
                         onClick={() => removeFile("photos", index)}

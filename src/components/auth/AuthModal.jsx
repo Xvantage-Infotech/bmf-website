@@ -108,7 +108,6 @@ export default function AuthModal({ isOpen, onClose }) {
             size: "invisible",
             callback: (response) => {
               // console.log("reCAPTCHA solved:", response);
-              
             },
             "expired-callback": () => {
               console.warn("reCAPTCHA expired");
@@ -141,7 +140,8 @@ export default function AuthModal({ isOpen, onClose }) {
 
           // Wait 1 second then refresh
           setTimeout(() => {
-            window.location.reload();
+            window.location.href = "/";
+            return;
           }, 1000);
           return;
         }
@@ -259,7 +259,7 @@ export default function AuthModal({ isOpen, onClose }) {
         });
 
         // console.log("✅ Backend token saved and user updated");
-        router.push('/profile');
+        router.push("/profile");
       } else {
         console.warn("❌ Token not received from backend");
       }

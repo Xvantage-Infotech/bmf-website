@@ -3,10 +3,28 @@
 import PropertyRegistrationForm from "@/components/forms/PropertyRegistrationForm";
 import PublicPageLayout from "./Layout/PublicPageLayout";
 import AuthModal from "@/components/auth/AuthModal";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function PropertyRegistration() {
+  const { user } = useAuth();
+  const router = useRouter();
+
   const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [modalDismissed, setModalDismissed] = useState(false);
+
+  useEffect(() => {
+    if (modalDismissed && !user?.token) {
+      router.push("/"); // Redirect to home if modal is closed and still not logged in
+    }
+  }, [modalDismissed, user]);
+
+  useEffect(() => {
+    if (!user?.token) {
+      setAuthModalOpen(true); // Show login modal immediately
+    }
+  }, [user]);
 
   return (
     <PublicPageLayout>
@@ -79,7 +97,10 @@ export default function PropertyRegistration() {
             />
             <AuthModal
               isOpen={authModalOpen}
-              onClose={() => setAuthModalOpen(false)}
+              onClose={() => {
+                setAuthModalOpen(false);
+                setModalDismissed(true);
+              }}
             />
           </div>
         </section>

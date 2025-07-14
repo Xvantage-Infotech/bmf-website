@@ -31,8 +31,27 @@ export default function Profiles() {
     }
   }, [modalDismissed, user]);
 
-  if (!authInitialized) return null;
-  if (!isAuthenticated && !authModalOpen) return null;
+  // if (!authInitialized) return null;
+  // if (!isAuthenticated && !authModalOpen) return null;
+
+  const isLoading = !authInitialized || (!isAuthenticated && !authModalOpen);
+
+  if (isLoading) {
+    return (
+      <PublicPageLayout>
+        <div className="min-h-screen flex flex-col justify-center items-center bg-white">
+          <img
+            src="/bmflogofoot.svg"
+            alt="Book My Farm Logo"
+            className="w-40 h-40 md:w-60 md:h-60 animate-pulse mb-6"
+          />
+          <p className="text-neutral-500 text-sm animate-pulse">
+            Loading your profile...
+          </p>
+        </div>
+      </PublicPageLayout>
+    );
+  }
 
   return (
     <PublicPageLayout>

@@ -52,10 +52,10 @@ export default function PropertyRegistration() {
     !token;
 
   useEffect(() => {
-    if (shouldShowModal) {
+    if (shouldShowModal && !modalDismissed) {
       setAuthModalOpen(true);
     }
-  }, [shouldShowModal]);
+  }, [shouldShowModal, modalDismissed]);
 
   useEffect(() => {
     if (shouldShowModal && modalDismissed) {

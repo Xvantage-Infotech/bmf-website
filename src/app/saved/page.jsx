@@ -5,16 +5,61 @@ import ClientOnly from "@/components/Clientonly/ClientOnly";
 import FarmCard from "@/components/FarmCard/FarmCard";
 import { useAuth } from "@/contexts/AuthContext";
 import { fetchWishlist } from "@/services/Wishlist/wishlist.service";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import PublicPageLayout from "@/components/Layout/PublicPageLayout";
+import Cookies from "js-cookie";
+import { getUserProfile } from "@/services/Auth/auth.service";
+import AuthModal from "@/components/auth/AuthModal";
+import { useRouter } from "next/navigation";
 
 export default function SavedFarms() {
-  const { user } = useAuth();
+  const { user, updateUser, authInitialized, userLoading, isAuthenticated } =
+    useAuth();
+
   const [wishlist, setWishlist] = useState([]);
   const [loading, setLoading] = useState(true);
-  const isAuthenticated = !!user?.token;
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [modalDismissed, setModalDismissed] = useState(false);
+  const router = useRouter();
 
+  const token = Cookies.get("access_token");
+
+  // ✅ 1. Hydrate user from cookie
+  useEffect(() => {
+    if (authInitialized && token && !user && !isAuthenticated) {
+      getUserProfile(token)
+        .then((res) => {
+          if (res?.data) {
+            updateUser({ ...res.data, token });
+          }
+        })
+        .catch((err) => {
+          console.error("🔥 Failed to hydrate user on /saved:", err);
+          Cookies.remove("access_token");
+        });
+    }
+  }, [authInitialized, token, user, isAuthenticated, updateUser]);
+
+  // ✅ 2. Show login modal if not authenticated
+  const shouldShowModal =
+    authInitialized &&
+    !authModalOpen &&
+    !isAuthenticated &&
+    !userLoading &&
+    !token;
+
+  useEffect(() => {
+    if (shouldShowModal && !modalDismissed) {
+      setAuthModalOpen(true);
+    }
+  }, [shouldShowModal, modalDismissed]);
+
+  useEffect(() => {
+    if (shouldShowModal && modalDismissed) {
+      router.push("/");
+    }
+  }, [shouldShowModal, modalDismissed]);
+
+  // ✅ 3. Fetch wishlist
   useEffect(() => {
     const loadWishlist = async () => {
       if (!user?.token) return;
@@ -33,25 +78,11 @@ export default function SavedFarms() {
   }, [user]);
 
   useEffect(() => {
-    window.scrollTo(0, 0); // Instant jump to top, no animation
+    window.scrollTo(0, 0);
   }, []);
 
-  if (!isAuthenticated) {
-    return (
-      <ClientOnly>
-        <div className="max-w-md mx-auto py-10 px-4 text-center">
-          <h2 className="text-xl font-bold mb-4">
-            Please log in to view your saved farms
-          </h2>
-          <Link href="/">
-            <Button className="bg-primary text-white hover:bg-primary/90">
-              Go to Home
-            </Button>
-          </Link>
-        </div>
-      </ClientOnly>
-    );
-  }
+  if (!authInitialized) return null;
+  if (!isAuthenticated && !authModalOpen) return null;
 
   return (
     <PublicPageLayout>
@@ -85,9 +116,9 @@ export default function SavedFarms() {
                     >
                       <path
                         d="M12.1 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 
-           4.42 3 7.5 3c1.74 0 3.41 0.81 4.5 2.09C13.09 
-           3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 
-           3.78-3.4 6.86-8.55 11.54L12.1 21.35z"
+                          4.42 3 7.5 3c1.74 0 3.41 0.81 4.5 2.09C13.09 
+                          3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 
+                          3.78-3.4 6.86-8.55 11.54L12.1 21.35z"
                       />
                     </svg>
                   </span>{" "}
@@ -103,6 +134,13 @@ export default function SavedFarms() {
             )}
           </div>
         )}
+        <AuthModal
+          isOpen={authModalOpen}
+          onClose={() => {
+            setAuthModalOpen(false);
+            setModalDismissed(true);
+          }}
+        />
       </ClientOnly>
     </PublicPageLayout>
   );

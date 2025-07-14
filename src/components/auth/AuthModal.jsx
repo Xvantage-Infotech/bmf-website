@@ -217,7 +217,8 @@ export default function AuthModal({ isOpen, onClose }) {
       if (shouldReload) {
         console.log("🔁 Reloading page due to:", errorCode);
         setTimeout(() => {
-          window.location.reload();
+          window.location.href = "/";
+          return;
         }, 1000);
       }
     } finally {

@@ -6,25 +6,65 @@ import AuthModal from "@/components/auth/AuthModal";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
+import { getUserProfile } from "@/services/Auth/auth.service";
+import Cookies from "js-cookie";
 
 export default function PropertyRegistration() {
-  const { user } = useAuth();
-  const router = useRouter();
+  const {
+    user,
+    isAuthenticated,
+    authInitialized,
+    userLoading,
+    updateUser, // ✅ grab from context
+  } = useAuth();
 
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [modalDismissed, setModalDismissed] = useState(false);
+  const router = useRouter();
+
+  const token = Cookies.get("access_token");
+
+  // ✅ 1. Hydrate user from token if user is null
+  useEffect(() => {
+    if (authInitialized && token && !user && !isAuthenticated) {
+      getUserProfile(token)
+        .then((res) => {
+          if (res?.data) {
+            updateUser({ ...res.data, token });
+          }
+        })
+        .catch((err) => {
+          console.error(
+            "🔥 Failed to hydrate user in PropertyRegistration:",
+            err
+          );
+          Cookies.remove("access_token");
+        });
+    }
+  }, [authInitialized, token, user, isAuthenticated, updateUser]);
+
+  // ✅ 2. Modal logic (unchanged)
+  const shouldShowModal =
+    authInitialized &&
+    !authModalOpen &&
+    !isAuthenticated &&
+    !userLoading &&
+    !token;
 
   useEffect(() => {
-    if (modalDismissed && !user?.token) {
-      router.push("/"); // Redirect to home if modal is closed and still not logged in
+    if (shouldShowModal) {
+      setAuthModalOpen(true);
     }
-  }, [modalDismissed, user]);
+  }, [shouldShowModal]);
 
   useEffect(() => {
-    if (!user?.token) {
-      setAuthModalOpen(true); // Show login modal immediately
+    if (shouldShowModal && modalDismissed) {
+      router.push("/");
     }
-  }, [user]);
+  }, [shouldShowModal, modalDismissed]);
+
+  if (!authInitialized) return null;
+  if (!isAuthenticated && !authModalOpen) return null;
 
   return (
     <PublicPageLayout>

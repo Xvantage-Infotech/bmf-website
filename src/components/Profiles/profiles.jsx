@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link"; // ✅ use this instead of 'wouter'
 import { useAuth } from "@/contexts/AuthContext";
@@ -9,30 +9,35 @@ import { Pencil } from "lucide-react";
 import { format } from "date-fns";
 import { USER_PROFILE_IMAGE_BASE_URL } from "@/lib/utils";
 import PublicPageLayout from "../Layout/PublicPageLayout";
+import AuthModal from "@/components/auth/AuthModal";
+import { useRouter } from "next/navigation";
 
 export default function Profiles() {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, authInitialized } = useAuth();
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [modalDismissed, setModalDismissed] = useState(false);
+  const router = useRouter();
 
-  // If not authenticated, show a message
-  if (!isAuthenticated) {
-    return (
-      <div className="max-w-md mx-auto py-10 px-4 text-center">
-        <h2 className="text-xl font-bold mb-4">
-          Please log in to view your profile
-        </h2>
-        <Link href="/">
-          <Button className="bg-primary text-white hover:bg-primary/90">
-            Go to Home
-          </Button>
-        </Link>
-      </div>
-    );
-  }
+  useEffect(() => {
+    if (authInitialized && !isAuthenticated) {
+      setAuthModalOpen(true);
+    }
+  }, [authInitialized, isAuthenticated]);
+
+  useEffect(() => {
+    if (modalDismissed && !user?.token) {
+      router.push("/");
+    }
+  }, [modalDismissed, user]);
+
+  if (!authInitialized) return null;
+  if (!isAuthenticated && !authModalOpen) return null;
 
   return (
     <PublicPageLayout>
       <div className="max-w-md mx-auto py-10 px-4">
+        {/* Profile Card */}
         <div className="flex flex-col items-center bg-white rounded-2xl shadow p-6 mb-8 relative">
           <button
             onClick={() => setIsEditDialogOpen(true)}
@@ -76,7 +81,6 @@ export default function Profiles() {
                 ? format(new Date(user.date_of_birth), "PPP")
                 : "Not provided"}
             </div>
-
             <div>
               <span className="font-medium">Address:</span>{" "}
               {user?.street || "Not provided"}
@@ -84,13 +88,13 @@ export default function Profiles() {
           </div>
         </div>
 
-        {/* Profile Edit Dialog */}
+        {/* Edit Dialog */}
         <ProfileEditDialog
           isOpen={isEditDialogOpen}
           onClose={() => setIsEditDialogOpen(false)}
         />
 
-        {/* Partner with Us Section */}
+        {/* Partner Section */}
         <div className="bg-primary/5 rounded-2xl p-6 text-center">
           <h3 className="text-lg font-semibold mb-2 text-primary">
             Partner with Us
@@ -99,6 +103,7 @@ export default function Profiles() {
             List your property and start earning, or manage your existing
             listings.
           </p>
+
           {user?.isOwner ? (
             <Link href="/owner">
               <Button className="w-full bg-primary text-white hover:bg-primary/90">
@@ -106,7 +111,7 @@ export default function Profiles() {
               </Button>
             </Link>
           ) : (
-            <Link href="/owner/register" passHref>
+            <Link href="/owner/register">
               <Button className="w-full bg-primary text-white hover:bg-primary/90">
                 Register Your Farm
               </Button>
@@ -114,6 +119,15 @@ export default function Profiles() {
           )}
         </div>
       </div>
+
+      {/* Auth Modal */}
+      <AuthModal
+        isOpen={authModalOpen}
+        onClose={() => {
+          setAuthModalOpen(false);
+          setModalDismissed(true);
+        }}
+      />
     </PublicPageLayout>
   );
 }

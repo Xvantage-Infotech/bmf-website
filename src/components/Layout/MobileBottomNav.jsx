@@ -1,20 +1,20 @@
 "use client";
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { Home, Search, Heart, User } from 'lucide-react';
-import { useResponsive } from '@/hooks/useResponsive';
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { Home, Building2, Heart, User } from "lucide-react";
+import { useResponsive } from "@/hooks/useResponsive";
 
 export default function MobileBottomNav() {
-  const pathname = usePathname(); 
+  const pathname = usePathname();
   const { isMobile } = useResponsive();
 
   const navItems = [
-    { href: '/', icon: Home, label: 'Home' },
-    { href: '/search', icon: Search, label: 'Search' },
-    { href: '/saved', icon: Heart, label: 'Saved' },
-    { href: '/profile', icon: User, label: 'Profile' },
-  ];
+  { href: '/', icon: Home, label: 'Home' },
+  { href: '/owner/register', icon: Building2, label: 'List Farm' }, 
+  { href: '/saved', icon: Heart, label: 'Saved' },
+  { href: '/profile', icon: User, label: 'Profile' },
+];
 
   if (!isMobile) return null;
 
@@ -29,9 +29,10 @@ export default function MobileBottomNav() {
               href={item.href}
               className={`
                 flex flex-col items-center py-3 px-2 transition-colors
-                ${isActive 
-                  ? 'text-primary' 
-                  : 'text-neutral-400 hover:text-neutral-600'
+                ${
+                  isActive
+                    ? "text-primary"
+                    : "text-neutral-400 hover:text-neutral-600"
                 }
               `}
             >

@@ -1583,13 +1583,25 @@ export default function PropertyRegistrationForm({
             className="space-y-2"
             ref={(el) => (refs.current["photos"] = el)}
           >
-            <Label className="flex items-center gap-1">
-              Upload Property Photos <span className="text-red-500">*</span>
-              <span className="text-xs text-neutral-500 ml-2">
-                (up to 10 images/videos, max 10 MB each)
-              </span>
-            </Label>
+            {/* Small 16:9 preview box BEFORE label */}
+            <div className="flex items-center gap-4">
+              <div className="w-40 aspect-video bg-gray-100 border border-dashed border-gray-300 rounded-lg flex items-center justify-center text-center text-xs text-gray-500">
+                16:9 Image
+                <br />
+                e.g. 1600×900
+              </div>
 
+              <div>
+                <Label className="flex items-center gap-1">
+                  Upload Property Photos <span className="text-red-500">*</span>
+                </Label>
+                <p className="text-xs text-neutral-500 mt-1">
+                  (up to 10 images/videos, max 10 MB each)
+                </p>
+              </div>
+            </div>
+
+            {/* Upload Input Box */}
             <div className="border-2 border-dashed border-neutral-300 rounded-lg p-6 text-center">
               <input
                 type="file"
@@ -1610,11 +1622,29 @@ export default function PropertyRegistrationForm({
               </label>
             </div>
 
+            {/* 16:9 Placeholder when no files */}
+            {/* {formData.photos.length === 0 && (
+              <div className="mt-4">
+                <div className="aspect-video bg-gray-100 border border-dashed border-gray-300 rounded-lg flex items-center justify-center">
+                  <div className="text-center px-4">
+                    <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                    <p className="text-sm text-gray-600">
+                      Recommended Image Size
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      Aspect Ratio: 16:9 (e.g., 1600x900)
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )} */}
+
+            {/* Preview Uploaded Files */}
             {formData.photos.length > 0 && (
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
                 {formData.photos.map((file, index) => (
                   <div key={index} className="relative">
-                    <div className="aspect-square bg-neutral-100 rounded-lg flex items-center justify-center relative overflow-hidden">
+                    <div className="aspect-video bg-neutral-100 rounded-lg flex items-center justify-center relative overflow-hidden">
                       {file.type.startsWith("image/") ? (
                         <img
                           src={URL.createObjectURL(file)}
@@ -1645,6 +1675,7 @@ export default function PropertyRegistrationForm({
               </div>
             )}
 
+            {/* Validation error */}
             {errors.photos && (
               <p className="text-sm text-red-500 flex items-center gap-1">
                 <AlertCircle className="w-4 h-4" />

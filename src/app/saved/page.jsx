@@ -100,7 +100,7 @@ export default function SavedFarms() {
           </div>
         ) : (
           <div className="max-w-4xl mx-auto py-10 px-4">
-            <h1 className="text-2xl font-bold mb-6 text-center">Saved Farms</h1>
+            <h1 className="text-2xl font-bold mb-6 text-center">Favorite Farms</h1>
 
             {wishlist.length === 0 ? (
               <div className="text-center text-neutral-600 mt-20">

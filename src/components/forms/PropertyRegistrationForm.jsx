@@ -1595,13 +1595,13 @@ export default function PropertyRegistrationForm({
               </div>
 
               {/* Example image preview */}
-              <div className="w-40 aspect-video bg-gray-100 border border-dashed border-gray-300 rounded-lg overflow-hidden">
+              {/* <div className="w-40 aspect-video bg-gray-100 border border-dashed border-gray-300 rounded-lg overflow-hidden">
                 <img
                   src="/RotateYourPhone.png"
                   alt="16:9 Example"
                   className="w-full h-full object-cover"
                 />
-              </div>
+              </div> */}
             </div>
 
             {/* Upload Input Box */}

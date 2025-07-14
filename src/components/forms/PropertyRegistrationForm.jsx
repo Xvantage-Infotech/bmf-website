@@ -456,7 +456,17 @@ export default function PropertyRegistrationForm({
     return "";
   };
 
+  const checkAuthAndPrompt = () => {
+    if (!user?.token) {
+      setAuthModalOpen?.(true);
+      return false;
+    }
+    return true;
+  };
+
   const handleInputChange = (name, value) => {
+    if (!checkAuthAndPrompt()) return;
+
     setFormData((prev) => ({ ...prev, [name]: value }));
 
     // Clear error when user starts typing
@@ -922,6 +932,14 @@ export default function PropertyRegistrationForm({
                 className="hidden"
                 ref={governmentIdRef}
                 onChange={(e) => {
+                  if (!user?.token) {
+                    setAuthModalOpen?.(true);
+                    if (governmentIdRef.current) {
+                      governmentIdRef.current.value = "";
+                    }
+                    return;
+                  }
+
                   const file = e.target.files[0];
                   setFormData((prev) => ({
                     ...prev,
@@ -1007,13 +1025,22 @@ export default function PropertyRegistrationForm({
                 multiple
                 ref={bankDetailsRef}
                 className="hidden"
-                onChange={(e) =>
+                onChange={(e) => {
+                  if (!user?.token) {
+                    setAuthModalOpen?.(true);
+                    // Reset the input so same file can be picked again after login
+                    if (governmentIdRef.current) {
+                      governmentIdRef.current.value = "";
+                    }
+                    return;
+                  }
+
                   handleMultiFileUpload(
                     "bank_details_check_photo",
                     e.target.files,
                     "image"
-                  )
-                }
+                  );
+                }}
               />
               <label
                 htmlFor="bank_details_check_photo"
@@ -1081,12 +1108,21 @@ export default function PropertyRegistrationForm({
                 accept="image/*,.pdf"
                 className="hidden"
                 ref={propertyAgreementRef} // ✅ added ref
-                onChange={(e) =>
+                onChange={(e) => {
+                  if (!user?.token) {
+                    setAuthModalOpen?.(true);
+                    // Reset the input so same file can be picked again after login
+                    if (governmentIdRef.current) {
+                      governmentIdRef.current.value = "";
+                    }
+                    return;
+                  }
+
                   setFormData((prev) => ({
                     ...prev,
                     property_agreement: e.target.files[0],
-                  }))
-                }
+                  }));
+                }}
               />
               <label htmlFor="property_agreement" className="cursor-pointer">
                 <Upload className="w-8 h-8 text-neutral-400 mx-auto mb-2" />
@@ -1451,6 +1487,10 @@ export default function PropertyRegistrationForm({
                       className="flex items-center gap-2 px-2 py-1 hover:bg-gray-100 cursor-pointer"
                       onClick={(e) => {
                         e.stopPropagation();
+                        if (!user?.token) {
+                          setAuthModalOpen?.(true);
+                          return;
+                        }
                         handleMultiSelect("check_in_time", time);
                       }}
                     >
@@ -1504,6 +1544,10 @@ export default function PropertyRegistrationForm({
                       className="flex items-center gap-2 px-2 py-1 hover:bg-gray-100 cursor-pointer"
                       onClick={(e) => {
                         e.stopPropagation();
+                        if (!user?.token) {
+                          setAuthModalOpen?.(true);
+                          return;
+                        }
                         handleMultiSelect("check_out_time", time);
                       }}
                     >

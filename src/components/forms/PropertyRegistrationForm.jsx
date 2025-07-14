@@ -1189,7 +1189,7 @@ export default function PropertyRegistrationForm({
               onChange={(e) =>
                 handleInputChange("house_rule_policy", e.target.value)
               }
-              placeholder="Enter property rules and regulations"
+              placeholder="Enter rules like check-in time, noise limits, pet policy, etc."
               rows={4}
               className={errors.house_rule_policy ? "border-red-500" : ""}
             />
@@ -1211,7 +1211,7 @@ export default function PropertyRegistrationForm({
             <Textarea
               value={formData.description}
               onChange={(e) => handleInputChange("description", e.target.value)}
-              placeholder="Enter property rules and regulations"
+              placeholder="Enter a brief description highlighting the property’s key features and vibe."
               rows={4}
               className={errors.description ? "border-red-500" : ""}
             />

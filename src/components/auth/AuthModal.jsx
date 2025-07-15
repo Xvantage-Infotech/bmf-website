@@ -314,7 +314,7 @@ export default function AuthModal({ isOpen, onClose }) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent
-        className="sm:max-w-[425px]"
+        className="max-w-[95%] sm:max-w-[425px] mx-auto px-4max-w-[95%] sm:max-w-[425px] mx-auto px-4 rounded-lg"
         aria-describedby="auth-modal-description"
       >
         <DialogHeader>

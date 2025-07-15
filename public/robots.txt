@@ -1,0 +1,9 @@
+# *
+User-agent: *
+Allow: /
+
+# Host
+Host: https://bookmyfarm.net
+
+# Sitemaps
+Sitemap: https://bookmyfarm.net/sitemap.xml

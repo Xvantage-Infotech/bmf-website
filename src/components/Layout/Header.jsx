@@ -278,6 +278,13 @@ export default function Header() {
                       </DropdownMenuItem>
                     )}
 
+                    {user?.is_owner === 1 && (
+                      <DropdownMenuItem onClick={() => router.push("/owner/bookings")}>
+                        <Home className="mr-2 h-4 w-4" />
+                        Owner Dashboard
+                      </DropdownMenuItem>
+                    )}
+
                     <DropdownMenuItem
                       onClick={async () => {
                         await logout();

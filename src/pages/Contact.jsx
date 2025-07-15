@@ -27,8 +27,8 @@ export default function Contact() {
 
     try {
       await emailjs.send(
-        "service_8lfomk4", // 🔁 Replace with your actual Service ID
-        "template_zxhhmyx", // Template ID (keep same if named like in your screenshot)
+        "service_8lfomk4", 
+        "template_zxhhmyx",
         {
           name: formData.name,
           email: formData.email,
@@ -36,7 +36,7 @@ export default function Contact() {
           subject: formData.subject,
           message: formData.message,
         },
-        "wvwJX6k0s712hImO9" // 🔁 Replace with your actual Public Key from EmailJS
+        "wvwJX6k0s712hImO9"
       );
 
       show({

@@ -14,6 +14,7 @@ import { checkBookingAvailability } from "@/services/Farm/farm.service";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { getAccessToken } from "@/hooks/cookies";
+import { CheckCircle, XCircle } from "lucide-react";
 
 export default function BookingForm({ farm, className = "" }) {
   const [checkIn, setCheckIn] = useState();
@@ -454,47 +455,65 @@ export default function BookingForm({ farm, className = "" }) {
           {farm.is_enable === 1 ? (
             <>
               {/* Agreement Checkbox with Toggleable Rules View */}
-              <div className="mb-4">
-                <div className="flex items-start space-x-2">
+              <div className="mb-6">
+                {/* Checkbox and label */}
+                <div className="flex items-start gap-3">
                   <input
                     type="checkbox"
                     checked={agreed}
                     onChange={(e) => setAgreed(e.target.checked)}
-                    className="form-checkbox mt-1 text-green-600"
+                    className="mt-1 h-4 w-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
                   />
-                  <span className="text-sm">
-                    Agree to the{" "}
-                    <button
-                      className="underline text-green-600 hover:text-green-700"
-                      onClick={() => setExpanded(!expanded)}
-                      type="button"
-                    >
-                      important rules
-                    </button>
+                  <span className="text-sm text-neutral-800 leading-snug">
+                    I agree to the{" "}
+                    <span className="text-green-600 font-medium">
+                      House Rules
+                    </span>
                   </span>
                 </div>
 
-                {expanded && farm?.farm_rules && (
-                  <div className="mt-2 p-3 border rounded-lg bg-gray-50 text-sm text-gray-700 space-y-4 max-h-[300px] overflow-auto">
+                {/* Always-visible House Rules */}
+                {farm?.farm_rules && (
+                  <div className="mt-4 rounded-xl bg-gray-100 border border-gray-200 p-5 max-h-[320px] overflow-auto shadow-sm space-y-6">
+                    {/* Allowed Rules */}
                     <div>
-                      <h4 className="font-semibold mb-2 text-gray-800">
-                        Allowed Rules
-                      </h4>
-                      <ul className="list-disc list-inside space-y-1">
+                      <div className="flex items-center gap-2 mb-2 text-green-700">
+                        <CheckCircle className="w-5 h-5" />
+                        <h4 className="text-sm font-semibold uppercase tracking-wide">
+                          Allowed
+                        </h4>
+                      </div>
+                      <ul className="space-y-2 pl-1">
                         {farm.farm_rules.allow_rule_names?.map((rule, i) => (
-                          <li key={`allow-${i}`}>{rule}</li>
+                          <li
+                            key={`allow-${i}`}
+                            className="flex items-start gap-2 text-sm text-green-800"
+                          >
+                            <CheckCircle className="w-4 h-4 mt-1 text-green-500 shrink-0" />
+                            <span>{rule}</span>
+                          </li>
                         ))}
                       </ul>
                     </div>
 
+                    {/* Not Allowed Rules */}
                     <div>
-                      <h4 className="font-semibold mt-4 mb-2 text-gray-800">
-                        Not Allowed Rules
-                      </h4>
-                      <ul className="list-disc list-inside space-y-1 text-red-600">
+                      <div className="flex items-center gap-2 mb-2 text-red-700">
+                        <XCircle className="w-5 h-5" />
+                        <h4 className="text-sm font-semibold uppercase tracking-wide">
+                          Not Allowed
+                        </h4>
+                      </div>
+                      <ul className="space-y-2 pl-1">
                         {farm.farm_rules.not_allow_rule_names?.map(
                           (rule, i) => (
-                            <li key={`not-allow-${i}`}>{rule}</li>
+                            <li
+                              key={`not-allow-${i}`}
+                              className="flex items-start gap-2 text-sm text-red-700"
+                            >
+                              <XCircle className="w-4 h-4 mt-1 text-red-500 shrink-0" />
+                              <span>{rule}</span>
+                            </li>
                           )
                         )}
                       </ul>

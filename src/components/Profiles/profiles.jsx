@@ -18,6 +18,7 @@ export default function Profiles() {
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [modalDismissed, setModalDismissed] = useState(false);
   const router = useRouter();
+  console.log(user);
 
   useEffect(() => {
     if (authInitialized && !isAuthenticated) {
@@ -123,8 +124,8 @@ export default function Profiles() {
             listings.
           </p>
 
-          {user?.isOwner ? (
-            <Link href="/owner">
+          {user?.is_owner ? (
+            <Link href="/owner/bookings">
               <Button className="w-full bg-primary text-white hover:bg-primary/90">
                 Go to Owner Dashboard
               </Button>

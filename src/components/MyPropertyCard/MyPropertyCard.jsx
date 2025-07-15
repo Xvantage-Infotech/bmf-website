@@ -12,7 +12,7 @@ const statusMap = {
   4: { label: "Rejected", color: "bg-red-500" },
 };
 
-export default function MyPropertyCard({ property }) {
+export default function MyPropertyCard({ property, onClick }) {
   const image =
     property.photos && property.photos.length > 0
       ? `${MY_PROPERTY_IMAGE_BASE_URL}/${property.photos[0]}`
@@ -23,10 +23,15 @@ export default function MyPropertyCard({ property }) {
     color: "bg-gray-400",
   };
 
-  const location = `${property.getarea?.name || property.area_id}, ${property.getcity?.name || property.city_id}`;
+  const location = `${property.getarea?.name || property.area_id}, ${
+    property.getcity?.name || property.city_id
+  }`;
 
   return (
-    <div className="rounded-xl border bg-white overflow-hidden shadow-sm transition hover:shadow-md">
+    <div
+      onClick={onClick}
+      className="rounded-xl border bg-white overflow-hidden shadow-sm transition hover:shadow-md cursor-pointer"
+    >
       {/* Image (cover fit, no absolute) */}
       <div className="relative h-48 w-full bg-neutral-200 overflow-hidden rounded-t-lg">
         <img

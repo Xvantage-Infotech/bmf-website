@@ -26,6 +26,7 @@ import {
   fetchRulesAndPolicies,
 } from "@/services/Farm/farm.service";
 import { getAccessToken } from "@/hooks/cookies";
+import { useRouter } from "next/navigation";
 
 // ✅ Move this above the default export or in a separate file
 const InputField = ({
@@ -86,6 +87,7 @@ export default function PropertyRegistrationForm({
   const { user } = useAuth();
   const { show } = useDialog();
   const refs = useRef({});
+  const router = useRouter();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -123,6 +125,10 @@ export default function PropertyRegistrationForm({
         description: "We’ll review it and get back to you soon.",
       });
 
+      setTimeout(() => {
+        router.push("/myproperty");
+      }, 3000);
+      
       setFormData({
         user_id: user.id, // Ensure user_id is correctly set here
         name: "",

@@ -342,25 +342,23 @@ export default function FarmList({
   const [loading, setLoading] = useState(false);
   const isSearchMode = externalFarms !== null;
   const { user } = useAuth();
-const [wishlistIds, setWishlistIds] = useState([]);
+  const [wishlistIds, setWishlistIds] = useState([]);
 
-useEffect(() => {
-  const loadWishlist = async () => {
-    if (!user?.token) return;
+  useEffect(() => {
+    const loadWishlist = async () => {
+      if (!user?.token) return;
 
-    try {
-      const wishlist = await fetchWishlist(1, 50, user.token); // adjust page size as needed
-      const ids = wishlist.map((f) => f.id);
-      setWishlistIds(ids);
-    } catch (err) {
-      console.error("Error fetching wishlist:", err);
-    }
-  };
+      try {
+        const wishlist = await fetchWishlist(1, 50, user.token); // adjust page size as needed
+        const ids = wishlist.map((f) => f.id);
+        setWishlistIds(ids);
+      } catch (err) {
+        console.error("Error fetching wishlist:", err);
+      }
+    };
 
-  loadWishlist();
-}, [user]);
-
-
+    loadWishlist();
+  }, [user]);
 
   const getFarms = async (append = false) => {
     if (isSearchMode) return;
@@ -371,14 +369,14 @@ useEffect(() => {
         category: selectedCategory !== "all" ? selectedCategory : undefined,
         sort_by: "",
         page: page.toString(),
-        per_page: "10",
+        per_page: "12",
         ...searchFilters,
       };
       const data = await fetchFarms(payload);
       const newFarms = data?.data || [];
 
       setFarms((prev) => (append ? [...prev, ...newFarms] : newFarms));
-      setHasMore(newFarms.length === 10); // Assume API returns 10 per page
+      setHasMore(newFarms.length === 12); 
     } catch (err) {
       console.error("Error fetching farms:", err);
     } finally {
@@ -525,15 +523,16 @@ useEffect(() => {
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {sortedFarms.map((farm) => (
-  <FarmCard
-  key={farm.id}
-  farm={farm}
-  isFavorited={wishlistIds.includes(farm.id)}
-  onToggleFavorite={() => {
-    setWishlistIds((prev) => prev.filter((id) => id !== farm.id));
-  }}
-/>
-
+                <FarmCard
+                  key={farm.id}
+                  farm={farm}
+                  isFavorited={wishlistIds.includes(farm.id)}
+                  onToggleFavorite={() => {
+                    setWishlistIds((prev) =>
+                      prev.filter((id) => id !== farm.id)
+                    );
+                  }}
+                />
               ))}
             </div>
             {hasMore && (

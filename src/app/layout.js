@@ -97,8 +97,8 @@ import ClientOnly from "@/components/Clientonly/ClientOnly";
 import FacebookPixel from "@/components/MetaPixel/FacebookPixel";
 
 export const metadata = {
-  title: "BookMyFarm",
-  description: "Book farms seamlessly",
+  title: 'Farmhouse Booking Made Easy | BookMyFarm',
+  description: 'Book your ideal farmhouse with ease. Verified farms, instant booking, no hidden charges – only on BookMyFarm.',
   icons: {
     icon: '/favicon.ico',
   },

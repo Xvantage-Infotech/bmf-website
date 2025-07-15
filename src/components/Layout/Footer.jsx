@@ -15,7 +15,7 @@ import {
 
 export default function Footer() {
   const quickLinks = [
-    { href: "/farms", label: "Browse Farms" },
+    { href: "/", label: "Browse Farms" },
     { href: "/how-it-works", label: "How it Works" },
     { href: "/owner/register", label: "List Your Property" },
     { href: "/customers", label: "Happy Customers" },

@@ -180,7 +180,7 @@ import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Search, MapPin } from "lucide-react";
 import { fetchFarms } from "@/services/Farm/farm.service";
-import {  cn, FARM_IMAGE_BASE_URL } from "@/lib/utils";
+import { cn, FARM_IMAGE_BASE_URL } from "@/lib/utils";
 
 export default function LiveSearchBar({
   placeholder = "Search by farm name, location...",
@@ -279,6 +279,14 @@ export default function LiveSearchBar({
     );
   };
 
+  useEffect(() => {
+    setTimeout(() => {
+      if (inputRef.current === document.activeElement) {
+        inputRef.current.blur();
+      }
+    }, 50);
+  }, []);
+
   return (
     <div className={cn("relative", className)} ref={dropdownRef}>
       <div className="relative">
@@ -289,9 +297,6 @@ export default function LiveSearchBar({
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}
-          onFocus={() =>
-            query.length >= 2 && results.length > 0 && setIsOpen(true)
-          }
           className="w-full pl-4 pr-10 py-2 border-neutral-200 focus:ring-2 focus:ring-primary focus:border-transparent"
         />
         <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-neutral-400" />

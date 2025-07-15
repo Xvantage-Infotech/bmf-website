@@ -19,8 +19,14 @@ import { CheckCircle, XCircle } from "lucide-react";
 export default function BookingForm({ farm, className = "" }) {
   const [checkIn, setCheckIn] = useState();
   const [checkOut, setCheckOut] = useState();
-  const [checkInTime, setCheckInTime] = useState();
-  const [checkOutTime, setCheckOutTime] = useState();
+  const [checkInTime, setCheckInTime] = useState(
+  farm?.check_in_time?.[0] || ""
+);
+
+const [checkOutTime, setCheckOutTime] = useState(
+  farm?.check_out_time?.[1] || farm?.check_out_time?.[0] || ""
+);
+
 
   const [adults, setAdults] = useState(2);
   const [children, setChildren] = useState(0);

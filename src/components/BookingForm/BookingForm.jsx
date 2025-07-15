@@ -456,66 +456,71 @@ export default function BookingForm({ farm, className = "" }) {
             <>
               {/* Agreement Checkbox with Toggleable Rules View */}
               <div className="mb-6">
-  {/* Checkbox and label */}
-  <div className="flex items-start gap-3">
-    <input
-      type="checkbox"
-      checked={agreed}
-      onChange={(e) => setAgreed(e.target.checked)}
-      className="mt-1 h-4 w-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
-    />
-    <span className="text-sm text-neutral-800 leading-snug">
-      I agree to the <span className="text-green-600 font-medium">House Rules</span>
-    </span>
-  </div>
+                {/* Checkbox and label */}
+                <div className="flex items-start gap-3">
+                  <input
+                    type="checkbox"
+                    checked={agreed}
+                    onChange={(e) => setAgreed(e.target.checked)}
+                    className="mt-1 h-4 w-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
+                  />
+                  <span className="text-sm text-neutral-800 leading-snug">
+                    I agree to the{" "}
+                    <span className="text-green-600 font-medium">
+                      House Rules
+                    </span>
+                  </span>
+                </div>
 
-  {/* Always-visible House Rules */}
-  {farm?.farm_rules && (
-    <div className="mt-4 rounded-xl bg-gray-100 border border-gray-200 p-5 max-h-[320px] overflow-auto shadow-sm space-y-6">
-      {/* Allowed Rules */}
-      <div>
-        <div className="flex items-center gap-2 mb-2 text-green-700">
-          <CheckCircle className="w-5 h-5" />
-          <h4 className="text-sm font-semibold uppercase tracking-wide">
-            Allowed
-          </h4>
-        </div>
-        <ul className="space-y-2 pl-1">
-          {farm.farm_rules.allow_rule_names?.map((rule, i) => (
-            <li
-              key={`allow-${i}`}
-              className="flex items-start gap-2 text-sm text-green-800"
-            >
-              <CheckCircle className="w-4 h-4 mt-1 text-green-500 shrink-0" />
-              <span>{rule}</span>
-            </li>
-          ))}
-        </ul>
-      </div>
+                {/* Always-visible House Rules */}
+                {farm?.farm_rules && (
+                  <div className="mt-4 rounded-xl bg-gray-100 border border-gray-200 p-5 max-h-[320px] overflow-auto shadow-sm space-y-6">
+                    {/* Allowed Rules */}
+                    <div>
+                      <div className="flex items-center gap-2 mb-2 text-green-700">
+                        <CheckCircle className="w-5 h-5" />
+                        <h4 className="text-sm font-semibold uppercase tracking-wide">
+                          Allowed
+                        </h4>
+                      </div>
+                      <ul className="space-y-2 pl-1">
+                        {farm.farm_rules.allow_rule_names?.map((rule, i) => (
+                          <li
+                            key={`allow-${i}`}
+                            className="flex items-start gap-2 text-sm text-green-800"
+                          >
+                            <CheckCircle className="w-4 h-4 mt-1 text-green-500 shrink-0" />
+                            <span>{rule}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
 
-      {/* Not Allowed Rules */}
-      <div>
-        <div className="flex items-center gap-2 mb-2 text-red-700">
-          <XCircle className="w-5 h-5" />
-          <h4 className="text-sm font-semibold uppercase tracking-wide">
-            Not Allowed
-          </h4>
-        </div>
-        <ul className="space-y-2 pl-1">
-          {farm.farm_rules.not_allow_rule_names?.map((rule, i) => (
-            <li
-              key={`not-allow-${i}`}
-              className="flex items-start gap-2 text-sm text-red-700"
-            >
-              <XCircle className="w-4 h-4 mt-1 text-red-500 shrink-0" />
-              <span>{rule}</span>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </div>
-  )}
-</div> 
+                    {/* Not Allowed Rules */}
+                    <div>
+                      <div className="flex items-center gap-2 mb-2 text-red-700">
+                        <XCircle className="w-5 h-5" />
+                        <h4 className="text-sm font-semibold uppercase tracking-wide">
+                          Not Allowed
+                        </h4>
+                      </div>
+                      <ul className="space-y-2 pl-1">
+                        {farm.farm_rules.not_allow_rule_names?.map(
+                          (rule, i) => (
+                            <li
+                              key={`not-allow-${i}`}
+                              className="flex items-start gap-2 text-sm text-red-700"
+                            >
+                              <XCircle className="w-4 h-4 mt-1 text-red-500 shrink-0" />
+                              <span>{rule}</span>
+                            </li>
+                          )
+                        )}
+                      </ul>
+                    </div>
+                  </div>
+                )}
+              </div>
 
               {/* Booking Button */}
               <Button

@@ -124,8 +124,8 @@ export default function Profiles() {
             listings.
           </p>
 
-          {user?.isOwner ? (
-            <Link href="/owner">
+          {user?.is_owner ? (
+            <Link href="/owner/bookings">
               <Button className="w-full bg-primary text-white hover:bg-primary/90">
                 Go to Owner Dashboard
               </Button>

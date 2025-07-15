@@ -18,6 +18,7 @@ export default function Profiles() {
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [modalDismissed, setModalDismissed] = useState(false);
   const router = useRouter();
+  console.log(user);
 
   useEffect(() => {
     if (authInitialized && !isAuthenticated) {

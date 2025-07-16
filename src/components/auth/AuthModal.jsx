@@ -258,9 +258,7 @@ export default function AuthModal({ isOpen, onClose }) {
           profile_image: result.data.profile_image,
           // Add more user fields if needed
         });
-
-        // console.log("✅ Backend token saved and user updated");
-        router.push("/profile");
+        
       } else {
         console.warn("❌ Token not received from backend");
       }

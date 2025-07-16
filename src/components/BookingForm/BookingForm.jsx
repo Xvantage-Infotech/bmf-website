@@ -622,15 +622,18 @@ import { getAccessToken } from "@/hooks/cookies";
 import { CheckCircle, XCircle } from "lucide-react";
 
 export default function BookingForm({ farm, className = "" }) {
-  const [checkIn, setCheckIn] = useState();
-  const [checkOut, setCheckOut] = useState();
-  const [checkInTime, setCheckInTime] = useState();
-  const [checkOutTime, setCheckOutTime] = useState();
+  const today = new Date();
+  const [checkIn, setCheckIn] = useState(today);
+  const [checkOut, setCheckOut] = useState(today);
+
+  const [checkInTime, setCheckInTime] = useState("");
+  const [checkOutTime, setCheckOutTime] = useState("");
 
   const [adults, setAdults] = useState(2);
   const [children, setChildren] = useState(0);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [hasCheckedAvailability, setHasCheckedAvailability] = useState(false);
+  const [hasChangedGuestCount, setHasChangedGuestCount] = useState(false);
   const [finalPrice, setFinalPrice] = useState(null);
 
   const [isBooked, setIsBooked] = useState(false);
@@ -804,20 +807,41 @@ export default function BookingForm({ farm, className = "" }) {
   const router = useRouter();
 
   const handleBooking = async () => {
+    console.log("Starting handleBooking", {
+      isLoggedIn,
+      checkIn,
+      checkOut,
+      checkInTime,
+      checkOutTime,
+      adults,
+      children,
+    });
+
     if (!isLoggedIn) {
+      console.log("User not logged in, opening auth modal");
       setIsAuthModalOpen(true);
       return;
     }
 
     if (!isCheckInBeforeCheckOut()) {
-      setBookingError("Check-out must be after check-in.");
+      setBookingError("");
       return;
     }
 
-    if (!checkIn || !checkOut || isGuestLimitExceeded) return;
+    if (!checkIn || !checkOut || isGuestLimitExceeded) {
+      console.log("Missing dates or guest limit exceeded", {
+        checkIn,
+        checkOut,
+        isGuestLimitExceeded,
+      });
+      return;
+    }
 
     const token = getAccessToken();
-    if (!token) return;
+    if (!token) {
+      console.log("No access token found");
+      return;
+    }
 
     const formatDate = (date) => {
       return date.toLocaleDateString("en-CA"); // YYYY-MM-DD
@@ -832,10 +856,19 @@ export default function BookingForm({ farm, className = "" }) {
       no_of_guest: String(adults + children),
     };
 
-    try {
-      const res = await checkBookingAvailability(payload, token);
-      setHasCheckedAvailability(true);
+    console.log("Sending availability check payload:", payload);
 
+    try {
+      // Reset states before checking availability
+      setBookingError("");
+      setIsBooked(false);
+      setHasCheckedAvailability(true);
+      setFinalPrice(null); // Reset price while checking
+
+      const res = await checkBookingAvailability(payload, token);
+      console.log("Availability check response:", res);
+
+      // Facebook Pixel tracking
       if (typeof window !== "undefined" && typeof fbq === "function") {
         fbq("trackCustom", "CheckAvailability", {
           name: user?.name || "Guest",
@@ -846,17 +879,30 @@ export default function BookingForm({ farm, className = "" }) {
       }
 
       if (res?.status === 0) {
+        console.log("Farm available, setting final price:", res.final_price);
         setIsBooked(false);
         setBookingError("");
         setFinalPrice(res.final_price);
+        setHasChangedGuestCount(false); // Reset guest count change flag
+
+        // Show success message
+        setBookingError("");
       } else {
+        console.log("Farm already booked");
         setIsBooked(true);
         setBookingError("This farm is already booked for the selected dates.");
         setFinalPrice(null);
       }
     } catch (err) {
+      console.error("Error checking availability:", err);
       setIsBooked(false);
-      setBookingError(err.message || "Error checking availability.");
+      setBookingError(
+        err.response?.data?.message ||
+          err.message ||
+          "Error checking availability. Please try again."
+      );
+      setFinalPrice(null);
+      setHasCheckedAvailability(false);
     }
   };
 
@@ -971,6 +1017,22 @@ export default function BookingForm({ farm, className = "" }) {
     window.open(url, "_blank");
   };
 
+  const handleGuestCountChange = (e) => {
+    if (!didMountRef.current || !isLoggedIn) return setIsAuthModalOpen(true);
+
+    setHasChangedGuestCount(true); // Track the guest count change
+    setHasCheckedAvailability(false); // Reset availability check when guest count changes
+
+    const val = parseInt(e.target.value);
+    if (!isNaN(val) && val >= 1) {
+      setAdults(val);
+    } else if (e.target.value === "") {
+      setAdults("");
+    } else {
+      setAdults(1);
+    }
+  };
+
   return (
     // <div className={`sticky top-8 ${className}`}>
     <div className={`sticky top-8 w-full max-w-md ${className}`}>
@@ -1029,6 +1091,8 @@ export default function BookingForm({ farm, className = "" }) {
                   if (!didMountRef.current || !isLoggedIn)
                     return setIsAuthModalOpen(true);
 
+                  setHasChangedGuestCount(true); // Track the guest count change
+                  setHasCheckedAvailability(false); // Reset availability check
                   const val = parseInt(e.target.value);
                   if (!isNaN(val) && val >= 1) {
                     setAdults(val);
@@ -1144,9 +1208,24 @@ export default function BookingForm({ farm, className = "" }) {
 
               {/* Booking Button */}
               <Button
-                onClick={
-                  hasCheckedAvailability ? handleConfirmBooking : handleBooking
-                }
+                onClick={() => {
+                  console.log("Button clicked", {
+                    hasCheckedAvailability,
+                    finalPrice,
+                    bookingError,
+                    isBooked,
+                  });
+                  if (
+                    hasCheckedAvailability &&
+                    finalPrice &&
+                    !isBooked &&
+                    !bookingError.includes("already booked")
+                  ) {
+                    handleConfirmBooking();
+                  } else {
+                    handleBooking();
+                  }
+                }}
                 disabled={!isBookingValid || isBooked || !agreed}
                 className="w-full bg-primary text-white hover:bg-primary/90 disabled:opacity-50"
                 size="lg"
@@ -1157,7 +1236,10 @@ export default function BookingForm({ farm, className = "" }) {
                   ? "Too Many Guests"
                   : isBooked
                   ? "Booked"
-                  : hasCheckedAvailability
+                  : hasCheckedAvailability &&
+                    finalPrice &&
+                    !isBooked &&
+                    !bookingError.includes("already booked")
                   ? "Book Now"
                   : "Check Availability"}
               </Button>

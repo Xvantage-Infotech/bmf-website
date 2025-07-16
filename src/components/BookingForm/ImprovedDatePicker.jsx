@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { CalendarDays, Clock, ArrowRight } from "lucide-react";
 import { formatDate, calculateNights, cn } from "@/lib/utils";
+import { check } from "drizzle-orm/gel-core";
 
 export default function ImprovedDatePicker({
   checkIn,
@@ -30,15 +31,6 @@ export default function ImprovedDatePicker({
   const [isCheckInOpen, setIsCheckInOpen] = useState(false);
   const [isCheckOutOpen, setIsCheckOutOpen] = useState(false);
   const didMountRef = useRef(false);
-
-  const getCurrentTime12Hr = () => {
-    const now = new Date();
-    const hours = now.getHours();
-    const minutes = now.getMinutes().toString().padStart(2, "0");
-    const ampm = hours >= 12 ? "PM" : "AM";
-    const hour12 = hours % 12 === 0 ? 12 : hours % 12;
-    return `${hour12}:${minutes} ${ampm}`;
-  };
 
   const convert24To12Hour = (timeStr) => {
     const [hour, minute] = timeStr.split(":");
@@ -69,14 +61,13 @@ export default function ImprovedDatePicker({
       onCheckOutChange?.(today);
     }
 
+    // ✅ Don't auto-select any time
     if (!checkInTime) {
-      const fallback = formattedCheckInOptions[0] || getCurrentTime12Hr();
-      onCheckInTimeChange?.(fallback);
+      onCheckInTimeChange?.(""); // or undefined, depending on your state shape
     }
 
     if (!checkOutTime) {
-      const fallback = formattedCheckOutOptions[0] || getCurrentTime12Hr();
-      onCheckOutTimeChange?.(fallback);
+      onCheckOutTimeChange?.(""); // or undefined
     }
   }, [isLoggedIn, checkInOptions, checkOutOptions]);
 
@@ -90,20 +81,14 @@ export default function ImprovedDatePicker({
     if (!date) return;
 
     onCheckInChange?.(date);
+    onCheckInTimeChange?.(""); // reset time
     setIsCheckInOpen(false);
 
-    // Set default check-in time
-    if (!checkInTime && formattedCheckInOptions.length) {
-      onCheckInTimeChange?.(formattedCheckInOptions[0]);
-    }
-
-    // Handle invalid checkOut
     if (checkOut && checkOut <= date) {
       onCheckOutChange(undefined);
-      setTimeout(() => setIsCheckOutOpen(true), 200); // auto prompt for new checkout
+      setTimeout(() => setIsCheckOutOpen(true), 200);
     }
 
-    // If no checkOut at all, auto open it
     if (!checkOut) {
       setTimeout(() => setIsCheckOutOpen(true), 200);
     }
@@ -125,6 +110,35 @@ export default function ImprovedDatePicker({
     return tomorrow; // Default to tomorrow if checkIn is not set
   };
 
+  const isInvalidTime = () => {
+    if (!checkInTime || !checkOutTime) return false;
+
+    const parse = (t) => {
+      const [time, period] = t.split(" ");
+      let [hour, minute] = time.split(":").map(Number);
+      if (period === "PM" && hour !== 12) hour += 12;
+      if (period === "AM" && hour === 12) hour = 0;
+      return hour * 60 + minute;
+    };
+
+    const checkInDateObj = new Date(checkIn);
+    const checkOutDateObj = new Date(checkOut);
+
+    // Case 1: If the check-out date is earlier than check-in date, it's invalid
+    if (checkOutDateObj < checkInDateObj) {
+      return true;
+    }
+
+    // Case 2: If the check-in and check-out dates are the same, compare times
+    if (checkInDateObj.getTime() === checkOutDateObj.getTime()) {
+      return parse(checkOutTime) <= parse(checkInTime);
+    }
+
+    // Case 3: If the check-out date is later than the check-in date, we don't compare times.
+    // The check-out is valid as long as it's on a later date.
+    return false;
+  };
+
   return (
     <div className={cn("space-y-4", className)}>
       <Card className="border-2 border-neutral-100 hover:border-primary/30 transition-colors">
@@ -133,7 +147,7 @@ export default function ImprovedDatePicker({
             <div className="space-y-2">
               <Label className="text-sm font-medium text-neutral-700 flex items-center gap-2">
                 <CalendarDays className="w-4 h-4 text-primary" />
-                Check-in
+                Check-in <span className="text-red-500">*</span>
               </Label>
               <Popover open={isCheckInOpen} onOpenChange={setIsCheckInOpen}>
                 <PopoverTrigger asChild>
@@ -172,13 +186,15 @@ export default function ImprovedDatePicker({
               {checkIn && (
                 <div className="mt-2">
                   <Label className="text-xs text-neutral-500">
-                    Check-in Time
+                    Check-in Time <span className="text-red-500">*</span>
                   </Label>
+
                   <select
                     className="w-full mt-1 p-2 border rounded text-sm"
                     value={checkInTime}
                     onChange={(e) => onCheckInTimeChange?.(e.target.value)}
                   >
+                    <option value="">Select Time</option>
                     {formattedCheckInOptions.map((time) => (
                       <option key={time} value={time}>
                         {time}
@@ -192,7 +208,7 @@ export default function ImprovedDatePicker({
             <div className="space-y-2">
               <Label className="text-sm font-medium text-neutral-700 flex items-center gap-2">
                 <Clock className="w-4 h-4 text-primary" />
-                Check-out
+                Check-out <span className="text-red-500">*</span>
               </Label>
               <Popover open={isCheckOutOpen} onOpenChange={setIsCheckOutOpen}>
                 <PopoverTrigger asChild>
@@ -234,19 +250,28 @@ export default function ImprovedDatePicker({
               {checkOut && (
                 <div className="mt-2">
                   <Label className="text-xs text-neutral-500">
-                    Check-out Time
+                    Check-out Time <span className="text-red-500">*</span>
                   </Label>
                   <select
-                    className="w-full mt-1 p-2 border rounded text-sm"
+                    className={cn(
+                      "w-full mt-1 p-2 border rounded text-sm",
+                      isInvalidTime() && "border-red-500"
+                    )}
                     value={checkOutTime}
                     onChange={(e) => onCheckOutTimeChange?.(e.target.value)}
                   >
+                    <option value="">Select Time</option>
                     {formattedCheckOutOptions.map((time) => (
                       <option key={time} value={time}>
                         {time}
                       </option>
                     ))}
                   </select>
+                  {isInvalidTime() && (
+                    <p className="text-xs text-red-500 mt-1">
+                      Check-out time must be after check-in time.
+                    </p>
+                  )}
                 </div>
               )}
             </div>

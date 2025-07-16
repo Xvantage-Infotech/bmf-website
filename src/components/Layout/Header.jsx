@@ -80,7 +80,7 @@ export default function Header() {
   }, [user?.token]);
 
   const navigationItems = [
-    { href: "/", label: "Farms" },
+    { href: "/farms", label: "Farms" },
     { href: "/customers", label: "Happy Customers" },
     { href: "/contact", label: "Contact" },
     { href: "/owner/register", label: "List Your Farm" },

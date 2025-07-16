@@ -226,13 +226,59 @@ export default function Header() {
     <header className="sticky top-0 bg-white shadow-sm z-50 border-b border-neutral-100">
       <div className="max-w-7xl mx-auto container-padding">
         <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <Logo />
+          {/* Left: Menu button (mobile) and Logo */}
+          <div className="flex items-center space-x-4">
+            {/* Mobile Menu Button */}
+            {isMobile && (
+              <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="icon">
+                    <Menu className="w-6 h-6 text-neutral-600" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="left" className="w-80">
+                  <div className="flex flex-col space-y-6 mt-6">
+                    <SearchBar />
+                    <Navigation mobile />
+                    <div className="pt-6 border-t border-neutral-200">
+                      <div className="space-y-3">
+                        <h4 className="font-semibold text-neutral-900">
+                          Popular Locations
+                        </h4>
+                        <div className="flex flex-wrap gap-2">
+                          {[
+                            "Surat",
+                            "Daman",
+                            "Navsari",
+                            "Saputara",
+                            "Vadodara",
+                          ].map((city) => (
+                            <Button
+                              key={city}
+                              variant="outline"
+                              size="sm"
+                              className="text-xs"
+                              onClick={() => setIsMenuOpen(false)}
+                            >
+                              {city}
+                            </Button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </SheetContent>
+              </Sheet>
+            )}
+
+            {/* Logo */}
+            <Logo />
+          </div>
 
           {/* Desktop Search Bar */}
           {!isMobile && <SearchBar className="flex-1 max-w-2xl mx-8" />}
 
-          {/* Desktop Navigation */}
+          {/* Right: Desktop Navigation or Login/Profile */}
           {!isMobile && (
             <div className="flex items-center space-x-6">
               <Navigation className="flex items-center space-x-6" />
@@ -246,7 +292,6 @@ export default function Header() {
                           <User className="w-5 h-5" />
                         </AvatarFallback>
                       </Avatar>
-                      {/* <span className="text-sm font-medium">User</span> */}
                     </div>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
@@ -254,12 +299,10 @@ export default function Header() {
                       <User className="mr-2 h-4 w-4" />
                       Profile
                     </DropdownMenuItem>
-
                     <DropdownMenuItem onClick={() => router.push("/saved")}>
                       <Heart className="mr-2 h-4 w-4" />
                       Wishlist
                     </DropdownMenuItem>
-
                     {hasProperties && (
                       <DropdownMenuItem
                         onClick={() => router.push("/myproperty")}
@@ -268,7 +311,6 @@ export default function Header() {
                         My Property
                       </DropdownMenuItem>
                     )}
-
                     {hasBookings && (
                       <DropdownMenuItem
                         onClick={() => router.push("/booking-confirmation")}
@@ -277,18 +319,18 @@ export default function Header() {
                         My Bookings
                       </DropdownMenuItem>
                     )}
-
                     {user?.is_owner === 1 && (
-                      <DropdownMenuItem onClick={() => router.push("/owner/bookings")}>
+                      <DropdownMenuItem
+                        onClick={() => router.push("/owner/bookings")}
+                      >
                         <Home className="mr-2 h-4 w-4" />
                         Owner Dashboard
                       </DropdownMenuItem>
                     )}
-
                     <DropdownMenuItem
                       onClick={async () => {
                         await logout();
-                        router.push("/"); // ✅ Redirect after logout
+                        router.push("/");
                       }}
                     >
                       <LogOut className="mr-2 h-4 w-4" />
@@ -306,49 +348,6 @@ export default function Header() {
               )}
             </div>
           )}
-
-          {/* Mobile Menu Button */}
-          {isMobile && (
-            <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <Menu className="w-6 h-6 text-neutral-600" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="right" className="w-80">
-                <div className="flex flex-col space-y-6 mt-6">
-                  <SearchBar />
-                  <Navigation mobile />
-                  <div className="pt-6 border-t border-neutral-200">
-                    <div className="space-y-3">
-                      <h4 className="font-semibold text-neutral-900">
-                        Popular Locations
-                      </h4>
-                      <div className="flex flex-wrap gap-2">
-                        {[
-                          "Surat",
-                          "Daman",
-                          "Navsari",
-                          "Saputara",
-                          "Vadodara",
-                        ].map((city) => (
-                          <Button
-                            key={city}
-                            variant="outline"
-                            size="sm"
-                            className="text-xs"
-                            onClick={() => setIsMenuOpen(false)}
-                          >
-                            {city}
-                          </Button>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </SheetContent>
-            </Sheet>
-          )}
         </div>
 
         {/* Mobile Search Bar */}
@@ -358,6 +357,7 @@ export default function Header() {
           </div>
         )}
       </div>
+
       {/* Auth Modal */}
       <AuthModal
         isOpen={isAuthModalOpen}

@@ -1,6 +1,6 @@
 // ImprovedDatePicker.jsx
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import {
@@ -25,9 +25,11 @@ export default function ImprovedDatePicker({
   checkInOptions = [],
   checkOutOptions = [],
   className = "",
+  isLoggedIn = false,
 }) {
   const [isCheckInOpen, setIsCheckInOpen] = useState(false);
   const [isCheckOutOpen, setIsCheckOutOpen] = useState(false);
+  const didMountRef = useRef(false);
 
   const getCurrentTime12Hr = () => {
     const now = new Date();
@@ -37,32 +39,6 @@ export default function ImprovedDatePicker({
     const hour12 = hours % 12 === 0 ? 12 : hours % 12;
     return `${hour12}:${minutes} ${ampm}`;
   };
-
-  useEffect(() => {
-    const today = new Date();
-
-    // Set checkIn to today if not already set
-    if (!checkIn) {
-      onCheckInChange?.(today);
-    }
-
-    // Set checkOut to today initially if not already set
-    if (!checkOut) {
-      onCheckOutChange?.(today);
-    }
-
-    // Default check-in time
-    if (!checkInTime) {
-      const fallback = formattedCheckInOptions[0] || getCurrentTime12Hr();
-      onCheckInTimeChange?.(fallback);
-    }
-
-    // Default check-out time
-    if (!checkOutTime) {
-      const fallback = formattedCheckOutOptions[0] || getCurrentTime12Hr();
-      onCheckOutTimeChange?.(fallback);
-    }
-  }, []);
 
   const convert24To12Hour = (timeStr) => {
     const [hour, minute] = timeStr.split(":");
@@ -74,6 +50,35 @@ export default function ImprovedDatePicker({
 
   const formattedCheckInOptions = checkInOptions.map(convert24To12Hour);
   const formattedCheckOutOptions = checkOutOptions.map(convert24To12Hour);
+
+  useEffect(() => {
+    if (didMountRef.current) return;
+
+    didMountRef.current = true;
+
+    if (!isLoggedIn) return;
+    if (!checkInOptions.length || !checkOutOptions.length) return;
+
+    const today = new Date();
+
+    if (!checkIn) {
+      onCheckInChange?.(today);
+    }
+
+    if (!checkOut) {
+      onCheckOutChange?.(today);
+    }
+
+    if (!checkInTime) {
+      const fallback = formattedCheckInOptions[0] || getCurrentTime12Hr();
+      onCheckInTimeChange?.(fallback);
+    }
+
+    if (!checkOutTime) {
+      const fallback = formattedCheckOutOptions[0] || getCurrentTime12Hr();
+      onCheckOutTimeChange?.(fallback);
+    }
+  }, [isLoggedIn, checkInOptions, checkOutOptions]);
 
   const today = new Date();
   const tomorrow = new Date(today);
@@ -109,9 +114,9 @@ export default function ImprovedDatePicker({
     setIsCheckOutOpen(false);
   };
 
-  if (!checkOutTime && formattedCheckOutOptions.length) {
-    onCheckOutTimeChange?.(formattedCheckOutOptions[0]);
-  }
+  // if (!checkOutTime && formattedCheckOutOptions.length) {
+  //   onCheckOutTimeChange?.(formattedCheckOutOptions[0]);
+  // }
 
   const getMinCheckOutDate = () => {
     if (checkIn) {

@@ -127,7 +127,7 @@ export default function AuthModal({ isOpen, onClose }) {
         // Render the recaptcha
         await recaptchaRef.current.render();
         setIsRecaptchaReady(true);
-        setRecaptchaError(null);
+        setRecaptchaError(null); 
       } catch (err) {
         console.error("reCAPTCHA initialization failed:", err);
 
@@ -258,9 +258,7 @@ export default function AuthModal({ isOpen, onClose }) {
           profile_image: result.data.profile_image,
           // Add more user fields if needed
         });
-
-        // console.log("✅ Backend token saved and user updated");
-        router.push("/profile");
+        
       } else {
         console.warn("❌ Token not received from backend");
       }

@@ -2,7 +2,7 @@
 
 import _dynamic from 'next/dynamic'; // ✅ Renamed to _dynamic
 
-export const dynamic = 'force-dynamic'; // ✅ No conflict now
+// export const dynamic = 'force-dynamic'; 
 const FarmDetail = _dynamic(() => import('@/components/Farm/FarmDetail'), { ssr: false });
 
 

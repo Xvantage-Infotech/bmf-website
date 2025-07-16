@@ -27,8 +27,8 @@ export default function Contact() {
 
     try {
       await emailjs.send(
-        "service_8lfomk4", 
-        "template_zxhhmyx",
+        "service_ua2f30o",
+        "template_sbx7ymm",
         {
           name: formData.name,
           email: formData.email,
@@ -36,7 +36,7 @@ export default function Contact() {
           subject: formData.subject,
           message: formData.message,
         },
-        "wvwJX6k0s712hImO9"
+        "GrDfTG_0G03LKnHTO"
       );
 
       show({

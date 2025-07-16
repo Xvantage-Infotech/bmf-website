@@ -127,7 +127,7 @@ export default function AuthModal({ isOpen, onClose }) {
         // Render the recaptcha
         await recaptchaRef.current.render();
         setIsRecaptchaReady(true);
-        setRecaptchaError(null);
+        setRecaptchaError(null); 
       } catch (err) {
         console.error("reCAPTCHA initialization failed:", err);
 

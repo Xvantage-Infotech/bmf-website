@@ -15,7 +15,7 @@ import {
 
 export default function Footer() {
   const quickLinks = [
-    { href: "/", label: "Browse Farms" },
+    { href: "/farms", label: "Browse Farms" },
     { href: "/how-it-works", label: "How it Works" },
     { href: "/owner/register", label: "List Your Property" },
     { href: "/customers", label: "Happy Customers" },
@@ -23,11 +23,11 @@ export default function Footer() {
   ];
 
   const locations = [
-    { href: "/farms/surat", label: "Surat Farmhouses" },
-    { href: "/farms/daman", label: "Daman Resorts" },
-    { href: "/farms/mumbai", label: "Mumbai Villas" },
-    { href: "/farms/pune", label: "Pune Retreats" },
-    { href: "/farms/vadodara", label: "Vadodara Estates" },
+    { href: "/farms?city=surat", label: "Surat Farmhouses" },
+    { href: "/farms?city=navsari", label: "Navsari Getaways" },
+    { href: "/farms?city=daman", label: "Daman Resorts" },
+    { href: "/farms?city=saputara", label: "Saputara Hillside Farms" },
+    { href: "/farms?city=silvassa", label: "Silvassa Retreats" },
   ];
 
   const socialLinks = [
@@ -113,12 +113,11 @@ export default function Footer() {
                 <li key={location.href}>
                   <Link
                     href={location.href}
-                    onClick={(e) => e.preventDefault()}
                     className="hover:text-white transition"
                   >
                     {location.label}
                   </Link>
-                </li> 
+                </li>
               ))}
             </ul>
           </div>
@@ -164,37 +163,6 @@ export default function Footer() {
             </div>
           </div>
         </div>
-
-        {/* Download Section */}
-        {/* <div className="border-t border-neutral-800 pt-8 mt-4">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
-            <p className="text-neutral-300 text-sm md:text-base">
-              Download{" "}
-              <span className="font-semibold text-white">BookMyFarm</span> for
-              exciting offers
-            </p>
-            <div className="flex gap-4">
-              <a
-                href="https://play.google.com/store/apps/details?id=com.app.bookmyfarm&hl=en_IN"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <img
-                  src="/googleplay-img.svg"
-                  alt="Google Play"
-                  className="h-10 hover:scale-105 transition-transform"
-                />
-              </a>
-              <a href="https://apps.apple.com/in/app/bookmyfarm-book-farmhouse/id6747479573" target="_blank" rel="noopener noreferrer">
-                <img
-                  src="/appstore-img.svg"
-                  alt="App Store"
-                  className="h-10 hover:scale-105 transition-transform"
-                />
-              </a>
-            </div>
-          </div>
-        </div> */}
       </div>
     </footer>
   );

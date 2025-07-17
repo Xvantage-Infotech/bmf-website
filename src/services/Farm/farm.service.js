@@ -112,3 +112,25 @@ export const fetchAreas = async () => {
     throw error;
   }
 };
+
+export const fetchFarmList = async (token) => {
+  try {
+    const response = await api.post(
+      "/api/list_farm",
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${token}`, // Authorization token in the header
+        },
+      }
+    );
+
+    // Returning the farm data
+    // console.log(response);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching farm list:", error);
+    throw error?.response?.data || error;
+  }
+};
+

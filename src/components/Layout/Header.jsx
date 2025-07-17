@@ -134,7 +134,7 @@ export default function Header() {
                   <AvatarImage src={user.profileImage} alt={user.name} />
                 ) : (
                   <AvatarFallback className="bg-primary text-white">
-                    {user?.name.charAt(0).toUpperCase()}
+                    {user?.name ? user.name[0].toUpperCase() : "?"}
                   </AvatarFallback>
                 )}
               </Avatar>
@@ -191,6 +191,20 @@ export default function Header() {
                 >
                   <User className="mr-2 h-4 w-4" />
                   <span>My Bookings</span>
+                </Button>
+              )}
+
+              {user?.is_owner === 1 && (
+                <Button
+                  variant="outline"
+                  className="w-full justify-start"
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    router.push("/owner/bookings");
+                  }}
+                >
+                  <Home className="mr-2 h-4 w-4" />
+                  <span>Owner Dashboard</span>
                 </Button>
               )}
 

@@ -188,35 +188,37 @@ export default function AllFarmsPage() {
           style={{ width: "350px", height: "350px" }}
           className="mb-4"
         />
-        <p className="text-neutral-500 text-sm animate-pulse">Loading farms...</p>
+        <p className="text-neutral-500 text-sm animate-pulse">
+          Loading farms...
+        </p>
       </div>
     );
   }
 
   return (
     <PublicPageLayout>
-      <div className="min-h-screen bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Farm Grid or Skeleton */}
-          <div className="mt-6">
-            <FarmList
-              selectedCity={selectedCity}
-              selectedCategory={selectedCategory}
-              farms={farms}
-              searchFilters={{
-                city_id:
-                  selectedCity !== "all"
-                    ? CITY_IDS[selectedCity.toLowerCase()]
-                    : "",
-                category_id:
-                  selectedCategory !== "all"
-                    ? parseInt(selectedCategory)
-                    : "",
-              }}
-            />
-          </div>
-        </div>
+  <div className="min-h-screen bg-gray-50">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-0 mt-0">
+      {/* Removed vertical padding and top margin */}
+      <div className="mt-0">
+        {/* Reduced top margin */}
+        <FarmList
+          selectedCity={selectedCity}
+          selectedCategory={selectedCategory}
+          farms={farms}
+          searchFilters={{
+            city_id:
+              selectedCity !== "all"
+                ? CITY_IDS[selectedCity.toLowerCase()]
+                : "",
+            category_id:
+              selectedCategory !== "all" ? parseInt(selectedCategory) : "",
+          }}
+        />
       </div>
-    </PublicPageLayout>
+    </div>
+  </div>
+</PublicPageLayout>
+
   );
 }

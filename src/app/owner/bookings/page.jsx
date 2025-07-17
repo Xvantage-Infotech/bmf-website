@@ -423,6 +423,155 @@ export default function FarmList() {
                     <span>Booked</span>
                   </div>
                 </div>
+
+                {/* Booking Cards Section under Calendar */}
+                <div className="mt-6">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {bookings.map((booking, index) => {
+                      // Function to convert 24-hour time format to 12-hour AM/PM format
+                      const formatTime = (time) => {
+                        const date = new Date(`1970-01-01T${time}Z`); // Convert the time string to a Date object
+                        return date.toLocaleString("en-US", {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          hour12: true,
+                        });
+                      };
+
+                      return (
+                        <div
+                          key={index}
+                          className="w-full bg-white rounded-xl shadow-md overflow-hidden p-6"
+                        >
+                          {/* Farm Name Header with Phone Call Icon after the farm name */}
+                          <div className="flex items-center space-x-2">
+                            <h1 className="text-2xl font-bold text-gray-800 w-full">
+                              {booking.farm.farm_alias_name}{" "}
+                              {/* Dynamic farm name */}
+                            </h1>
+                            {/* Phone Call Icon next to the farm name */}
+                            <a
+                              href={`tel:${booking.user.phone_number}`}
+                              className="text-green-600 hover:text-green-800 transition-colors"
+                              title="Call farm"
+                            >
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                                className="w-6 h-6 cursor-pointer"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+                                />
+                              </svg>
+                            </a>
+                          </div>
+
+                          {/* Payment Status with rounded border under farm name */}
+                          <div
+                            className={`inline-block px-3 py-1 rounded-full text-xs font-medium mt-1 mb-4 border ${
+                              booking.status === "Payment Success"
+                                ? "text-green-600 border-green-200 bg-green-50"
+                                : booking.status === "Payment Pending"
+                                ? "text-orange-600 border-orange-200 bg-orange-50"
+                                : "text-red-600 border-red-200 bg-red-50"
+                            }`}
+                          >
+                            {booking.status === 1
+                              ? "Payment Success"
+                              : booking.status === 0
+                              ? "Payment Pending"
+                              : "Cancelled"}{" "}
+                          </div>
+
+                          {/* Booking Dates */}
+                          <div className="flex justify-between mb-6">
+                            <div>
+                              <p className="text-sm text-gray-500">Check in</p>
+                              <p className="font-medium">
+                                {booking.check_in_date}{" "}
+                                {formatTime(booking.check_in_time)}{" "}
+                                {/* Format the check-in time */}
+                              </p>{" "}
+                              {/* Dynamic check-in date and time */}
+                            </div>
+                            <div>
+                              <p className="text-sm text-gray-500">Check out</p>
+                              <p className="font-medium">
+                                {booking.check_out_date}{" "}
+                                {formatTime(booking.check_out_time)}{" "}
+                                {/* Format the check-out time */}
+                              </p>{" "}
+                              {/* Dynamic check-out date and time */}
+                            </div>
+                          </div>
+
+                          <div className="border-t border-gray-200 my-4"></div>
+
+                          {/* Booker Information */}
+                          <div className="mb-4 bg-gray-50 rounded-lg p-4 space-y-3">
+                            <div>
+                              <h2 className="text-xs font-medium text-gray-400 uppercase tracking-wider">
+                                Booked By
+                              </h2>
+                              <h3 className="text-lg font-bold text-gray-700 mt-1">
+                                {booking.user.name}{" "}
+                                {/* Dynamic booked by name */}
+                              </h3>
+                            </div>
+
+                            {/* Guest/Total/Pending section with light borders */}
+                            <div className="grid grid-cols-3 gap-0 bg-white rounded-md p-2 border border-gray-100">
+                              <div className="text-center">
+                                <p className="text-xs text-gray-500">
+                                  No. of Guests
+                                </p>
+                                <p className="font-medium text-gray-800">
+                                  {booking.no_of_guest}
+                                </p>{" "}
+                                {/* Dynamic number of guests */}
+                              </div>
+                              <div className="text-center border-l border-r border-gray-100">
+                                <p className="text-xs text-gray-500">
+                                  Total Amount
+                                </p>
+                                <p className="font-medium text-gray-800">
+                                  {booking.total_price}{" "}
+                                  {/* Dynamic total price without dollar sign */}
+                                </p>{" "}
+                                {/* Dynamic total price */}
+                              </div>
+                              <div className="text-center">
+                                <p className="text-xs text-gray-500">
+                                  Pending Amount
+                                </p>
+                                <p className="font-medium text-gray-800">
+                                  {booking.status === "Payment Success"
+                                    ? "0.00"
+                                    : `${booking.pending_amount}`}{" "}
+                                  {/* Dynamic pending amount without dollar sign */}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Cancel Booking Button with reduced top margin */}
+                          <button className="w-full mt-4 py-2 px-4 bg-[#FF5858] text-white font-medium rounded-full hover:bg-[#E04E4E] transition-colors">
+                            {booking.status === "Cancelled"
+                              ? "Closed"
+                              : "Cancel Booking"}{" "}
+                            {/* Conditional text based on status */}
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
             )}
           </div>

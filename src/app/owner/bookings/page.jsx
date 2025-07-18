@@ -4,10 +4,11 @@ import { useEffect, useState } from "react";
 import PublicPageLayout from "@/components/Layout/PublicPageLayout";
 import { getAccessToken } from "@/hooks/cookies";
 import { fetchFarmList } from "@/services/Farm/farm.service";
+import { getOwnerBookings } from "@/services/Owner/owner.service"; // Import the function for API call
 import {
-  getOwnerBookings,
+  cancelBooking,
   getOwnerPayCalculation,
-} from "@/services/Owner/owner.service"; // Import the function for API call
+} from "@/services/Booking/booking.service";
 
 export default function FarmList() {
   const [farms, setFarms] = useState([]);
@@ -59,11 +60,19 @@ export default function FarmList() {
         }
 
         try {
-          const data = await getOwnerPayCalculation({
+          const response = await getOwnerPayCalculation({
             farmId: selectedFarm.id,
             token,
           });
-          setPayCalculation(data); // Set the pay calculation data
+
+          if (response) {
+            setPayCalculation(response); // Set the data correctly
+          } else {
+            console.error(
+              "Error fetching pay calculation data",
+              response.message
+            );
+          }
         } catch (error) {
           console.error("Error fetching pay calculation:", error);
         }
@@ -141,9 +150,13 @@ export default function FarmList() {
     let isStart = false;
     let isEnd = false;
     let isMiddle = false;
+    let isSingle = false;
     let color = "";
 
     for (let booking of bookings) {
+      // Skip cancelled bookings (status === 2)
+      if (booking.status === 2) continue;
+
       const checkInDate = new Date(booking.check_in_date);
       const checkOutDate = new Date(booking.check_out_date);
 
@@ -153,11 +166,16 @@ export default function FarmList() {
       const normDate = new Date(date.setHours(0, 0, 0, 0));
 
       if (normDate >= normCheckIn && normDate <= normCheckOut) {
+        color = booking.owner_booked === 1 ? "green" : "orange";
+
+        // Detect SAME-DAY booking
+        if (normCheckIn.getTime() === normCheckOut.getTime()) {
+          isBooked = true;
+          isSingle = true;
+          break;
+        }
+
         isBooked = true;
-
-        // Set color based on owner_booked value
-        color = booking.owner_booked === 1 ? "green" : "orange"; // Green if confirmed, orange if not
-
         if (normDate.getTime() === normCheckIn.getTime()) {
           isStart = true;
         } else if (normDate.getTime() === normCheckOut.getTime()) {
@@ -165,12 +183,50 @@ export default function FarmList() {
         } else {
           isMiddle = true;
         }
-
         break;
       }
     }
 
-    return { isBooked, isStart, isEnd, isMiddle, color };
+    return { isBooked, isStart, isEnd, isMiddle, isSingle, color };
+  };
+
+  const handleCancelBooking = async (bookingId) => {
+    // Update the booking status immediately in the UI
+    setBookings((prevBookings) =>
+      prevBookings.map((booking) =>
+        booking.id === bookingId ? { ...booking, status: 2 } : booking
+      )
+    );
+
+    try {
+      const result = await cancelBooking(bookingId);
+    } catch (error) {
+      console.error("Error canceling booking:", error);
+      // In case of error, revert the status change in the UI
+      setBookings((prevBookings) =>
+        prevBookings.map((booking) =>
+          booking.id === bookingId ? { ...booking, status: 1 } : booking
+        )
+      );
+    }
+  };
+
+  const handleWhatsAppClick = (booking) => {
+    if (!booking) return;
+
+    const name = booking.farm.farm_alias_name || booking.farm.name;
+    const checkInDate = new Date(booking.check_in_date).toLocaleDateString();
+    const checkOutDate = new Date(booking.check_out_date).toLocaleDateString();
+
+    // Creating the message with the updated request context
+    const message = `Hello Book My Farm Team, \n\nI am the owner of the property: ${name}. I would like to request the cancellation of the following booking:\n\nCheck-in Date: ${checkInDate}\nCheck-out Date: ${checkOutDate}\n\nPlease assist me with the cancellation of this booking.\n\nThank you!`;
+
+    const encodedMessage = encodeURIComponent(message).replace(/\+/g, "%20");
+
+    const url = `https://wa.me/919277778778?text=${encodedMessage}`;
+
+    // Open WhatsApp URL in a new tab or window
+    window.open(url, "_blank");
   };
 
   if (loading) {
@@ -189,26 +245,6 @@ export default function FarmList() {
         </p>
       </div>
     );
-  }
-  function formatDate(dateStr) {
-    if (!dateStr) return "";
-    const date = new Date(dateStr);
-    return date.toLocaleDateString("en-GB", {
-      day: "2-digit",
-      month: "long",
-      year: "numeric",
-    });
-  }
-
-  function formatTime(timeStr) {
-    if (!timeStr) return "";
-    // Use a dummy date for time formatting
-    const date = new Date(`1970-01-01T${timeStr}Z`);
-    return date.toLocaleTimeString("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true,
-    });
   }
 
   const isPastDate = (dateStr) => {
@@ -315,19 +351,19 @@ export default function FarmList() {
                       <div className="flex flex-col items-center p-2">
                         <div className="text-sm sm:text-base">Total</div>
                         <div className="font-bold text-sm sm:text-base text-blue-600">
-                          {payCalculation?.booking_total || 0}
+                          {payCalculation?.booking_total}
                         </div>
                       </div>
                       <div className="flex flex-col items-center p-2">
                         <div className="text-sm sm:text-base">Upcoming</div>
                         <div className="font-bold text-sm sm:text-base text-green-600">
-                          {payCalculation?.booking_upcoming || 0}
+                          {payCalculation?.booking_upcoming}
                         </div>
                       </div>
                       <div className="flex flex-col items-center p-2">
                         <div className="text-sm sm:text-base">Cancelled</div>
                         <div className="font-bold text-sm sm:text-base text-red-600">
-                          {payCalculation?.booking_cancelled || 0}
+                          {payCalculation?.booking_cancelled}
                         </div>
                       </div>
                     </div>
@@ -344,13 +380,13 @@ export default function FarmList() {
                       <div className="flex flex-col items-center p-2">
                         <div className="text-sm sm:text-base">Total</div>
                         <div className="font-bold text-sm sm:text-base text-blue-600">
-                          ₹{payCalculation?.transaction_total || 0}
+                          ₹{payCalculation?.transaction_total}
                         </div>
                       </div>
                       <div className="flex flex-col items-center p-2">
                         <div className="text-sm sm:text-base">Paid</div>
                         <div className="font-bold text-sm sm:text-base text-green-600">
-                          ₹{payCalculation?.transaction_paid || 0}
+                          ₹{payCalculation?.transaction_paid}
                         </div>
                       </div>
                       <div className="flex flex-col items-center p-2">
@@ -358,7 +394,7 @@ export default function FarmList() {
                           Under Progress
                         </div>
                         <div className="font-bold text-sm sm:text-base text-orange-600">
-                          ₹{payCalculation?.transaction_upcoming || 0}
+                          ₹{payCalculation?.transaction_upcoming}
                         </div>
                       </div>
                     </div>
@@ -408,8 +444,14 @@ export default function FarmList() {
 
                     {/* Calendar days */}
                     {calendarDays.map((date, i) => {
-                      const { isBooked, isStart, isEnd, isMiddle, color } =
-                        handleDateClass(date);
+                      const {
+                        isBooked,
+                        isStart,
+                        isEnd,
+                        isMiddle,
+                        isSingle,
+                        color,
+                      } = handleDateClass(date);
                       const dayOfWeek = date.getDay();
 
                       return (
@@ -420,21 +462,30 @@ export default function FarmList() {
                           <span className="z-10">{date.getDate()}</span>
 
                           {/* Booking indicator line */}
-                          {isBooked && (
-                            <div
-                              className={`absolute bottom-0 h-1.5 
-                        ${color === "green" ? "bg-green-500" : "bg-orange-500"}
-                        ${
-                          isMiddle || (isStart && dayOfWeek !== 0) || isEnd
-                            ? "left-0 right-0"
-                            : isStart
-                            ? "left-1/2 right-0"
-                            : "left-0 right-0"
-                        }
-                        ${isStart ? "rounded-l-full" : ""}
-                        ${isEnd ? "rounded-r-full" : ""}`}
-                            ></div>
-                          )}
+                          {isBooked &&
+                            (isSingle ? (
+                              <div
+                                className={`absolute bottom-0 left-0 right-0 h-1.5 ${
+                                  color === "green"
+                                    ? "bg-green-500"
+                                    : "bg-orange-500"
+                                } rounded-full`}
+                              ></div>
+                            ) : (
+                              <div
+                                className={`absolute bottom-0 h-1.5 
+              ${color === "green" ? "bg-green-500" : "bg-orange-500"}
+              ${
+                isMiddle || (isStart && dayOfWeek !== 0) || isEnd
+                  ? "left-0 right-0"
+                  : isStart
+                  ? "left-1/2 right-0"
+                  : "left-0 right-0"
+              }
+              ${isStart ? "rounded-l-full" : ""}
+              ${isEnd ? "rounded-r-full" : ""}`}
+                              ></div>
+                            ))}
                         </div>
                       );
                     })}
@@ -456,6 +507,16 @@ export default function FarmList() {
                 <div className="mt-6">
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     {bookings.map((booking, index) => {
+                      const formatDate = (dateStr) => {
+                        const date = new Date(dateStr);
+                        const day = date.getDate().toString().padStart(2, "0");
+                        const month = date.toLocaleString("en-US", {
+                          month: "short",
+                        });
+                        const year = date.getFullYear();
+                        return `${day} ${month} ${year}`;
+                      };
+
                       const formatTime = (time) => {
                         const date = new Date(`1970-01-01T${time}Z`);
                         return date.toLocaleString("en-US", {
@@ -468,7 +529,7 @@ export default function FarmList() {
                       const ribbonText =
                         booking.owner_booked === 1 ? "HOST" : "BMF";
                       const ribbonBg =
-                        booking.owner_booked === 1 ? "#17AE7D" : "#FF5858";
+                        booking.owner_booked === 1 ? "#17AE7D" : "#E0795F";
 
                       return (
                         <div
@@ -540,31 +601,31 @@ export default function FarmList() {
                           </div>
 
                           {/* Booking Dates */}
-                          <div className="flex justify-between gap-2 mb-6 flex-wrap">
+                          <div className="flex justify-between gap-3 mb-6 flex-wrap sm:flex-nowrap">
                             {/* Check-in */}
                             <div className="flex-1 min-w-[120px]">
-                              <p className="text-xs md:text-xs text-[#888D97] font-medium mb-1">
+                              <p className="text-xs text-[#888D97] font-medium mb-1">
                                 Check in
                               </p>
-                              <div className="flex items-baseline gap-2">
-                                <span className="text-sm md:text-base font-semibold text-gray-900">
+                              <div className="flex flex-nowrap items-center gap-1 text-[13px] sm:text-[15px] md:text-base font-semibold text-gray-900 leading-tight">
+                                <span className="whitespace-nowrap">
                                   {formatDate(booking.check_in_date)}
                                 </span>
-                                <span className="text-sm md:text-base font-bold text-gray-900">
+                                <span className="font-bold text-gray-900 whitespace-nowrap">
                                   {formatTime(booking.check_in_time)}
                                 </span>
                               </div>
                             </div>
                             {/* Check-out */}
                             <div className="flex-1 min-w-[120px]">
-                              <p className="text-xs md:text-xs text-[#888D97] font-medium mb-1">
+                              <p className="text-xs text-[#888D97] font-medium mb-1">
                                 Check out
                               </p>
-                              <div className="flex items-baseline gap-2">
-                                <span className="text-sm md:text-base font-semibold text-gray-900">
+                              <div className="flex flex-nowrap items-center gap-1 text-[13px] sm:text-[15px] md:text-base font-semibold text-gray-900 leading-tight">
+                                <span className="whitespace-nowrap">
                                   {formatDate(booking.check_out_date)}
                                 </span>
-                                <span className="text-sm md:text-base font-bold text-gray-900">
+                                <span className="font-bold text-gray-900 whitespace-nowrap">
                                   {formatTime(booking.check_out_time)}
                                 </span>
                               </div>
@@ -608,30 +669,52 @@ export default function FarmList() {
                                     {booking.total_price ?? "--"}
                                   </p>
                                 </div>
-                                <div className="w-[1px] bg-[#E0E2E7] mx-2"></div>
-                                {/* Pending Amount */}
-                                <div className="flex-1 text-center">
-                                  <p className="text-xs text-[#888D97] mb-1 font-medium">
-                                    Pending Amount
-                                  </p>
-                                  <p className="text-[19px] font-medium text-gray-800">
-                                    {booking.status === "Payment Success"
-                                      ? "0.00"
-                                      : booking.pending_amount ?? "--"}
-                                  </p>
-                                </div>
+                                {/* Pending Amount (only if present) */}
+                                {booking.pending_amount != null && (
+                                  <>
+                                    <div className="w-[1px] bg-[#E0E2E7] mx-2"></div>
+                                    <div className="flex-1 text-center">
+                                      <p className="text-xs text-[#888D97] mb-1 font-medium">
+                                        Pending Amount
+                                      </p>
+                                      <p className="text-[19px] font-medium text-gray-800">
+                                        {booking.pending_amount}
+                                      </p>
+                                    </div>
+                                  </>
+                                )}
                               </div>
                             )}
                           </div>
 
                           {/* Cancel Booking Button with reduced top margin */}
-                          {!isPastDate(booking.check_out_date) && (
-                            <button className="w-full mt-4 py-2 px-4 bg-[#FF5858] text-white font-medium rounded-full hover:bg-[#E04E4E] transition-colors">
-                              {booking.status === "Cancelled"
-                                ? "Closed"
-                                : "Cancel Booking"}{" "}
-                            </button>
-                          )}
+                          {!isPastDate(booking.check_out_date) &&
+                            (booking.status === 2 ? (
+                              <button
+                                className="w-full mt-4 py-2 px-4 bg-red-100 text-red-600 font-medium rounded-full cursor-not-allowed"
+                                disabled
+                              >
+                                Cancelled
+                              </button>
+                            ) : booking.owner_booked === 1 ? (
+                              <button
+                                className="w-full mt-4 py-2 px-4 bg-[#FF5858] text-white font-medium rounded-full hover:bg-[#E04E4E] transition-colors"
+                                onClick={() => handleCancelBooking(booking.id)} // Update the status immediately on click
+                              >
+                                Cancel Booking
+                              </button>
+                            ) : (
+                              <button
+                                className="w-full mt-4 py-2 px-4 font-medium rounded-full transition-colors"
+                                style={{
+                                  backgroundColor: "#E0795F",
+                                  color: "#fff",
+                                }}
+                                onClick={() => handleWhatsAppClick(booking)} // Trigger WhatsApp redirect with booking details
+                              >
+                                Request Cancel Booking
+                              </button>
+                            ))}
                         </div>
                       );
                     })}

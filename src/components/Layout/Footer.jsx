@@ -34,7 +34,7 @@ export default function Footer() {
   const socialLinks = [
     {
       icon: Facebook,
-      href: "https://facebook.com/bookmyfarm",
+      href: "https://www.facebook.com/share/15bNNS1yrr/",
       label: "Facebook",
     },
     {

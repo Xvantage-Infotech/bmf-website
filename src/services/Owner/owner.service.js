@@ -30,23 +30,4 @@ export const getOwnerBookings = async ({
   }
 };
 
-export const getOwnerPayCalculation = async ({ farmId, token }) => {
-  try {
-    const response = await api.post(
-      "/api/owner_pay_calculation",
-      {
-        farm_id: farmId,
-      },
-      {
-        headers: {
-          Accept: "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-    return response?.data?.data || {};
-  } catch (error) {
-    console.error("Error fetching owner pay calculation:", error);
-    throw error;
-  }
-};
+

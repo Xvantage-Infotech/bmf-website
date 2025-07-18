@@ -104,3 +104,25 @@ export const cancelBooking = async (bookingId) => {
     throw error;
   }
 };
+
+export const getOwnerPayCalculation = async ({ farmId, token }) => {
+  try {
+    const response = await api.get(
+      "/api/owner_pay_calculation",
+      {
+        farm_id: farmId,
+      },
+      {
+        headers: {
+          Accept: "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    // console.log("Pay Calculation Response:", response);
+    return response?.data?.data || {};
+  } catch (error) {
+    console.error("Error fetching owner pay calculation:", error);
+    throw error;
+  }
+};

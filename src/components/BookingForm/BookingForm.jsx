@@ -604,13 +604,6 @@
 // }
 
 // BookingForm.jsx
-
-
-
-
-
-
-
 "use client";
 
 import { useEffect, useRef, useState } from "react";
@@ -685,11 +678,6 @@ export default function BookingForm({ farm, className = "" }) {
 
     return `${paddedHours}:${paddedMinutes}:00`;
   };
-
-  async function sha256(input) {
-  const buffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(input));
-  return [...new Uint8Array(buffer)].map(b => b.toString(16).padStart(2, '0')).join('');
-}
 
   const isWeekend = (date) => {
     const day = date.getDay(); // Sunday = 0, Saturday = 6
@@ -927,38 +915,14 @@ export default function BookingForm({ farm, className = "" }) {
       return;
     }
 
-   // ✅ Add inside your handleConfirmBooking() or useEffect
-if (typeof window !== 'undefined' && typeof fbq === 'function' && user) {
-  const phoneRaw = user.phone_number || ''
-  const emailRaw = user.email || ''
-  const name = user.name || ''
-  const [firstName = '', lastName = ''] = name.split(' ')
-
-  const email = emailRaw.trim().toLowerCase()
-  const phone = phoneRaw.replace(/\D/g, '') // digits only
-
-  // Hash before sending
-  Promise.all([
-    sha256(email),
-    sha256(phone),
-    sha256(firstName.toLowerCase()),
-    sha256(lastName.toLowerCase())
-  ]).then(([hashedEmail, hashedPhone, hashedFirst, hashedLast]) => {
-    fbq('track', 'Booking-Pay', {
-      content_name: farm?.name,
-      content_ids: [farm?.id],
-      content_type: 'product',
-      currency: 'INR',
-      value: finalPrice || 0,
-      em: hashedEmail,
-      ph: hashedPhone,
-      fn: hashedFirst,
-      ln: hashedLast,
-    });
-  });
-}
-
-
+    if (typeof window !== "undefined" && typeof fbq === "function") {
+      fbq("track", "Booking-Pay", {
+        name: user?.name || "Guest",
+        phone: user?.phone || "N/A",
+        farmName: farm.name,
+        farmId: farm.id.toString(),
+      });
+    }
 
     router.push(
       "/booking-pay?" +

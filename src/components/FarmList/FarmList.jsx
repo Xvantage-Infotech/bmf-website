@@ -490,79 +490,76 @@ export default function FarmList({
   );
 
   return (
-    <section id="farm-list" className="section-padding bg-white">
-      <div className="max-w-7xl mx-auto container-padding">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h2 className="text-3xl font-bold text-neutral-900 mb-2">
-              {title}
-            </h2>
-            <p className="text-neutral-600">{description}</p>
-            {!loading && sortedFarms.length > 0 && (
-              <p className="text-sm text-neutral-500 mt-1">
-                {/* {sortedFarms.length} result{sortedFarms.length !== 1 ? 's' : ''} */}
-              </p>
-            )}
-          </div>
+    <section id="farm-list" className="section-padding bg-white pt-6 mt-6">
+  <div className="max-w-7xl mx-auto container-padding px-4 sm:px-6 lg:px-8">
+    <div className="flex items-center justify-between mb-4">
+      <div>
+        <h2 className="text-3xl font-bold text-neutral-900 mb-2">{title}</h2>
+        <p className="text-neutral-600">{description}</p>
+        {!loading && sortedFarms.length > 0 && (
+          <p className="text-sm text-neutral-500 mt-1">
+            {/* {sortedFarms.length} result{sortedFarms.length !== 1 ? 's' : ''} */}
+          </p>
+        )}
+      </div>
 
-          <Select value={sortBy} onValueChange={setSortBy}>
-            <SelectTrigger className="w-48">
-              <SelectValue placeholder="Sort by" />
-            </SelectTrigger>
-            <SelectContent>
-              {sortOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+      <Select value={sortBy} onValueChange={setSortBy}>
+        <SelectTrigger className="w-48">
+          <SelectValue placeholder="Sort by" />
+        </SelectTrigger>
+        <SelectContent>
+          {sortOptions.map((option) => (
+            <SelectItem key={option.value} value={option.value}>
+              {option.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+
+    {!loading && sortedFarms.length > 0 ? (
+      <>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {sortedFarms.map((farm) => (
+            <FarmCard
+              key={farm.id}
+              farm={farm}
+              isFavorited={wishlistIds.includes(farm.id)}
+              onToggleFavorite={() => {
+                setWishlistIds((prev) => prev.filter((id) => id !== farm.id));
+              }}
+            />
+          ))}
         </div>
-
-        {!loading && sortedFarms.length > 0 ? (
-          <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {sortedFarms.map((farm) => (
-                <FarmCard
-                  key={farm.id}
-                  farm={farm}
-                  isFavorited={wishlistIds.includes(farm.id)}
-                  onToggleFavorite={() => {
-                    setWishlistIds((prev) =>
-                      prev.filter((id) => id !== farm.id)
-                    );
-                  }}
-                />
-              ))}
-            </div>
-            {hasMore && (
-              <div className="flex justify-center mt-10">
-                <Button onClick={() => setPage((prev) => prev + 1)}>
-                  Load More
-                </Button>
-              </div>
-            )}
-          </>
-        ) : loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {Array.from({ length: 10 }).map((_, index) => (
-              <FarmCardSkeleton key={index} />
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-16">
-            <h3 className="text-xl font-semibold text-neutral-900 mb-2">
-              No farms found
-            </h3>
-            <p className="text-neutral-600 mb-6">
-              Try changing your search filters or explore other options.
-            </p>
-            <Button onClick={() => window.location.reload()}>
-              Clear Filters
+        {hasMore && (
+          <div className="flex justify-center mt-6">
+            <Button onClick={() => setPage((prev) => prev + 1)}>
+              Load More
             </Button>
           </div>
         )}
+      </>
+    ) : loading ? (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        {Array.from({ length: 10 }).map((_, index) => (
+          <FarmCardSkeleton key={index} />
+        ))}
       </div>
-    </section>
+    ) : (
+      <div className="text-center py-12">
+        <h3 className="text-xl font-semibold text-neutral-900 mb-2">
+          No farms found
+        </h3>
+        <p className="text-neutral-600 mb-6">
+          Try changing your search filters or explore other options.
+        </p>
+        <Button onClick={() => window.location.reload()}>
+          Clear Filters
+        </Button>
+      </div>
+    )}
+  </div>
+</section>
+
   );
 }

@@ -915,14 +915,26 @@ export default function BookingForm({ farm, className = "" }) {
       return;
     }
 
-    if (typeof window !== "undefined" && typeof fbq === "function") {
-      fbq("track", "Booking-Pay", {
-        name: user?.name || "Guest",
-        phone: user?.phone || "N/A",
-        farmName: farm.name,
-        farmId: farm.id.toString(),
-      });
-    }
+   // ✅ Add inside your handleConfirmBooking() or useEffect
+if (typeof window !== 'undefined' && typeof fbq === 'function' && user) {
+  const phone = user.phone_number?.replace(/\D/g, '')
+  const [firstName = '', lastName = ''] = (user.name || '').split(' ')
+  const email = user.email?.toLowerCase()
+
+  fbq('trackCustom', 'Booking-Pay', {
+    content_name: farm?.name,
+    content_ids: [farm?.id],
+    content_type: 'product',
+    currency: 'INR',
+    value: finalPrice || 0,
+    booking_name: user.name,
+    phone_number: phone,
+    email: email,
+    fn: firstName,
+    ln: lastName,
+  })
+}
+
 
     router.push(
       "/booking-pay?" +

@@ -188,7 +188,7 @@ useEffect(() => {
         key: razorpayKey,
         amount: Math.round(discountedPrice * 100),
         currency: "INR",
-        name: farmName,
+        name: "Book My Farm",
         description: "Farm Booking",
         order_id: data.order_id,
 

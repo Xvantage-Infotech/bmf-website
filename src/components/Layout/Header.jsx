@@ -57,7 +57,7 @@ export default function Header() {
   const { user, isAuthenticated, logout, authInitialized } = useAuth();
   const [hasProperties, setHasProperties] = useState(false);
   const [hasBookings, setHasBookings] = useState(false);
-
+  const popularCities = ["Surat", "Daman", "Navsari", "Saputara", "silvassa"];
   const router = useRouter();
 
   // if (!authInitialized) return null; // or a skeleton if you want
@@ -166,6 +166,18 @@ export default function Header() {
                 <span>Edit Profile</span>
               </Button>
 
+              <Button
+                variant="outline"
+                className="w-full justify-start"
+                onClick={() => {
+                  setIsMenuOpen(false);
+                  router.push("/saved");
+                }}
+              >
+                <Heart className="mr-2 h-4 w-4" />
+                <span>Wishlist</span>
+              </Button>
+
               {hasProperties && (
                 <Button
                   variant="outline"
@@ -260,22 +272,25 @@ export default function Header() {
                           Popular Locations
                         </h4>
                         <div className="flex flex-wrap gap-2">
-                          {[
-                            "Surat",
-                            "Daman",
-                            "Navsari",
-                            "Saputara",
-                            "Vadodara",
-                          ].map((city) => (
-                            <Button
+                          {popularCities.map((city) => (
+                            <Link
                               key={city}
-                              variant="outline"
-                              size="sm"
-                              className="text-xs"
-                              onClick={() => setIsMenuOpen(false)}
+                              href={`/farms?city=${encodeURIComponent(
+                                city.toLowerCase()
+                              )}`}
+                              passHref
+                              legacyBehavior
                             >
-                              {city}
-                            </Button>
+                              <Button
+                                as="a"
+                                variant="outline"
+                                size="sm"
+                                className="text-xs"
+                                onClick={() => setIsMenuOpen(false)}
+                              >
+                                {city}
+                              </Button>
+                            </Link>
                           ))}
                         </div>
                       </div>

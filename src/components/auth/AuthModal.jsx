@@ -127,7 +127,7 @@ export default function AuthModal({ isOpen, onClose }) {
         // Render the recaptcha
         await recaptchaRef.current.render();
         setIsRecaptchaReady(true);
-        setRecaptchaError(null); 
+        setRecaptchaError(null);
       } catch (err) {
         console.error("reCAPTCHA initialization failed:", err);
 
@@ -240,7 +240,10 @@ export default function AuthModal({ isOpen, onClose }) {
       // ✅ Step 1: Verify OTP with Firebase
       await verifyOtpAndLogin(values.otp);
 
-      const result = await loginOrRegisterUser(formattedPhone);
+      // const result = await loginOrRegisterUser(formattedPhone);
+      const result = await loginOrRegisterUser(
+        formattedPhone.replace(/^\+91/, "")
+      );
 
       if (result?.status === 1 && result?.data?.token) {
         const backendToken = result.data.token;
@@ -256,9 +259,9 @@ export default function AuthModal({ isOpen, onClose }) {
           name: result.data.name,
           date_of_birth: result.data.date_of_birth,
           profile_image: result.data.profile_image,
+          is_owner: result.data.is_owner,
           // Add more user fields if needed
         });
-        
       } else {
         console.warn("❌ Token not received from backend");
       }

@@ -166,6 +166,18 @@ export default function Header() {
                 <span>Edit Profile</span>
               </Button>
 
+              <Button
+                variant="outline"
+                className="w-full justify-start"
+                onClick={() => {
+                  setIsMenuOpen(false);
+                  router.push("/saved");
+                }}
+              >
+                <Heart className="mr-2 h-4 w-4" />
+                <span>Wishlist</span>
+              </Button>
+
               {hasProperties && (
                 <Button
                   variant="outline"

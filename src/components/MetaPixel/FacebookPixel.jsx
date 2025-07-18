@@ -1,21 +1,15 @@
 'use client'
 
 import Script from 'next/script'
-import { useAuth } from '@/contexts/AuthContext'
 
 const FacebookPixel = () => {
   const pixelId = process.env.NEXT_PUBLIC_PIXEL_KEY_ID
-  const { user } = useAuth()
 
   if (!pixelId) return null
 
-  const email = user?.email?.trim().toLowerCase()
-  const phone = user?.phone_number?.replace(/\D/g, '') // remove non-digit chars
-  const name = user?.name || ''
-  const [firstName, lastName] = name.split(' ')
-
   return (
     <>
+      {/* Facebook Pixel Script */}
       <Script
         id="facebook-pixel"
         strategy="afterInteractive"
@@ -29,18 +23,13 @@ const FacebookPixel = () => {
             t.src=v;s=b.getElementsByTagName(e)[0];
             s.parentNode.insertBefore(t,s)}(window, document,'script',
             'https://connect.facebook.net/en_US/fbevents.js');
-
-            fbq('init', '${pixelId}', {
-              em: '${email || ''}',
-              ph: '${phone || ''}',
-              fn: '${firstName || ''}',
-              ln: '${lastName || ''}'
-            });
+            fbq('init', '${pixelId}');
             fbq('track', 'PageView');
           `,
         }}
       />
 
+      {/* Fallback for noscript */}
       <noscript>
         <img
           height="1"
@@ -54,3 +43,7 @@ const FacebookPixel = () => {
 }
 
 export default FacebookPixel
+
+
+
+

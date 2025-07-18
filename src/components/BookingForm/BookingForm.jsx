@@ -604,6 +604,13 @@
 // }
 
 // BookingForm.jsx
+
+
+
+
+
+
+
 "use client";
 
 import { useEffect, useRef, useState } from "react";
@@ -678,6 +685,11 @@ export default function BookingForm({ farm, className = "" }) {
 
     return `${paddedHours}:${paddedMinutes}:00`;
   };
+
+  async function sha256(input) {
+  const buffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(input));
+  return [...new Uint8Array(buffer)].map(b => b.toString(16).padStart(2, '0')).join('');
+}
 
   const isWeekend = (date) => {
     const day = date.getDay(); // Sunday = 0, Saturday = 6
@@ -917,23 +929,35 @@ export default function BookingForm({ farm, className = "" }) {
 
    // ✅ Add inside your handleConfirmBooking() or useEffect
 if (typeof window !== 'undefined' && typeof fbq === 'function' && user) {
-  const phone = user.phone_number?.replace(/\D/g, '')
-  const [firstName = '', lastName = ''] = (user.name || '').split(' ')
-  const email = user.email?.toLowerCase()
+  const phoneRaw = user.phone_number || ''
+  const emailRaw = user.email || ''
+  const name = user.name || ''
+  const [firstName = '', lastName = ''] = name.split(' ')
 
-  fbq('trackCustom', 'Booking-Pay', {
-    content_name: farm?.name,
-    content_ids: [farm?.id],
-    content_type: 'product',
-    currency: 'INR',
-    value: finalPrice || 0,
-    booking_name: user.name,
-    phone_number: phone,
-    email: email,
-    fn: firstName,
-    ln: lastName,
-  })
+  const email = emailRaw.trim().toLowerCase()
+  const phone = phoneRaw.replace(/\D/g, '') // digits only
+
+  // Hash before sending
+  Promise.all([
+    sha256(email),
+    sha256(phone),
+    sha256(firstName.toLowerCase()),
+    sha256(lastName.toLowerCase())
+  ]).then(([hashedEmail, hashedPhone, hashedFirst, hashedLast]) => {
+    fbq('track', 'Booking-Pay', {
+      content_name: farm?.name,
+      content_ids: [farm?.id],
+      content_type: 'product',
+      currency: 'INR',
+      value: finalPrice || 0,
+      em: hashedEmail,
+      ph: hashedPhone,
+      fn: hashedFirst,
+      ln: hashedLast,
+    });
+  });
 }
+
 
 
     router.push(

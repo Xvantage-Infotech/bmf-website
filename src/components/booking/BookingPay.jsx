@@ -55,7 +55,7 @@ useEffect(() => {
     const phone = user?.phone_number;
     const email = user?.email;
 
-    window.fbq('track', 'Lead', {
+    window.fbq('track', 'Booking-Pay', {
       content_name: farmName,
       content_ids: [farmId],
       content_type: 'product',

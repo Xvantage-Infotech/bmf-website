@@ -916,7 +916,7 @@ export default function BookingForm({ farm, className = "" }) {
     }
 
     if (typeof window !== "undefined" && typeof fbq === "function") {
-      fbq("track", "Lead", {
+      fbq("track", "Booking-Pay", {
         name: user?.name || "Guest",
         phone: user?.phone || "N/A",
         farmName: farm.name,

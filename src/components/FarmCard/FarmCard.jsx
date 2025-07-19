@@ -151,27 +151,6 @@ export default function FarmCard({
               </span>
             </div>
           </div>
-
-          {/* Favorite Button */}
-          <Button
-            size="icon"
-            variant="secondary"
-            className="absolute top-3 right-3 w-8 h-8 bg-white/80 backdrop-blur-sm hover:bg-white"
-            onClick={toggleFavorite}
-          >
-            <Heart
-              className={`w-4 h-4 ${
-                isFavorited ? "fill-red-500 text-red-500" : "text-neutral-600"
-              }`}
-            />
-          </Button>
-
-          {/* Category Badge */}
-          <div className="absolute bottom-3 left-3">
-            <span className="bg-white/90 backdrop-blur-sm text-neutral-700 px-2 py-1 rounded text-xs font-medium capitalize">
-              {farm.category?.name || "Farm"}
-            </span>
-          </div>
         </div>
 
         <div className="p-4">

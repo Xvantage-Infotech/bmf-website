@@ -311,7 +311,7 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { fetchWishlist } from "@/services/Wishlist/wishlist.service";
 
 import FarmCard from "@/components/FarmCard/FarmCard";
@@ -343,6 +343,9 @@ export default function FarmList({
   const isSearchMode = externalFarms !== null;
   const { user } = useAuth();
   const [wishlistIds, setWishlistIds] = useState([]);
+  const [restored, setRestored] = useState(false);
+  const scrollPositionRef = useRef(0);
+  const isInitialLoad = useRef(true);
 
   useEffect(() => {
     const loadWishlist = async () => {
@@ -376,7 +379,7 @@ export default function FarmList({
       const newFarms = data?.data || [];
 
       setFarms((prev) => (append ? [...prev, ...newFarms] : newFarms));
-      setHasMore(newFarms.length === 12); 
+      setHasMore(newFarms.length === 12);
     } catch (err) {
       console.error("Error fetching farms:", err);
     } finally {
@@ -384,13 +387,15 @@ export default function FarmList({
     }
   };
 
+  // On city/category/search/externalFarms change, reset page to 1 and farms to []
   useEffect(() => {
+    setPage(1);
+    setFarms([]);
+    setHasMore(true);
+    setRestored(false); 
     if (isSearchMode) {
       setFarms(externalFarms || []);
       setHasMore(false);
-    } else {
-      setPage(1);
-      getFarms(false);
     }
   }, [
     selectedCity,
@@ -400,13 +405,9 @@ export default function FarmList({
   ]);
 
   useEffect(() => {
-    setPage(1);
-    getFarms(false);
-  }, [selectedCity, selectedCategory, JSON.stringify(searchFilters)]);
-
-  useEffect(() => {
-    if (page > 1) getFarms(true);
-  }, [page]);
+    if (isSearchMode) return;
+    getFarms(page > 1); // append=true if page > 1
+  }, [page, isSearchMode, externalFarms]);
 
   const sortedFarms = [...farms].sort((a, b) => {
     switch (sortBy) {
@@ -424,39 +425,35 @@ export default function FarmList({
     }
   });
 
+  useEffect(() => {
+    setRestored(false); // allow scroll restoration after city/category/search changes
+  }, [selectedCity, selectedCategory, JSON.stringify(searchFilters)]);
+
   // Add this effect to restore scroll position
   useEffect(() => {
-    const restoreScrollPosition = () => {
-      // Wait for farms to load and render
-      if (!loading && farms.length > 0) {
-        const savedPosition = sessionStorage.getItem("farmScrollPosition");
-        if (savedPosition) {
-          // Use setTimeout to ensure restoration happens after render
-          setTimeout(() => {
-            window.scrollTo({
-              top: parseInt(savedPosition),
-              behavior: "auto", // Instant scroll
-            });
+    // Only restore scroll if coming back from a farm detail (i.e., the session value exists)
+    const savedPosition = sessionStorage.getItem("farmScrollPosition");
+    if (
+      page === 1 &&
+      !restored &&
+      farms.length > 0 &&
+      savedPosition !== null // <-- Only if this is present!
+    ) {
+      window.scrollTo({
+        top: parseInt(savedPosition, 10),
+        behavior: "auto",
+      });
 
-            // Optional: Highlight last clicked card
-            const lastCard = document.querySelector(".last-clicked-farm");
-            if (lastCard) {
-              lastCard.scrollIntoView({ block: "nearest", behavior: "auto" });
-              lastCard.classList.remove("last-clicked-farm");
-            }
-
-            sessionStorage.removeItem("farmScrollPosition");
-          }, 50); // Short delay to ensure DOM is ready
-        }
+      const lastCard = document.querySelector(".last-clicked-farm");
+      if (lastCard) {
+        lastCard.scrollIntoView({ block: "nearest", behavior: "auto" });
+        lastCard.classList.remove("last-clicked-farm");
       }
-    };
 
-    restoreScrollPosition();
-
-    // Handle browser back/forward navigation
-    window.addEventListener("popstate", restoreScrollPosition);
-    return () => window.removeEventListener("popstate", restoreScrollPosition);
-  }, [loading, farms]);
+      sessionStorage.removeItem("farmScrollPosition");
+      setRestored(true);
+    }
+  }, [page, farms.length, restored]);
 
   const sortOptions = [
     { value: "featured", label: "Featured" },
@@ -491,75 +488,78 @@ export default function FarmList({
 
   return (
     <section id="farm-list" className="section-padding bg-white pt-6 mt-6">
-  <div className="max-w-7xl mx-auto container-padding px-4 sm:px-6 lg:px-8">
-    <div className="flex items-center justify-between mb-4">
-      <div>
-        <h2 className="text-3xl font-bold text-neutral-900 mb-2">{title}</h2>
-        <p className="text-neutral-600">{description}</p>
-        {!loading && sortedFarms.length > 0 && (
-          <p className="text-sm text-neutral-500 mt-1">
-            {/* {sortedFarms.length} result{sortedFarms.length !== 1 ? 's' : ''} */}
-          </p>
-        )}
-      </div>
+      <div className="max-w-7xl mx-auto container-padding px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h2 className="text-3xl font-bold text-neutral-900 mb-2">
+              {title}
+            </h2>
+            <p className="text-neutral-600">{description}</p>
+            {!loading && sortedFarms.length > 0 && (
+              <p className="text-sm text-neutral-500 mt-1">
+                {/* {sortedFarms.length} result{sortedFarms.length !== 1 ? 's' : ''} */}
+              </p>
+            )}
+          </div>
 
-      <Select value={sortBy} onValueChange={setSortBy}>
-        <SelectTrigger className="w-48">
-          <SelectValue placeholder="Sort by" />
-        </SelectTrigger>
-        <SelectContent>
-          {sortOptions.map((option) => (
-            <SelectItem key={option.value} value={option.value}>
-              {option.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </div>
-
-    {!loading && sortedFarms.length > 0 ? (
-      <>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {sortedFarms.map((farm) => (
-            <FarmCard
-              key={farm.id}
-              farm={farm}
-              isFavorited={wishlistIds.includes(farm.id)}
-              onToggleFavorite={() => {
-                setWishlistIds((prev) => prev.filter((id) => id !== farm.id));
-              }}
-            />
-          ))}
+          <Select value={sortBy} onValueChange={setSortBy}>
+            <SelectTrigger className="w-48">
+              <SelectValue placeholder="Sort by" />
+            </SelectTrigger>
+            <SelectContent>
+              {sortOptions.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
-        {hasMore && (
-          <div className="flex justify-center mt-6">
-            <Button onClick={() => setPage((prev) => prev + 1)}>
-              Load More
+
+        {!loading && sortedFarms.length > 0 ? (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {sortedFarms.map((farm) => (
+                <FarmCard
+                  key={farm.id}
+                  farm={farm}
+                  isFavorited={wishlistIds.includes(farm.id)}
+                  onToggleFavorite={() => {
+                    setWishlistIds((prev) =>
+                      prev.filter((id) => id !== farm.id)
+                    );
+                  }}
+                />
+              ))}
+            </div>
+            {hasMore && (
+              <div className="flex justify-center mt-6">
+                <Button onClick={() => setPage((prev) => prev + 1)}>
+                  Load More
+                </Button>
+              </div>
+            )}
+          </>
+        ) : loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {Array.from({ length: 10 }).map((_, index) => (
+              <FarmCardSkeleton key={index} />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12">
+            <h3 className="text-xl font-semibold text-neutral-900 mb-2">
+              No farms found
+            </h3>
+            <p className="text-neutral-600 mb-6">
+              Try changing your search filters or explore other options.
+            </p>
+            <Button onClick={() => window.location.reload()}>
+              Clear Filters
             </Button>
           </div>
         )}
-      </>
-    ) : loading ? (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        {Array.from({ length: 10 }).map((_, index) => (
-          <FarmCardSkeleton key={index} />
-        ))}
       </div>
-    ) : (
-      <div className="text-center py-12">
-        <h3 className="text-xl font-semibold text-neutral-900 mb-2">
-          No farms found
-        </h3>
-        <p className="text-neutral-600 mb-6">
-          Try changing your search filters or explore other options.
-        </p>
-        <Button onClick={() => window.location.reload()}>
-          Clear Filters
-        </Button>
-      </div>
-    )}
-  </div>
-</section>
-
+    </section>
   );
 }

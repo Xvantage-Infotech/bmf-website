@@ -646,7 +646,7 @@ export default function BookingForm({ farm, className = "" }) {
   const isLoggedIn = !!user?.token;
 
   useEffect(() => {
-    console.log("⏱ useEffect running", didMountRef.current, isLoggedIn);
+    // console.log("⏱ useEffect running", didMountRef.current, isLoggedIn);
 
     if (!didMountRef.current) {
       didMountRef.current = true;

@@ -9,14 +9,14 @@ const isProd = process.env.NODE_ENV === "production";
 // Set tokens without expiry — session-only
 export const setAccessToken = (token) => {
   Cookies.set("access_token", token, {
+    expires: 30,
     sameSite: "Lax",
     secure: process.env.NODE_ENV === "production",
   });
 
-    if (process.env.NODE_ENV !== "production") {
+  if (process.env.NODE_ENV !== "production") {
     // console.log("✅ Access token set:", token);
   }
-
 };
 
 export const setFirebaseToken = (token) => {
@@ -28,7 +28,6 @@ export const setFirebaseToken = (token) => {
     // console.log("📲 Firebase token set:", token);
   }
 };
-
 
 // Get tokens
 export const getAccessToken = () => Cookies.get(ACCESS_TOKEN_KEY);

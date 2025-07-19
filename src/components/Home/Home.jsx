@@ -311,7 +311,9 @@ export default function Homes() {
 
             <div className="text-center mt-12">
               <Button
-                onClick={() => router.push("/farms")}
+                onClick={() =>
+                  router.push("/farms")
+                }
                 size="lg"
                 variant="outline"
                 className="border-2 hover:bg-primary hover:text-white transition-all"

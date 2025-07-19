@@ -68,105 +68,164 @@ export default function AuthModal({ isOpen, onClose }) {
     }
   }, [isOpen]);
 
+  // useEffect(() => {
+  //   if (!isOpen) return;
+
+  //   const initializeRecaptcha = async () => {
+  //     try {
+  //       // Clean up existing recaptcha
+  //       if (recaptchaRef.current) {
+  //         try {
+  //           await recaptchaRef.current.clear();
+  //         } catch (e) {
+  //           console.warn("Error clearing existing recaptcha:", e);
+  //         }
+  //         recaptchaRef.current = null;
+  //       }
+
+  //       // Ensure auth is available
+  //       if (!auth) {
+  //         throw new Error("Firebase auth not initialized");
+  //       }
+
+  //       // Create container if it doesn't exist
+  //       let container = document.getElementById("recaptcha-container");
+  //       if (!container) {
+  //         container = document.createElement("div");
+  //         container.id = "recaptcha-container";
+  //         container.style.display = "none";
+  //         document.body.appendChild(container);
+  //       }
+
+  //       // Wait a bit for DOM to be ready
+  //       await new Promise((resolve) => setTimeout(resolve, 100));
+
+  //       // Create new RecaptchaVerifier
+  //       recaptchaRef.current = new RecaptchaVerifier(
+  //         auth,
+  //         "recaptcha-container",
+  //         {
+  //           size: "invisible",
+  //           callback: (response) => {
+  //             // console.log("reCAPTCHA solved:", response);
+  //           },
+  //           "expired-callback": () => {
+  //             console.warn("reCAPTCHA expired");
+  //             setIsRecaptchaReady(false);
+  //           },
+  //           "error-callback": (error) => {
+  //             console.error("reCAPTCHA error:", error);
+  //             setRecaptchaError(
+  //               "Security verification failed. Please try again."
+  //             );
+  //             setIsRecaptchaReady(false);
+  //           },
+  //         },
+  //         app // ✅ pass the actual app instance, not `auth.app`
+  //       );
+
+  //       // Render the recaptcha
+  //       await recaptchaRef.current.render();
+  //       setIsRecaptchaReady(true);
+  //       setRecaptchaError(null);
+  //     } catch (err) {
+  //       console.error("reCAPTCHA initialization failed:", err);
+
+  //       // If recaptcha has already been rendered in this element
+  //       if (err.message?.includes("already been rendered")) {
+  //         // Optional: show message briefly before reload
+  //         setRecaptchaError(
+  //           "Security verification failed. Refreshing the page..."
+  //         );
+
+  //         // Wait 1 second then refresh
+  //         setTimeout(() => {
+  //           window.location.href = "/";
+  //           return;
+  //         }, 1000);
+  //         return;
+  //       }
+
+  //       setRecaptchaError(
+  //         "Security verification failed. Please refresh the page."
+  //       );
+  //       setIsRecaptchaReady(false);
+  //     }
+  //   };
+
+  //   initializeRecaptcha();
+
+  //   return () => {
+  //     if (recaptchaRef.current) {
+  //       try {
+  //         recaptchaRef.current.clear();
+  //       } catch (e) {
+  //         console.warn("reCAPTCHA cleanup error:", e);
+  //       }
+  //       recaptchaRef.current = null;
+  //     }
+  //     setIsRecaptchaReady(false);
+  //   };
+  // }, [isOpen]);
+
+  // --- CHANGES: ---
+  // - Only run once on mount: dependency array is []
+  // - Only initialize RecaptchaVerifier if not already initialized
+  // - Do NOT clear/destroy recaptcha on modal close
+  // - Keep instance alive for entire page session
+
   useEffect(() => {
-    if (!isOpen) return;
+    // Guard for browser only
+    if (typeof window === "undefined") return;
 
-    const initializeRecaptcha = async () => {
-      try {
-        // Clean up existing recaptcha
-        if (recaptchaRef.current) {
-          try {
-            await recaptchaRef.current.clear();
-          } catch (e) {
-            console.warn("Error clearing existing recaptcha:", e);
-          }
-          recaptchaRef.current = null;
-        }
+    // If already globally initialized, just set ref and ready state
+    if (window.recaptchaVerifier) {
+      recaptchaRef.current = window.recaptchaVerifier;
+      setIsRecaptchaReady(true);
+      setRecaptchaError(null);
+      return;
+    }
 
-        // Ensure auth is available
-        if (!auth) {
-          throw new Error("Firebase auth not initialized");
-        }
+    // Create container if missing
+    let container = document.getElementById("recaptcha-container");
+    if (!container) {
+      container = document.createElement("div");
+      container.id = "recaptcha-container";
+      container.style.display = "none";
+      document.body.appendChild(container);
+    }
 
-        // Create container if it doesn't exist
-        let container = document.getElementById("recaptcha-container");
-        if (!container) {
-          container = document.createElement("div");
-          container.id = "recaptcha-container";
-          container.style.display = "none";
-          document.body.appendChild(container);
-        }
-
-        // Wait a bit for DOM to be ready
-        await new Promise((resolve) => setTimeout(resolve, 100));
-
-        // Create new RecaptchaVerifier
-        recaptchaRef.current = new RecaptchaVerifier(
-          auth,
-          "recaptcha-container",
-          {
-            size: "invisible",
-            callback: (response) => {
-              // console.log("reCAPTCHA solved:", response);
-            },
-            "expired-callback": () => {
-              console.warn("reCAPTCHA expired");
-              setIsRecaptchaReady(false);
-            },
-            "error-callback": (error) => {
-              console.error("reCAPTCHA error:", error);
-              setRecaptchaError(
-                "Security verification failed. Please try again."
-              );
-              setIsRecaptchaReady(false);
-            },
+    try {
+      // Init RecaptchaVerifier ONCE per page load
+      window.recaptchaVerifier = new RecaptchaVerifier(
+        auth,
+        "recaptcha-container",
+        {
+          size: "invisible",
+          callback: () => {},
+          "expired-callback": () => setIsRecaptchaReady(false),
+          "error-callback": (error) => {
+            setRecaptchaError(
+              "Security verification failed. Please try again."
+            );
+            setIsRecaptchaReady(false);
           },
-          app // ✅ pass the actual app instance, not `auth.app`
-        );
-
-        // Render the recaptcha
-        await recaptchaRef.current.render();
+        },
+        app
+      );
+      window.recaptchaVerifier.render().then(() => {
+        recaptchaRef.current = window.recaptchaVerifier;
         setIsRecaptchaReady(true);
         setRecaptchaError(null);
-      } catch (err) {
-        console.error("reCAPTCHA initialization failed:", err);
-
-        // If recaptcha has already been rendered in this element
-        if (err.message?.includes("already been rendered")) {
-          // Optional: show message briefly before reload
-          setRecaptchaError(
-            "Security verification failed. Refreshing the page..."
-          );
-
-          // Wait 1 second then refresh
-          setTimeout(() => {
-            window.location.href = "/";
-            return;
-          }, 1000);
-          return;
-        }
-
-        setRecaptchaError(
-          "Security verification failed. Please refresh the page."
-        );
-        setIsRecaptchaReady(false);
-      }
-    };
-
-    initializeRecaptcha();
-
-    return () => {
-      if (recaptchaRef.current) {
-        try {
-          recaptchaRef.current.clear();
-        } catch (e) {
-          console.warn("reCAPTCHA cleanup error:", e);
-        }
-        recaptchaRef.current = null;
-      }
+      });
+    } catch (err) {
+      console.error("reCAPTCHA initialization failed:", err);
+      setRecaptchaError(
+        "Security verification failed. Please refresh the page."
+      );
       setIsRecaptchaReady(false);
-    };
-  }, [isOpen]);
+    }
+  }, []);
 
   const handleSendOtp = async (phoneNumber) => {
     try {

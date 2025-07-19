@@ -67,9 +67,19 @@ export function generateStars(rating) {
 }
 
 export function calculateNights(checkIn, checkOut) {
-  const timeDiff = checkOut.getTime() - checkIn.getTime();
+  if (!checkIn || !checkOut) return 0;
+  // Convert strings to Date
+  const inDate =
+    typeof checkIn === "string" ? new Date(checkIn) : checkIn;
+  const outDate =
+    typeof checkOut === "string" ? new Date(checkOut) : checkOut;
+  // Validate
+  if (!(inDate instanceof Date) || isNaN(inDate)) return 0;
+  if (!(outDate instanceof Date) || isNaN(outDate)) return 0;
+  const timeDiff = outDate.getTime() - inDate.getTime();
   return Math.ceil(timeDiff / (1000 * 3600 * 24));
 }
+
 
 export function calculateTotalPrice(
   pricePerNight,

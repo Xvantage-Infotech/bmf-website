@@ -8,6 +8,13 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { CalendarDays, Clock, ArrowRight } from "lucide-react";
@@ -189,18 +196,21 @@ export default function ImprovedDatePicker({
                     Check-in Time <span className="text-red-500">*</span>
                   </Label>
 
-                  <select
-                    className="w-full mt-1 p-2 border rounded text-sm"
+                  <Select
                     value={checkInTime}
-                    onChange={(e) => onCheckInTimeChange?.(e.target.value)}
+                    onValueChange={onCheckInTimeChange}
                   >
-                    <option value="">Select Time</option>
-                    {formattedCheckInOptions.map((time) => (
-                      <option key={time} value={time}>
-                        {time}
-                      </option>
-                    ))}
-                  </select>
+                    <SelectTrigger className="w-full mt-1">
+                      <SelectValue placeholder="Select Time" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {formattedCheckInOptions.map((time) => (
+                        <SelectItem key={time} value={time}>
+                          {time}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               )}
             </div>
@@ -252,21 +262,26 @@ export default function ImprovedDatePicker({
                   <Label className="text-xs text-neutral-500">
                     Check-out Time <span className="text-red-500">*</span>
                   </Label>
-                  <select
-                    className={cn(
-                      "w-full mt-1 p-2 border rounded text-sm",
-                      isInvalidTime() && "border-red-500"
-                    )}
+                  <Select
                     value={checkOutTime}
-                    onChange={(e) => onCheckOutTimeChange?.(e.target.value)}
+                    onValueChange={onCheckOutTimeChange}
                   >
-                    <option value="">Select Time</option>
-                    {formattedCheckOutOptions.map((time) => (
-                      <option key={time} value={time}>
-                        {time}
-                      </option>
-                    ))}
-                  </select>
+                    <SelectTrigger
+                      className={cn(
+                        "w-full mt-1",
+                        isInvalidTime() && "border-red-500"
+                      )}
+                    >
+                      <SelectValue placeholder="Select Time" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {formattedCheckOutOptions.map((time) => (
+                        <SelectItem key={time} value={time}>
+                          {time}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   {isInvalidTime() && (
                     <p className="text-xs text-red-500 mt-1">
                       Check-out time must be after check-in time.
